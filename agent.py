@@ -63,7 +63,7 @@ class GPTAgent:
                                                     " Break down your song structure  into time segments that add up to  " + str(duration) + " seconds."
                                                     " Within each section, ensure that the sum of all sleep durations equals the allocated time for that section. "
                                                     " Use in_thread to create concurrent threads. Each thread can have its own timing, but make sure the total duration of each thread is synchronized with the overall song duration."                                                                                                                                         
-                                                    " The script should have a clear start and end, emphasizing a harmonious blend of sounds characteristic of " + genre)
+                                                    " The script should have a clear start and end, emphasizing a harmonious blend of sounds characteristic of " + genre + ".")
 
             if additional_information:
                 prompt = prompt_with_config + " Finally, consider the following: " + additional_information
