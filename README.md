@@ -20,9 +20,6 @@ This manual provides instructions on installation, configuration, and song gener
 ### Prerequisites
 
 - **Sonic Pi:** Must be installed on your system (needed to run the *.rb files): https://sonic-pi.net/
-![img.png](img.png)
-
-
 - **OPENAI_API_KEY:** Set as a system environment variable or in `ArtistConfig/mITyJohn/ArtistConfig.json`.
 - **Python** Must be installed on your machine
 
