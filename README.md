@@ -21,6 +21,14 @@ This manual provides instructions on installation, configuration, and song gener
 
 - **Sonic Pi:** Must be installed on your system (needed to run the *.rb files): https://sonic-pi.net/
 - **OPENAI_API_KEY:** Set as a system environment variable or in `ArtistConfig/mITyJohn/ArtistConfig.json`.
+    On MAC
+    ```bash
+    export OPENAI_API_KEY='<your_api_key>'
+    ```
+    On Windows (using PowerShell)
+    ```bash
+    $env:OPENAI_API_KEY='<your_api_key>'
+    ```
 - **Python** Must be installed on your machine
 
 ### Installation
