@@ -1,95 +1,204 @@
 '''
 This file contains the GPTAgent class that interacts with the OpenAI API to generate song lyrics.
 '''
-import os
-import requests
+
 from openai import OpenAI
+import json
+import os
+from songCreationData import SongCreationData
+import requests
+import imghdr
 class GPTAgent:
-    def __init__(self, api_key, selected_model):
-        self.api_key = api_key
+    def __init__(self, selected_model, logger, song):
         self.selected_model = selected_model
+        self.song_creation_data = SongCreationData()
+        self.continue_composed_loop = True
+        self.logger = logger
+        self.song = song
 
-    def validate_sonicpi(self, lyrics):
-        client = OpenAI()
-        client.api_key = self.api_key
+    def get_api_key(self):
+        # Try to get the API key from an environment variable
+        api_key = os.getenv("OPENAI_API_KEY")
 
-        prompt = ("Validate the following sonic pi code and correct where needed "
-                  "to make sure it compiles and can be ran in sonic pi IDE: \n" + lyrics + "\n"
-                  "Make sure only simple loops and threads are used, if live_loop is used, you should replace it or use conditionals to manage timing. ")
+        # If not found, fallback to the config file
+        if not api_key:
+            try:
+                with open('AgentConfig/mITyJohn/ArtistConfig.json', 'r') as config_file:
+                    config = json.load(config_file)
+                    api_key = config.get('OPENAI_API_KEY')
+            except (FileNotFoundError, json.JSONDecodeError) as e:
+                print(f"Error reading config file: {e}")
+                return None
 
+        return api_key
+
+    # Function to get assistant content from ArtistConfig
+    def get_assistant_content(self, role_name, artist_config):
+        for assistant in artist_config["assistants"]:
+            if role_name in assistant:
+                return assistant[role_name][0]  # Assuming single item in each role's array
+        return None
+
+    def execute_phase(self, client, phase, song_creation_data, artist_config, phase_config):
+        print("\nExecuting phase ["+phase+"]")
+
+        task_type = ''
+        if phase in phase_config:
+            task_type = phase_config[phase]["type"]
+        else:
+            self.logger.info(f"No configuration type for phase: {phase}")
+
+        self.logger.info("\n\nExecuting phase ["+phase+"] (type: " + task_type + ")")
+
+        if task_type == "chat":
+            self.discussion(client, phase, song_creation_data, artist_config, phase_config)
+        elif task_type == "art":
+            album_cover_style = artist_config.get('artist_style')
+            image_prompt = "Album cover style defined as: " + album_cover_style + " / Song on the album described as " + self.song_creation_data.song_description
+            self.generate_and_download_image(image_prompt, self.song.name, self.song.get_song_dir())
+        elif task_type == "readme":
+            self.song.create_readme_file(self.song_creation_data)
+        elif task_type == "file":
+            self.song.create_song_file(self.song_creation_data)
+        else:
+            return "Unknown task type"
+
+    def discussion(self, client, phase, song_creation_data, artist_config, phase_config):
+        if phase in phase_config:
+            assistant_role_name = phase_config[phase]["assistant_role_name"]
+            user_role_name = phase_config[phase]["user_role_name"]
+            phase_prompt = phase_config[phase]["phase_prompt"]
+            phase_prompt_str = ''.join(phase_prompt)
+        else:
+            self.logger.info(f"No configuration found for phase: {phase}")
+
+        assistant_content = self.get_assistant_content(assistant_role_name, artist_config)
+        for key, value in phase_config[phase]["input"].items():
+            param_value = song_creation_data.get_parameter(value)
+            if param_value is not None:
+                phase_prompt_str = phase_prompt_str.replace(f"{{{key}}}", str(param_value))
+
+
+        self.logger.info(
+            "\nAssistant is " + assistant_role_name + ", questioned by " + user_role_name + ". \nPrompting:\n " + phase_prompt_str + "\n")
+        # Compose the call to OpenAI
         completion = client.chat.completions.create(
-            model=self.selected_model,
+            model=self.selected_model,  # Replace with your desired model
             messages=[
-                {"role": "system", "content": "You validate and test code written in sonic pi. You'll only verify and correct if needed an return only the code. "
-                                              "If no corrections are needed, you'll return the original prompted script. Code explanation is added in comment."},
-                {"role": "user", "content": prompt}
+                {"role": "system", "content": assistant_content},
+                {"role": "user", "content": phase_prompt_str}
             ]
         )
-
-        # Extract Sonic Pi script from the response
         response_text = completion.choices[0].message.content
-        script_start = response_text.find('```ruby') + len('```ruby\n')
-        script_end = response_text.find('```', script_start)
-        if script_start != -1 and script_end != -1:
-            print("Corrections were needed.")
-            lyrics = response_text[script_start:script_end].strip()
-        else:
-            print("No corrections were needed.")
-        return lyrics
-    def generate_lyrics(self, song_name, duration, structure, style_description, additional_information):
-        print("\n ----------------------------------------------------------------------------------\n")
-        print(" Let's get started with your music agent *** mITy.John *** \n")
-        print(" Song: '" + song_name +"'")
-        print(" Structure: " + structure + "")
-        print(" Genre: " + style_description + "")
-        print(" Duration: " + str(duration) + " seconds")
-        print(" Additional info: " + additional_information + "")
-        print("\n ----------------------------------------------------------------------------------\n")
+        self.logger.info("Response: " + response_text)
+        try:
 
-        # Generate the song lyrics using the OpenAI API
-        lyrics = self.generate_music_code(structure, style_description, duration, additional_information)
-        return lyrics
-    def generate_music_code(self, song_structure, genre, duration, additional_information):
+            # response_text = completion.choices[0].message.content
+            # script_start = response_text.find('```ruby') + len('```ruby\n')
+            # script_end = response_text.find('```', script_start)
+            # sonic_pi_script = response_text[script_start:script_end].strip()
+
+            response_data = json.loads(response_text)
+            if "no further code changes are required" in str(response_data):
+                self.logger.info(
+                    "Conclusion of review: No further code changes are required. We keep the code like:\n" + self.song_creation_data.sonicpi_code)
+                self.continue_composed_loop = False
+            elif 'sonicpi_code' in response_data and isinstance(response_data['sonicpi_code'], list):
+                # Handle the case where sonicpi_code is a list
+                code_to_retrieve = '\n'.join(response_data['sonicpi_code'])
+                self.logger.info("Code successfully retrieved from array: %s", code_to_retrieve)
+                song_creation_data.set_parameter("sonicpi_code", code_to_retrieve)
+            else:
+                song_creation_data.update_parameters_from_response(response_data)
+        except json.JSONDecodeError as e:
+            self.logger.info(f"Failed to parse the response as JSON: {e}")
+            marker = '"sonicpi_code": "'
+            start = response_text.find(marker)
+            if start != -1:
+                start += len(marker)
+                end = response_text.find('"', start)
+                if end != -1:
+                    code_to_retrieve = response_text[start:end]
+                    self.logger.info("Code could be extracted via workaround: %s", code_to_retrieve)
+                    song_creation_data.set_parameter("sonicpi_code", code_to_retrieve)
+                else:
+                    self.logger.info("End marker not found for 'sonicpi_code'")
+            else:
+                self.logger.info("Start marker not found for 'sonicpi_code'")
+
+
+    def execute_composition_chain(self, genre, duration, additional_information):
+        with open('AgentConfig/mITyJohn/MusicCreationPhaseConfig.json') as file:
+            phase_config = json.load(file)
+        with open('AgentConfig/mITyJohn/MusicCreationChainConfig.json') as file:
+            compose_chain_config = json.load(file)
+        with open('AgentConfig/mITyJohn/ArtistConfig.json') as file:
+            artist_config = json.load(file)
 
         client = OpenAI()
-        client.api_key = self.api_key
+        client.api_key = self.get_api_key()
 
-        while True:
-            base_prompt = (f"Create a Sonic Pi script that plays a song with the following structure: {song_structure}. "
-                           "The script should use simple loops and threads, and should not use live_loop. Ensure the song has a clear start and end.")
-            prompt_with_config = (base_prompt + " As a genre for the song, please use "
-                                  + genre + ". Incorporate multiple sounds in parallel, but make sure the entire composition takes "
-                                  + str(duration) + " seconds (use sleep, ADSR, in_thread or Live Loops with Conditionals to manage timing, and provide specific durations for each section of the song)."
-                                                    " Break down your song structure  into time segments that add up to  " + str(duration) + " seconds."
-                                                    " Within each section, ensure that the sum of all sleep durations equals the allocated time for that section. "
-                                                    " Use in_thread to create concurrent threads. Each thread can have its own timing, but make sure the total duration of each thread is synchronized with the overall song duration."                                                                                                                                         
-                                                    " The script should have a clear start and end, emphasizing a harmonious blend of sounds characteristic of " + genre + ".")
+        song_description = f"I want to compose a brand new song. I like the "+genre+" genre. If I would describe the song, I would say: "+additional_information
 
-            if additional_information:
-                prompt = prompt_with_config + " Finally, consider the following: " + additional_information
+        self.song_creation_data.set_parameter("song_description", song_description)
+        self.song_creation_data.set_parameter("total_duration", str(duration))
+
+        # Iterate over phases
+        for phase_info in compose_chain_config["chain"]:
+            phase = phase_info["phase"]
+            if phase_info["phaseType"] == "ComposedPhase":
+                # Iterating through cycles
+                for cycle_num in range(phase_info["cycleNum"]):
+                    self.logger.info("Code: "+self.song_creation_data.sonicpi_code)
+                    if not self.continue_composed_loop:
+                        break
+                    self.logger.info(f"Executing cycle {cycle_num + 1} of {phase_info['cycleNum']} for ComposedPhase: {phase}")
+                    for sub_phase_info in phase_info["Composition"]:
+                        if not self.continue_composed_loop:
+                            break
+                        sub_phase = sub_phase_info["phase"]
+                        self.execute_phase(client, sub_phase, self.song_creation_data, artist_config, phase_config)
+                self.continue_composed_loop = True
             else:
-                prompt = prompt_with_config
+                self.execute_phase(client, phase, self.song_creation_data, artist_config, phase_config)
 
-            print("\nPrompting OpenAI: ")
-            print(prompt)
-            completion = client.chat.completions.create(
-                model=self.selected_model,
-                messages=[
-                    {"role": "system", "content": "You are a songwriter, skilled in creating song programmed in sonic pi. "
-                                                  "You create and program songs using Sonic PI. You know the song basic structure: intro, verse — chorus — verse — chorus — bridge — chorus — outro. "
-                                                  "Your songs duration varies between 2 & 4 minutes. You like to use multiple sounds in parallel."
-                                                  "Don't use live_loop in Sonic PI script, use simple loops and threads instead. The song clearly ends & starts."},
-                    {"role": "user", "content": prompt}
-                ]
-            )
-            # Extract Sonic Pi script from the response
-            response_text = completion.choices[0].message.content
-            script_start = response_text.find('```ruby') + len('```ruby\n')
-            script_end = response_text.find('```', script_start)
-            sonic_pi_script = response_text[script_start:script_end].strip()
+    def generate_and_download_image(self, prompt, filename, songdir):
+        client = OpenAI()
+        client.api_key = self.get_api_key()
+        response = client.images.generate(
+            model="dall-e-3",
+            prompt=prompt,
+            n=1,
+            size="1024x1024",
+            quality="standard",
+        )
 
-            # Check if the script contains valid Sonic Pi code
-            if 'play' in sonic_pi_script or 'sleep' in sonic_pi_script:  # Add more checks as needed
-                break
+        # Extract image URL from response
+        image_url = response.data[0].url
+        self.logger.info("image " + image_url)
 
-        return sonic_pi_script
+        # Ensure the directory exists
+        if not os.path.exists(songdir):
+            os.makedirs(songdir)
+
+        # Download the image
+        image_response = requests.get(image_url)
+        if image_response.status_code == 200:
+            # Detect image type
+            image_type = imghdr.what(None, h=image_response.content)
+            if image_type:
+                # Append the correct extension if necessary
+                if not filename.lower().endswith(f".{image_type}"):
+                    filename = f"{filename}.{image_type}"
+
+            # Define the full path for the file
+            file_path = os.path.join(songdir, filename)
+
+            # Write the file
+            with open(file_path, 'wb') as file:
+                file.write(image_response.content)
+            self.logger.info(f"Image downloaded as {file_path}")
+        else:
+            self.logger.info("Failed to download image")
+
+
