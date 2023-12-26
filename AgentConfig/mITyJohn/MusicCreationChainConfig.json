@@ -1,0 +1,51 @@
+{
+  "chain": [
+    {
+      "phase": "Conceptualization",
+      "phaseType": "SimplePhase"
+    },
+    {
+      "phase": "Songwriting",
+      "phaseType": "SimplePhase"
+    },
+    {
+      "phase": "Segmentation",
+      "phaseType": "SimplePhase"
+    },
+    {
+      "phase": "Arrangements",
+      "phaseType": "SimplePhase"
+    },
+    {
+      "phase": "Initial Song Coding",
+      "phaseType": "SimplePhase"
+    },
+    {
+      "phase": "Song Code Review",
+      "phaseType": "ComposedPhase",
+      "cycleNum": 3,
+      "Composition": [
+        {
+          "phase": "Code Review",
+          "phaseType": "SimplePhase"
+        },
+        {
+          "phase": "Code Modification",
+          "phaseType": "SimplePhase"
+        }
+      ]
+    },
+    {
+      "phase": "Song Track Creation",
+      "phaseType": "SimplePhase"
+    },
+    {
+      "phase": "Cover Art",
+      "phaseType": "SimplePhase"
+    },
+    {
+      "phase": "Booklet Creation",
+      "phaseType": "SimplePhase"
+    }
+  ]
+}

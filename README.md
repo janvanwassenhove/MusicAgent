@@ -1,5 +1,7 @@
 # MusicAgent User Manual
 
+![Music Agency](img.png)
+
 ## Table of Contents
 1. [Introduction](#introduction)
 2. [Prerequisites](#prerequisites)

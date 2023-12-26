@@ -3,6 +3,7 @@ The main file that will be executed to run the GPT agent for songwriting.
 '''
 import os
 import openai
+import logging
 import json
 from agent import GPTAgent
 from song import Song
@@ -21,7 +22,7 @@ def main():
         print(f"{index}. {model}")
 
     # Initialize the default model
-    selected_model = "davinci"
+    selected_model = "gpt-3.5-turbo"
 
     # Prompt the user to pick a model
     try:
@@ -32,44 +33,52 @@ def main():
         else:
             print("Invalid selection. Please choose a number from the list.")
     except ValueError:
-        print("Invalid input. By default davinci will be chosen.")
+        print("Invalid input. By default selected_model will be chosen.")
         pass
+
+    # Load JSON data from the file
+    with open("AgentConfig/mITyJohn/ArtistConfig.json", "r") as file:
+        artist_config = json.load(file)
 
     # Get input parameters from the user
     song_name = input("\nEnter the name of the song: ")
-    structure = get_valid_structure()
-    duration = get_valid_duration(structure)
+    duration = get_valid_duration()
     genre = get_valid_style()
 
-    additional_information = input("\nPlease add some additional information (if you wanna go wild, leave blank :-) ):")
+    additional_information = input("\nPlease add a description of you song (think musical influence, certain feelings that come up, ...) :")
+
+    setup_logger(song_name)
+    logger = logging.getLogger()
+    logger.info("Starting Song Generation")
 
     # Create a GPT agent
-    agent = GPTAgent(get_api_key(), selected_model)
+    agent = GPTAgent(selected_model, logger, Song(song_name, logger))
 
-    # Generate song lyrics using the GPT agent
-    lyrics = agent.generate_lyrics(song_name, duration, structure, genre, additional_information)
+    # Start the music composition chain
+    agent.execute_composition_chain(genre, duration, additional_information)
 
-    #double check if correctly written
-    validatedLyrics = agent.validate_sonicpi(lyrics)
 
-    # Create a Song object
-    song = Song(song_name, duration, structure, genre, validatedLyrics)
-    # Create the song file in the songs directory
-    song.create_song_file()
+def setup_logger(song_name):
+    # Create 'songs' directory if it doesn't exist
+    if not os.path.exists('songs'):
+        os.makedirs('songs')
+    # Create the subdirectory for the song
+    song_directory = os.path.join('songs', song_name)
+    if not os.path.exists(song_directory):
+        os.makedirs(song_directory)
 
-def get_valid_duration(structurename):
-    structures = load_json_data('structures')
+    # Setting up the logger
+    log_file = os.path.join(song_directory, 'music_agent.log')
+    logging.basicConfig(filename=log_file, level=logging.INFO,
+                        format='%(asctime)s:%(levelname)s:%(message)s')
 
+
+def get_valid_duration():
     while True:
         input_value = input("Enter the approximate duration of the song in seconds (or leave empty if you feel confident): ")
 
         if input_value == "":
-            for structure in structures:
-                if structure["name"] == structurename:
-                    print("Structure " + structurename)
-                    return structure["duration"]
-                else:
-                    return 180
+            return 180
         try:
             duration = int(input_value)
             if duration > 0:

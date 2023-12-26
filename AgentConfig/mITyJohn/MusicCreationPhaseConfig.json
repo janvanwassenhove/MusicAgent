@@ -1,0 +1,225 @@
+{
+
+  "Conceptualization": {
+    "type" : "chat",
+    "assistant_role_name": "Composer",
+    "user_role_name": "Artist",
+    "phase_prompt": [
+      "Come up with a concept for a song based on this description: {song_description}.",
+      "Provide a response in JSON format with separate fields for theme, melody, and rhythm.",
+      "A theme could be an emotion, a story, an event, or any specific idea.",
+      "The melody might  include the mood of the melody (e.g., uplifting, melancholic), specific musical influences, or even instruments you'd like it to be associated with.",
+      "Detail the kind of rhythm you want for the song. This could include the tempo (e.g., fast-paced, slow and steady), the style of rhythm (e.g., jazzy, syncopated), or specific percussion instruments.",
+      "For example, \"The rhythm should be lively and upbeat, with a moderate tempo, using hand drums and tambourines.\""
+    ],
+    "input": {
+      "song_description" : "song_description"
+    },
+    "outcome": {
+      "theme": "theme",
+      "melody": "melody",
+      "rhythm": "rhythm"
+    }
+  },
+  "Songwriting": {
+    "type" : "chat",
+    "assistant_role_name": "Songwriter",
+    "user_role_name": "Composer",
+    "phase_prompt": [
+      "Write me lyrics for the song with following ideas: ",
+      "Theme of the song: {theme}. ",
+      "Melody: {melody}. ",
+      "Rhythm: {rhythm}. ",
+      "Lyrics should not be single words, but wel elaborated, taking the structure of the song into account.",
+      "Provide a response in JSON format with separate fields for lyrics and structure.",
+      "The structure of the song, can be defined like e.g. Intro - Verse - Chorus - Verse - Chorus - Solo - Bridge - Chorus - Outro.",
+      "For defining the structure, the choice is free and should take into account the melody & rhythm."
+    ],
+    "input": {
+      "theme": "theme",
+      "melody": "melody",
+      "rhythm": "rhythm"
+    },
+    "outcome": {
+      "lyrics": "lyrics",
+      "structure": "structure"
+    }
+  },
+  "Segmentation": {
+    "type" : "chat",
+    "assistant_role_name": "Arranger",
+    "user_role_name": "Composer",
+    "phase_prompt": [
+      "We have following lyrics of my new song: {lyrics} ",
+      "The melody is defined as: {melody}. ",
+      "Rhythm: {rhythm}. ",
+      "The structure of the song, is defined as {structure}.",
+      "We expect the song to have a total duration of {total_duration} seconds.",
+      "Given this information determine the duration of the different segments in the songs. Segments are based on the song structure. ",
+      "Provide a response in JSON format with separate field for segments."
+    ],
+    "input": {
+      "lyrics": "lyrics",
+      "melody": "melody",
+      "rhythm": "rhythm",
+      "structure": "structure",
+      "total_duration": "total_duration"
+    },
+    "outcome": {
+      "segments": "segments"
+    }
+  },
+  "Arrangements": {
+    "type" : "chat",
+    "assistant_role_name": "Arranger",
+    "user_role_name": "Composer",
+    "phase_prompt": [
+      "We have following lyrics of my new song {lyrics}, the theme of the song is {theme}. ",
+      "The melody is defined as: {melody}. ",
+      "Rhythm is defined as: {rhythm}. ",
+      "The structure of the song is defined as {structure}.",
+      "The song has a total duration of {total_duration} seconds, divided in the following segments {segments} (where numbers represent the duration of the individual segments).",
+      "Given this information define the instruments that will be used and how they will be played during the complete song and the individual segments. ",
+      "These will be defined as arrangements. To variate, you can use chord progessions like: power chord progression, jazz or blues chord progression.",
+      "Other variations can be drops like: EDM drops, half-time or trap drops. Try to vary as well with drum breaks, breakdowns and guitar breaks.",
+      "Other techniques you can use are stabs, arpeggios, dynamic shifts, polyrhythms or counterpoint melodies",
+      "Try to arrange multiple instruments to get a fuller sound across the song.",
+      "Provide a response in JSON format with a separate field for arrangements."
+    ],
+    "input": {
+      "type" : "chat",
+      "lyrics": "lyrics",
+      "theme": "theme",
+      "melody": "melody",
+      "rhythm": "rhythm",
+      "structure": "structure",
+      "total_duration": "total_duration",
+      "segments": "segments"
+    },
+    "outcome": {
+      "arrangements": "arrangements"
+    }
+  },
+  "Initial Song Coding": {
+    "type" : "chat",
+    "assistant_role_name":"Sonic PI coder",
+    "user_role_name": "Artist",
+    "phase_prompt": [
+      "We have following lyrics of a new song {lyrics}. ",
+      "The melody is defined as: {melody}. ",
+      "Rhythm: {rhythm}. ",
+      "The structure of the song, is defined as {structure}. ",
+      "The song has to have a total duration of {total_duration} seconds. ",
+      "The song is divided in different segments with their own individual timings (in seconds): {segments}. ",
+      "For the complete song, as for the individual segments, following arrangements were defined: {arrangements}. ",
+      "Given this information, code the song using Sonic PI programming language.",
+      "Translate the arrangements within the limitations (instruments, samples, ...) of sonic pi. ",
+      "Provide a response in JSON format with separate field for sonicpi_code. This field holds the complete sonic pi code.",
+      "The response should be formatted as a JSON-compatible string, ready to be parsed."
+    ],
+    "input": {
+      "lyrics": "lyrics",
+      "theme": "theme",
+      "melody": "melody",
+      "rhythm": "rhythm",
+      "structure": "structure",
+      "total_duration": "total_duration",
+      "segments": "segments",
+      "arrangements": "arrangements"
+    },
+    "outcome": {
+      "sonicpi_code": "sonicpi_code"
+    }
+  },
+  "Code Review": {
+    "type" : "chat",
+    "assistant_role_name":"Sonic PI reviewer",
+    "user_role_name": "Sonic PI coder",
+    "phase_prompt": [
+      "We have following Sonic PI code: {sonicpi_code}.",
+      "The initial demand was to code a song using Sonic PI programming language. ",
+      "Therefore following requirements were provided:",
+      "1) lyrics of the new song {lyrics};",
+      "2) The melody: {melody}; ",
+      "3) Rhythm: {rhythm};",
+      "4) Song structure: {structure};",
+      "5) Total duration: {total_duration} seconds;",
+      "6) The song is divided in different segments with their own individual timings (in seconds): {segments};",
+      "7) For the complete song, as for the individual segments, following arrangements were defined: {arrangements};",
+      "Review the code regarding following regulations:",
+      "1) The script uses correct sonic pi code. ",
+      "2) All methods should be implemented; Verify for phrases in style of \"Add code here\", \"arrangement goes here\" or \"Sonic Pi code for\" or other references that mention code still should be implemented;",
+      "3) The total_duration of the song is approximately {total_duration} seconds; ",
+      "4) no potential bugs; ",
+      "5) check for # Add code patterns , if this is the case code still needs to be implemented on these places and the song won't work; ",
+      "6) most importantly, do not only check the errors in the code, but also the logic of code. Make sure that the song is coded without losing any feature of the requirements.",
+      "Provide a response in JSON format with separate field for review. The review field is a single string field.",
+      "The review provides clear instructions on the corrections that need to be made.",
+      "The review will be used to correct the code, only provide a review if the code needs to be corrected, else return the review field as \"no further code changes are required\". ",
+      "The response should be formatted as a JSON-compatible string, ready to be parsed. Please format the response like this: {\"sonicpi_code\": \"<complete code here>\"}"
+    ],
+    "input": {
+      "lyrics": "lyrics",
+      "theme": "theme",
+      "melody": "melody",
+      "rhythm": "rhythm",
+      "structure": "structure",
+      "total_duration": "total_duration",
+      "segments": "segments",
+      "arrangements": "arrangements",
+      "sonicpi_code": "sonicpi_code"
+    },
+    "outcome": {
+      "review": "review"
+    }
+  },
+  "Code Modification": {
+    "type" : "chat",
+    "assistant_role_name":"Sonic PI coder",
+    "user_role_name": "Sonic PI reviewer",
+    "phase_prompt": [
+      "We have following Sonic PI code {sonicpi_code} . ",
+      "The code was reviewed with following comments: {review}. ",
+      "The initial requirements were defined as follows:",
+      "1) lyrics of the new song {lyrics};",
+      "2) The melody: {melody}; ",
+      "3) Rhythm: {rhythm};",
+      "4) Song structure: {structure};",
+      "5) Total duration: {total_duration} seconds;",
+      "6) The song is divided in different segments with their own individual timings (in seconds): {segments};",
+      "7) For the complete song, as for the individual segments, following arrangements were defined: {arrangements};",
+      "Correct the code according to the review. ",
+      "If according to the review \"no further code changes are required\", keep the code an return the complete code unchanged. ",
+      "Provide a response in JSON format with separate field for sonicpi_code. This field holds the complete sonic pi code.",
+      "In the sonicpi_code field, you should return the complete sonic pi code (not only the revised code, but the entire song code). Make sure you output the complete code and not only parts.",
+      "The response should be formatted as a JSON-compatible string, ready to be parsed. Please format the response like this: {\"sonicpi_code\": \"<complete code here>\"}"
+    ],
+    "input": {
+      "lyrics": "lyrics",
+      "theme": "theme",
+      "melody": "melody",
+      "rhythm": "rhythm",
+      "structure": "structure",
+      "total_duration": "total_duration",
+      "segments": "segments",
+      "arrangements": "arrangements",
+      "sonicpi_code": "sonicpi_code",
+      "review": "review"
+    },
+    "outcome": {
+      "sonicpi_code": "sonicpi_code"
+    }
+  },
+  "Song Track Creation": {
+    "type" : "file",
+    "assistant_role_name":"Music Publisher"
+  },
+  "Booklet Creation": {
+    "type" : "readme",
+    "assistant_role_name":"Music Publisher"
+  },
+  "Cover Art": {
+    "type" : "art",
+    "assistant_role_name":"Music Publisher"
+  }
+}
