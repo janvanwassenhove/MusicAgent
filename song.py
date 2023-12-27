@@ -25,7 +25,7 @@ class Song:
 
         self.song_dir = song_directory
         self.logger.info("Writing song to directory: " + self.song_dir)
-        self.logger.info("sonic pi code " + song_creation_data.sonicpi_code)
+        # self.logger.info("sonic pi code " + song_creation_data.sonicpi_code)
 
         # Create the song file
         song_file = os.path.join(self.song_dir, self.name + '.rb')

@@ -11,8 +11,9 @@ import imghdr
 class GPTAgent:
     def __init__(self, selected_model, logger, song):
         self.selected_model = selected_model
-        self.song_creation_data = SongCreationData()
+        self.song_creation_data = SongCreationData(logger)
         self.continue_composed_loop = True
+        self.stop_review_and_modify = False
         self.logger = logger
         self.song = song
 
@@ -78,54 +79,74 @@ class GPTAgent:
             if param_value is not None:
                 phase_prompt_str = phase_prompt_str.replace(f"{{{key}}}", str(param_value))
 
-
         self.logger.info(
             "\nAssistant is " + assistant_role_name + ", questioned by " + user_role_name + ". \nPrompting:\n " + phase_prompt_str + "\n")
-        # Compose the call to OpenAI
-        completion = client.chat.completions.create(
-            model=self.selected_model,  # Replace with your desired model
-            messages=[
-                {"role": "system", "content": assistant_content},
-                {"role": "user", "content": phase_prompt_str}
-            ]
-        )
-        response_text = completion.choices[0].message.content
-        self.logger.info("Response: " + response_text)
-        try:
 
-            # response_text = completion.choices[0].message.content
-            # script_start = response_text.find('```ruby') + len('```ruby\n')
-            # script_end = response_text.find('```', script_start)
-            # sonic_pi_script = response_text[script_start:script_end].strip()
+        retry_count = 0
+        max_retries = 3  # Adjust this number as needed
 
-            response_data = json.loads(response_text)
-            if "no further code changes are required" in str(response_data):
-                self.logger.info(
-                    "Conclusion of review: No further code changes are required. We keep the code like:\n" + self.song_creation_data.sonicpi_code)
-                self.continue_composed_loop = False
-            elif 'sonicpi_code' in response_data and isinstance(response_data['sonicpi_code'], list):
-                # Handle the case where sonicpi_code is a list
-                code_to_retrieve = '\n'.join(response_data['sonicpi_code'])
-                self.logger.info("Code successfully retrieved from array: %s", code_to_retrieve)
-                song_creation_data.set_parameter("sonicpi_code", code_to_retrieve)
-            else:
-                song_creation_data.update_parameters_from_response(response_data)
-        except json.JSONDecodeError as e:
-            self.logger.info(f"Failed to parse the response as JSON: {e}")
-            marker = '"sonicpi_code": "'
-            start = response_text.find(marker)
-            if start != -1:
-                start += len(marker)
-                end = response_text.find('"', start)
-                if end != -1:
-                    code_to_retrieve = response_text[start:end]
-                    self.logger.info("Code could be extracted via workaround: %s", code_to_retrieve)
+        while retry_count < max_retries:
+            try:
+
+                # in a next phase, replace chat by assistants
+                # assistant = client.beta.assistants.create(
+                #     name="Data visualizer",
+                #     description=assistant_content,
+                #     model=self.selected_model,
+                #     tools=[{"type": "code_interpreter"}],
+                # )
+
+                # Compose the call to OpenAI
+                completion = client.chat.completions.create(
+                    model=self.selected_model,  # Replace with your desired model
+                    messages=[
+                        {"role": "system", "content": assistant_content},
+                        {"role": "user", "content": phase_prompt_str}
+                    ]
+                )
+                response_text = completion.choices[0].message.content
+                self.logger.info("Response (retry "+str(retry_count)+"): " + response_text)
+
+                # response_text = completion.choices[0].message.content
+                # script_start = response_text.find('```ruby') + len('```ruby\n')
+                # script_end = response_text.find('```', script_start)
+                # sonic_pi_script = response_text[script_start:script_end].strip()
+
+                response_data = json.loads(response_text)
+
+                if "no further code changes are required" in str(response_data):
+                    self.logger.info(
+                        "Conclusion of review: No further code changes are required. We keep the code like:\n" + self.song_creation_data.sonicpi_code)
+                    self.continue_composed_loop = False
+                    self.stop_review_and_modify = True
+                elif 'sonicpi_code' in response_data and isinstance(response_data['sonicpi_code'], list):
+                    # Handle the case where sonicpi_code is a list
+                    code_to_retrieve = '\n'.join(response_data['sonicpi_code'])
+                    self.logger.info("Code successfully retrieved from array: %s", code_to_retrieve)
                     song_creation_data.set_parameter("sonicpi_code", code_to_retrieve)
                 else:
-                    self.logger.info("End marker not found for 'sonicpi_code'")
-            else:
-                self.logger.info("Start marker not found for 'sonicpi_code'")
+                    song_creation_data.update_parameters_from_response(response_data)
+                break
+            except json.JSONDecodeError as e:
+                self.logger.info(f"Failed to parse the response as JSON: {e}")
+                retry_count += 1
 
+                if retry_count >= max_retries:
+                    marker = '"sonicpi_code": "'
+                    start = response_text.find(marker)
+                    if start != -1:
+                        start += len(marker)
+                        end = response_text.find('"', start)
+                        if end != -1:
+                            code_to_retrieve = response_text[start:end]
+                            self.logger.info("Code could be extracted via workaround: %s", code_to_retrieve)
+                            song_creation_data.set_parameter("sonicpi_code", code_to_retrieve)
+                        else:
+                            self.logger.info("End marker not found for 'sonicpi_code'")
+                    else:
+                        self.logger.info("Start marker not found for 'sonicpi_code'")
+        if retry_count >= max_retries:
+            self.logger.info("Maximum number of retries reached, unable to parse JSON")
 
     def execute_composition_chain(self, genre, duration, additional_information):
         with open('AgentConfig/mITyJohn/MusicCreationPhaseConfig.json') as file:
@@ -149,16 +170,19 @@ class GPTAgent:
             if phase_info["phaseType"] == "ComposedPhase":
                 # Iterating through cycles
                 for cycle_num in range(phase_info["cycleNum"]):
-                    self.logger.info("Code: "+self.song_creation_data.sonicpi_code)
+                    # self.logger.info("Code: "+self.song_creation_data.sonicpi_code)
                     if not self.continue_composed_loop:
+                        self.logger.info("Breaking composed loop - no further changes needed.")
                         break
                     self.logger.info(f"Executing cycle {cycle_num + 1} of {phase_info['cycleNum']} for ComposedPhase: {phase}")
                     for sub_phase_info in phase_info["Composition"]:
                         if not self.continue_composed_loop:
+                            self.logger.info("Breaking sub phase loop - no further changes needed.")
                             break
                         sub_phase = sub_phase_info["phase"]
-                        self.execute_phase(client, sub_phase, self.song_creation_data, artist_config, phase_config)
-                self.continue_composed_loop = True
+                        if  (not self.stop_review_and_modify and (sub_phase == "Code Modification" or sub_phase == "Code Review")) or (sub_phase != "Code Modification" and sub_phase != "Code Review") :
+                            self.execute_phase(client, sub_phase, self.song_creation_data, artist_config, phase_config)
+                    self.continue_composed_loop = True
             else:
                 self.execute_phase(client, phase, self.song_creation_data, artist_config, phase_config)
 

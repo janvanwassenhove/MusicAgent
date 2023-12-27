@@ -14,7 +14,7 @@ def main():
     print("First let get you started, providing me some options to consider.")
 
     # List of available OpenAI models
-    available_models = ["gpt-3.5-turbo", "gpt-4", "curie", "babbage", "ada"]
+    available_models = ["gpt-3.5-turbo", "gpt-4"]
 
     # Display the available models
     print("\nAvailable OpenAI models:")

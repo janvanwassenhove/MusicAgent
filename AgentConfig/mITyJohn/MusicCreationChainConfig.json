@@ -23,7 +23,7 @@
     {
       "phase": "Song Code Review",
       "phaseType": "ComposedPhase",
-      "cycleNum": 3,
+      "cycleNum": 5,
       "Composition": [
         {
           "phase": "Code Review",
@@ -34,6 +34,10 @@
           "phaseType": "SimplePhase"
         }
       ]
+    },
+    {
+      "phase": "Song mixing",
+      "phaseType": "SimplePhase"
     },
     {
       "phase": "Song Track Creation",

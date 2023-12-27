@@ -1,5 +1,5 @@
 class SongCreationData:
-    def __init__(self):
+    def __init__(self,logger):
         self.song_description = ""
         self.theme = ""
         self.melody = ""
@@ -12,6 +12,7 @@ class SongCreationData:
         self.sonicpi_code = ""
         self.review = ""
         self.album_url = ""
+        self.logger = logger
 
     def set_parameter(self, param_name, value):
         if hasattr(self, param_name):
@@ -21,8 +22,12 @@ class SongCreationData:
         return getattr(self, param_name, None)
 
     def print_attributes(self):
+        self.logger.info("------------------------ start logging parameters ------------------------")
         for attr in self.__dict__:
-            print(f"{attr}: {getattr(self, attr)}")
+            attr_value = getattr(self, attr)
+            self.logger.info(f"{attr} : {attr_value}")
+        self.logger.info("------------------------- end logging parameters -------------------------")
+
     def update_parameters_from_response(self, response_data):
         for key in response_data:
             if hasattr(self, key):

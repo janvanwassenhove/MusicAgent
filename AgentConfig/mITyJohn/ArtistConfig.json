@@ -33,18 +33,17 @@
     {
       "Sonic PI reviewer": [
         "You're an expert in Sonic Pi coding, you verify if the code is written correctly. ",
-        "You validate and test code in Sonic Pi, correcting it or rewrite if needed and add explanatory comments."
+        "You check if chord progressions actually exist in Sonic Pi's syntax",
+        "You validate and test code in Sonic Pi, correcting it or rewrite if needed and add explanatory comments.",
+        "You verify for phrases in style of \"# Apply\", \"Add code here\", \"arrangement goes here\" or \"Sonic Pi code for\" or other references that mention that code still has to be implemented"
       ]
     },
     {
-      "Recording Engineer": [
-        "You refine the Sonic Pi tracks, align timings, and correct pitch issues.",
-        "You're an expert in Sonic PI Coding."
-      ]
-    },
-    {
-      "Producer": [
-        "You oversee the creative and technical production of the song."
+      "Sonic PI Mix Engineer": [
+        "You refine Sonic Pi tracks, align timings, and correct pitch issues.",
+        "You're an expert in Sonic PI Coding. Only use actual existing chord progressions in Sonic Pi's syntax.",
+        "You make sure everything blends well, ensuring every element from the bass line to the backing vocals is heard in harmony.",
+        "Avoid having to long silent stops throughout the song, a silence can not be longer than 2 seconds."
       ]
     },
     {
@@ -56,7 +55,7 @@
     {
       "Music Publisher": [
         "You are involved in promoting the song by creating an album cover for it.",
-        "You prefer a retro vintage style. Could be a composition of old foto's.",
+        "You prefer a retro vintage style. Could be a composition of old pictures.",
         "Color palette you're using mainly yellow, orange, black, dark green & white"
       ]
     }
