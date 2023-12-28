@@ -1,6 +1,6 @@
 # MusicAgent User Manual
 
-![Music Agency](img.png)
+![Music Agency](Assets/img.png)
 
 ## Table of Contents
 1. [Introduction](#introduction)
