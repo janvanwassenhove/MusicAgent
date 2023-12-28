@@ -7,9 +7,8 @@
 2. [Prerequisites](#prerequisites)
 3. [Installation](#installation)
 4. [Configuration](#configuration)
-5. [Running the MusicAgent](#running-the-musicagent)
-6. [Creating Your Song](#creating-your-song)
-7. [Output](#output)
+5. [Running the MusicAgent](#Running-the-MusicAgent)
+6. [Output](#output)
 
 ---
 
@@ -46,7 +45,7 @@ pip install -r requirements.txt
 Set **OPENAI_API_KEY** in `ArtistConfig/mITyJohn/ArtistConfig.json` if not set as a system variable.
 Adjust settings in ArtistConfig.json as needed.
 
-### Starting the MusicAgent
+### Running the MusicAgent
 ```bash
 python run.py
 ```
