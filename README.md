@@ -56,5 +56,7 @@ Once launched you'll be able to pass multiple criteria:
 - Optionally add specific requests like chord progressions or musical influences.
 
 ### Output
-- Track File Generated: the *.rb file can be found in the Songs directory.
-- To play Your Song track: load this file in Sonic Pi.
+MusicAgent will generate the following in the songs folder in a subdirectory called by trackname:
+- Track File Generated: the *.rb file can be found in the Songs directory. To play your track, simply load the file in SONIC PI.
+- A booklet containing cover image (which resides in same subdirectory), lyrics & additional technical info on setup of the track
+- Music Agent logging file. If Track code got lost or is incomplete, you can verify the logs.
