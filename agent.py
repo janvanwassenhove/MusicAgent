@@ -12,7 +12,6 @@ class GPTAgent:
     def __init__(self, selected_model, logger, song):
         self.selected_model = selected_model
         self.song_creation_data = SongCreationData(logger)
-        self.continue_composed_loop = True
         self.stop_review_and_modify = False
         self.logger = logger
         self.song = song
@@ -87,7 +86,6 @@ class GPTAgent:
 
         while retry_count < max_retries:
             try:
-
                 # in a next phase, replace chat by assistants
                 # assistant = client.beta.assistants.create(
                 #     name="Data visualizer",
@@ -117,7 +115,6 @@ class GPTAgent:
                 if "no further code changes are required" in str(response_data):
                     self.logger.info(
                         "Conclusion of review: No further code changes are required. We keep the code like:\n" + self.song_creation_data.sonicpi_code)
-                    self.continue_composed_loop = False
                     self.stop_review_and_modify = True
                 elif 'sonicpi_code' in response_data and isinstance(response_data['sonicpi_code'], list):
                     # Handle the case where sonicpi_code is a list
@@ -170,19 +167,17 @@ class GPTAgent:
             if phase_info["phaseType"] == "ComposedPhase":
                 # Iterating through cycles
                 for cycle_num in range(phase_info["cycleNum"]):
-                    # self.logger.info("Code: "+self.song_creation_data.sonicpi_code)
-                    if not self.continue_composed_loop:
-                        self.logger.info("Breaking composed loop - no further changes needed.")
+                    if self.stop_review_and_modify :
                         break
-                    self.logger.info(f"Executing cycle {cycle_num + 1} of {phase_info['cycleNum']} for ComposedPhase: {phase}")
+                    self.logger.info(f"Executing cycle {cycle_num + 1} of {phase_info['cycleNum']} for ComposedPhase: {phase}; Boolean stop_review_and_modify " + str(self.stop_review_and_modify) )
                     for sub_phase_info in phase_info["Composition"]:
-                        if not self.continue_composed_loop:
-                            self.logger.info("Breaking sub phase loop - no further changes needed.")
-                            break
                         sub_phase = sub_phase_info["phase"]
-                        if  (not self.stop_review_and_modify and (sub_phase == "Code Modification" or sub_phase == "Code Review")) or (sub_phase != "Code Modification" and sub_phase != "Code Review") :
+                        if self.stop_review_and_modify :
+                            self.logger.info("Skip " + sub_phase);
+                            break
+                        else:
+                            self.logger.info("Starting subphase " + sub_phase);
                             self.execute_phase(client, sub_phase, self.song_creation_data, artist_config, phase_config)
-                    self.continue_composed_loop = True
             else:
                 self.execute_phase(client, phase, self.song_creation_data, artist_config, phase_config)
 

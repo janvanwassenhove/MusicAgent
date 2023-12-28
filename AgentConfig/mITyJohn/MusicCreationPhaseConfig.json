@@ -215,7 +215,7 @@
       "Make sure the song has a total duration of: {total_duration} seconds;",
       "Verify the different segments with their own individual timings (in seconds): {segments};",
       "For the complete song, as for the individual segments, following arrangements were defined: {arrangements};",
-      "Validate and correct if neede the sonic pi code so it answers to these criteria ",
+      "Validate and correct if needed the sonic pi code so it answers to these criteria. Also make sure intro fades in and outro fades out.",
       "Provide a response in JSON format with separate field for sonicpi_code. This field holds the complete script of sonic pi code.",
       "In the sonicpi_code field, you should return the complete sonic pi code (not only the revised code, but the entire song code). Make sure you output the complete code (written in ruby) and not only parts.",
       "The response should be formatted as a JSON-compatible string, ready to be parsed. Please format the response like this: {\"sonicpi_code\": \"<complete code here>\"}"
