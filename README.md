@@ -27,6 +27,22 @@ It does not yet generate singing voices, only instrumental versions.
 We defined different assistants, all having a different role throughout the phases of composing and writing a song.
 The will handle the different steps, starting from the user's initial input.
 
+The different assistant roles:
+Different roles are defined in [ArtistConfig.json](AgentConfig/mITyJohn/ArtistConfig.json)
+- Artist
+- Composer
+- Songwriter
+- Arranger
+- Sonic PI coder
+- Sonic PI reviewer
+- Sonic PI Mix Engineer
+- Master Engineer
+- Music Publisher
+
+All roles take there part in different phases of composing a song.
+- Configuration of sequences in the chaing can be found in  [MusicCreationChainConfig.json](AgentConfig/mITyJohn/MusicCreationChainConfig.json).
+- Configuration and description of each phase is configured in [MusicCreationPhaseConfig.json](AgentConfig/mITyJohn/MusicCreationPhaseConfig.json).
+
 ![Song Creation Flow](Assets/Flow-Creation.jpg)
 
 The eventual output is a booklet with an album cover, and of course the coded song track in a *.rb file.
