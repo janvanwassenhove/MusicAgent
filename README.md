@@ -3,11 +3,14 @@
 ![Music Agency](Assets/img.png)
 
 ## Table of Contents
+## Table of Contents
 1. [Introduction](#introduction)
-2. [Prerequisites](#prerequisites)
-3. [Installation](#installation)
+2. [How does it work?](#how-does-it-work)
+3. [Using Music Agent](#using-music-agent)
+    - [Prerequisites](#prerequisites)
+    - [Installation](#installation)
 4. [Configuration](#configuration)
-5. [Running the MusicAgent](#Running-the-MusicAgent)
+5. [Running the MusicAgent](#running-the-musicagent)
 6. [Output](#output)
 
 ---
@@ -20,9 +23,12 @@ This manual provides instructions on installation, configuration, and song gener
 
 ## How does it work?
 
+We defined different assistants, all having a different role throughout the phases of composing and writing a song.
+The will handle the different steps, starting from the user's initial input.
 
+![Song Creation Flow](Assets/Flow-Creation.jpg)
 
-
+The eventual output is a booklet with an album cover, and of course the coded song track in a *.rb file.
 
 ## Using Music Agent
 ### Prerequisites
@@ -66,3 +72,5 @@ MusicAgent will generate the following in the songs folder in a subdirectory cal
 - Track File Generated: the *.rb file can be found in the Songs directory. To play your track, simply load the file in SONIC PI.
 - A booklet containing cover image (which resides in same subdirectory), lyrics & additional technical info on setup of the track
 - Music Agent logging file. If Track code got lost or is incomplete, you can verify the logs.
+
+![Record a WAV](Assets/WAV-recording.jpg)
