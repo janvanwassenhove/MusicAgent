@@ -167,16 +167,16 @@ class GPTAgent:
             if phase_info["phaseType"] == "ComposedPhase":
                 # Iterating through cycles
                 for cycle_num in range(phase_info["cycleNum"]):
-                    if self.stop_review_and_modify :
+                    if self.stop_review_and_modify:
                         break
                     self.logger.info(f"Executing cycle {cycle_num + 1} of {phase_info['cycleNum']} for ComposedPhase: {phase}; Boolean stop_review_and_modify " + str(self.stop_review_and_modify) )
                     for sub_phase_info in phase_info["Composition"]:
                         sub_phase = sub_phase_info["phase"]
-                        if self.stop_review_and_modify :
-                            self.logger.info("Skip " + sub_phase);
+                        if self.stop_review_and_modify:
+                            self.logger.info("Skip " + sub_phase)
                             break
                         else:
-                            self.logger.info("Starting subphase " + sub_phase);
+                            self.logger.info("Starting subphase " + sub_phase)
                             self.execute_phase(client, sub_phase, self.song_creation_data, artist_config, phase_config)
             else:
                 self.execute_phase(client, phase, self.song_creation_data, artist_config, phase_config)
