@@ -3,7 +3,6 @@
 ![Music Agency](Assets/img.png)
 
 ## Table of Contents
-## Table of Contents
 1. [Introduction](#introduction)
 2. [How does it work?](#how-does-it-work)
 3. [Using Music Agent](#using-music-agent)
