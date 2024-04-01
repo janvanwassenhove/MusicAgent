@@ -45,7 +45,8 @@ def main():
     duration = get_valid_duration()
     genre = get_valid_style()
 
-    additional_information = input("\nPlease add a description of you song (think musical influence, certain feelings that come up, ...) :")
+    additional_information = input("\nPlease add a description of your song.\n "
+                                   "Think musical influence, certain feelings that come up, ...:\n")
 
     setup_logger(song_name)
     logger = logging.getLogger()
@@ -75,6 +76,7 @@ def setup_logger(song_name):
 
 def get_valid_duration():
     while True:
+        return 180
         input_value = input("Enter the approximate duration of the song in seconds (or leave empty if you feel confident): ")
 
         if input_value == "":

@@ -44,6 +44,10 @@
       "phaseType": "SimplePhase"
     },
     {
+      "phase": "Recording",
+      "phaseType": "SimplePhase"
+    },
+    {
       "phase": "Cover Art",
       "phaseType": "SimplePhase"
     },

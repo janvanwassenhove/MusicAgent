@@ -59,7 +59,9 @@ class GPTAgent:
         elif task_type == "readme":
             self.song.create_readme_file(self.song_creation_data)
         elif task_type == "file":
-            self.song.create_song_file(self.song_creation_data)
+            self.song.create_song_file(self.song_creation_data, None)
+        elif task_type == "recording":
+            self.song.record_song(self.song_creation_data)
         else:
             return "Unknown task type"
 
@@ -121,6 +123,7 @@ class GPTAgent:
                     code_to_retrieve = '\n'.join(response_data['sonicpi_code'])
                     self.logger.info("Code successfully retrieved from array: %s", code_to_retrieve)
                     song_creation_data.set_parameter("sonicpi_code", code_to_retrieve)
+                    self.song.create_song_file(song_creation_data, "Attempt_" + str(retry_count))
                 else:
                     song_creation_data.update_parameters_from_response(response_data)
                 break
@@ -138,6 +141,7 @@ class GPTAgent:
                             code_to_retrieve = response_text[start:end]
                             self.logger.info("Code could be extracted via workaround: %s", code_to_retrieve)
                             song_creation_data.set_parameter("sonicpi_code", code_to_retrieve)
+                            self.song.create_song_file(song_creation_data, "Attempt_" + str(retry_count))
                         else:
                             self.logger.info("End marker not found for 'sonicpi_code'")
                     else:

@@ -1,5 +1,7 @@
 {
   "OPENAI_API_KEY": "your api key",
+  "OSC_client": "127.0.0.1",
+  "OSC_port": "4559",
   "agent_name": "mITy.John",
   "artist_style": " Retro & vintage using yellow, dark green, orange, black, white color palette.",
   "assistants": [

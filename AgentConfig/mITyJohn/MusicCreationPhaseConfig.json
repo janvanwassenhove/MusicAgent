@@ -234,6 +234,10 @@
     "type" : "file",
     "assistant_role_name":"Music Publisher"
   },
+  "Recording": {
+    "type" : "recording",
+    "assistant_role_name":"Music Publisher"
+  },
   "Booklet Creation": {
     "type" : "readme",
     "assistant_role_name":"Music Publisher"
