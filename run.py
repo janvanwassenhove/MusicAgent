@@ -14,7 +14,7 @@ def main():
     print("First let get you started, providing me some options to consider.")
 
     # List of available OpenAI models
-    available_models = ["gpt-3.5-turbo", "gpt-4"]
+    available_models = ["gpt-3.5-turbo", "gpt-4", "gpt-4-turbo", "gpt-4o"]
 
     # Display the available models
     print("\nAvailable OpenAI models:")
@@ -72,21 +72,21 @@ def setup_logger(song_name):
     logging.basicConfig(filename=log_file, level=logging.INFO,
                         format='%(asctime)s:%(levelname)s:%(message)s')
 
-
 def get_valid_duration():
-    while True:
-        input_value = input("Enter the approximate duration of the song in seconds (or leave empty if you feel confident): ")
-
-        if input_value == "":
-            return 180
-        try:
-            duration = int(input_value)
-            if duration > 0:
-                return duration
-            else:
-                print("Duration must be a positive integer.")
-        except ValueError:
-            print("Invalid duration. Please enter a valid integer.")
+    return 180
+    # while True:
+    #     input_value = input("Enter the approximate duration of the song in seconds (or leave empty if you feel confident): ")
+    #
+    #     if input_value == "":
+    #         return 180
+    #     try:
+    #         duration = int(input_value)
+    #         if duration > 0:
+    #             return duration
+    #         else:
+    #             print("Duration must be a positive integer.")
+    #     except ValueError:
+    #         print("Invalid duration. Please enter a valid integer.")
 
 def get_api_key():
     # Try to get the API key from an environment variable
