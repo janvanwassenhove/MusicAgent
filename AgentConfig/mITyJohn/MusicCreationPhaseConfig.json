@@ -56,7 +56,7 @@
       "The structure of the song, is defined as {structure}.",
       "We expect the song to have a total duration of {total_duration} seconds.",
       "Given this information determine the duration of the different segments in the songs. Segments are based on the song structure. ",
-      "Provide a response in JSON format with separate field for segments. The json fields segments holds the information on the segements.",
+      "Provide a response in JSON format with separate field for segments. The json fields segments holds the information on the segments.",
       "The response should be formatted as a JSON-compatible string, ready to be parsed. "
     ],
     "input": {
