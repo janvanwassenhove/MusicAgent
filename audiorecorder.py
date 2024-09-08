@@ -5,6 +5,9 @@ from scipy.io.wavfile import write
 import time
 import threading
 from sonicPi import SonicPi
+import sys
+
+sys.set_int_max_str_digits(1000000)  # Increase as necessary
 
 class AudioRecorder:
     def __init__(self, logger, song, artist_config, fs=44100):
