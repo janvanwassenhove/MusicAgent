@@ -74,6 +74,33 @@ pip install -r requirements.txt
 Set **OPENAI_API_KEY** in `ArtistConfig/mITyJohn/ArtistConfig.json` if not set as a system variable.
 Adjust settings in ArtistConfig.json as needed.
 
+By default, the artist mITyJohn will be ran with the basic chain of music creation.
+But if you want additional sonic pi evaluation or even start a recording you can choose on of the other agent configurations=
+- Eval: will evaluate your sonic pi code via sonic pi instance running on your machine
+- Full: will evaluate your sonic pi code via sonic pi instance running on your machine but will also start a recording (currently only on windows machine)
+
+For these extended chains an additional setup is needed:
+
+1. Launch Sonic Pi on your machine
+2. Adapt ArtistConfig.json with correct the sonic_pi_IP & sonic_pi_port (these can be found in Soni Pi IDE via menu>IO). Verify incoming OSC messages is allowed. 
+3. Copy and run following code (needs to be running before starting MusicAgent)
+```bash
+live_loop :listen do
+  use_real_time
+  script = sync "/osc*/run-code"
+  
+  begin
+    eval script[0]
+    osc_send '127.0.0.1', 4559, '/feedback', 'MusicAgent Code was executed successfully'
+  rescue Exception => e
+    osc_send '127.0.0.1', 4559, '/feedback', e.message
+  end
+end
+```
+or just load `Sonicpi/Setup/recording.rb` in your Sonic PI.
+
+4. Once launched, you'll notice the listener in your Cues being launched. This will enable Sonic Pi to play your music file and send feedback to MusicAgent.
+
 ### Running the MusicAgent
 ```bash
 python run.py

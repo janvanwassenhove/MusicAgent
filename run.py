@@ -14,7 +14,8 @@ def main():
     print("First let get you started, providing me some options to consider.")
 
     # List of available OpenAI models
-    available_models = ["gpt-3.5-turbo", "gpt-4", "gpt-4-turbo", "gpt-4o"]
+    # available_models = ["gpt-3.5-turbo", "gpt-4", "gpt-4-turbo", "gpt-4o", "gpt-4o-mini"]
+    available_models = ["gpt-4o", "gpt-4o-mini"]
 
     # Display the available models
     print("\nAvailable OpenAI models:")
@@ -22,7 +23,7 @@ def main():
         print(f"{index}. {model}")
 
     # Initialize the default model
-    selected_model = "gpt-3.5-turbo"
+    selected_model = "gpt-4o-mini"
 
     # Prompt the user to pick a model
     try:
@@ -33,11 +34,36 @@ def main():
         else:
             print("Invalid selection. Please choose a number from the list.")
     except ValueError:
-        print("Invalid input. By default selected_model will be chosen.")
+        print("Invalid input. By default "+selected_model+"will be chosen.")
         pass
 
+    # Path to the directory
+    directory_path = 'AgentConfig'
+
+    # Get the list of folders
+    available_models = [folder for folder in os.listdir(directory_path) if os.path.isdir(os.path.join(directory_path, folder))]
+
+    # Display the available models
+    print("Available Music Agent Configurations:")
+    for i, model in enumerate(available_models, 1):
+        print(f"{i}. {model}")
+
+    # Prompt user to pick a model
+    try:
+        choice = int(input("Pick the music Agent configuration you want to use: "))
+        if 1 <= choice <= len(available_models):
+            agenttype = available_models[choice - 1]
+            print(f"You have selected: {agenttype}")
+        else:
+            print("Invalid selection. Please choose a number from the list.")
+    except ValueError:
+        print("Invalid input. By default, the first model will be selected.")
+        agenttype = available_models[0]
+
+    print(f"Selected model: {agenttype}")
+
     # Load JSON data from the file
-    with open("AgentConfig/mITyJohn/ArtistConfig.json", "r") as file:
+    with open("AgentConfig/"+agenttype+"/ArtistConfig.json", "r") as file:
         artist_config = json.load(file)
 
     # Get input parameters from the user
@@ -52,7 +78,7 @@ def main():
     logger.info("Starting Song Generation")
 
     # Create a GPT agent
-    agent = GPTAgent(selected_model, logger, Song(song_name, logger))
+    agent = GPTAgent(selected_model, logger, Song(song_name, logger), agenttype)
 
     # Start the music composition chain
     agent.execute_composition_chain(genre, duration, additional_information)
@@ -87,22 +113,6 @@ def get_valid_duration():
     #             print("Duration must be a positive integer.")
     #     except ValueError:
     #         print("Invalid duration. Please enter a valid integer.")
-
-def get_api_key():
-    # Try to get the API key from an environment variable
-    api_key = os.getenv("OPENAI_API_KEY")
-
-    # If not found, fallback to the config file
-    if not api_key:
-        try:
-            with open('AgentConfig/mITyJohn/ArtistConfig.json', 'r') as config_file:
-                config = json.load(config_file)
-                api_key = config.get('OPENAI_API_KEY')
-        except (FileNotFoundError, json.JSONDecodeError) as e:
-            print(f"Error reading config file: {e}")
-            return None
-
-    return api_key
 
 def load_json_data(key):
     file_path = 'AgentConfig/mITyJohn/SongConfig.json'
