@@ -38,7 +38,8 @@ class AudioRecorder:
         devices = sd.query_devices()
         selected_device_index = None
 
-        known_working_devices = [43]  # Add any other indices that have been tested and confirmed
+        recording_device_id = self.artist_config.get('recording_device_id')
+        known_working_devices = [recording_device_id]  # Add any other indices that have been tested and confirmed
 
         for device_id in known_working_devices:
             if device_id < len(devices):

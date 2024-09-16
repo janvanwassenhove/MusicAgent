@@ -121,7 +121,7 @@
       "The song is divided into different segments with their own individual timings (in seconds): {segments}.",
       "For the complete song, as for the individual segments, the following arrangements were defined: {arrangements}.",
       "Given this information, code the song using the Sonic PI programming language.",
-      "Please generate Sonic Pi code that plays a continuous, fluent melody with no silent gaps or separate blocks, but without using live loops.",
+      "Please generate Sonic Pi code that plays a continuous, fluent melody with no silent gaps or separate blocks, but without using live loops (instead you can use e.g. in_thread or sync).",
       "Instead, use other techniques such as functions, threads, sleeps, and timed sequences to manage the flow and ensure that the total duration of the song does not exceed {total_duration} seconds.",
       "The composition should feel complete and cohesive, with a consistent tempo and flow.",
       "Translate the arrangements within the limitations (instruments, samples, etc.) of Sonic Pi and aim to play multiple instruments in parallel where possible to achieve a fuller sound.",

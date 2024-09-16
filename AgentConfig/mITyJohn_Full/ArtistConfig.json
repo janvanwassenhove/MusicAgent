@@ -5,6 +5,7 @@
   "artist_style": " Retro & vintage using yellow, dark green, orange, black, white color palette.",
   "sonic_pi_IP" : "127.0.0.1",
   "sonic_pi_port" : "4560",
+  "recording_device_id" : 13,
   "assistants": [
     {
       "Artist":  [
