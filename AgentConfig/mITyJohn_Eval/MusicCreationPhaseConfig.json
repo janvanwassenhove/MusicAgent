@@ -142,7 +142,7 @@
     "outcome": {
       "sonicpi_code": "sonicpi_code"
     },
-    "codeValidation" : false
+    "codeValidation" : true
   },
   "Code Review": {
     "type" : "chat",
@@ -186,6 +186,11 @@
       "review": "review"
     }
   },
+  "Human Review" : {
+    "type" : "human_chat",
+    "assistant_role_name":"Artist",
+    "user_role_name": "Human reviewer"
+  },
   "Code Modification": {
     "type" : "chat",
     "assistant_role_name":"Sonic PI coder",
@@ -222,7 +227,7 @@
     "outcome": {
       "sonicpi_code": "sonicpi_code"
     },
-    "codeValidation" : false
+    "codeValidation" : true
   },
   "Song mixing": {
     "type" : "chat",
