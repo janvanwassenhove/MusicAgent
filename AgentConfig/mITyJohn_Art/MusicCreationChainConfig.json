@@ -1,0 +1,12 @@
+{
+  "chain": [
+    {
+      "phase": "Conceptualization",
+      "phaseType": "SimplePhase"
+    },
+    {
+      "phase": "Cover Art",
+      "phaseType": "SimplePhase"
+    }
+  ]
+}

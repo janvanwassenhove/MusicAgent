@@ -1,0 +1,27 @@
+{
+  "Conceptualization": {
+    "type" : "chat",
+    "assistant_role_name": "Composer",
+    "user_role_name": "Artist",
+    "phase_prompt": [
+      "Come up with a concept for a song based on this description: {song_description}.",
+      "Provide a response in JSON format with separate fields for theme, melody, and rhythm. The response should be formatted as a JSON-compatible string, ready to be parsed. ",
+      "A theme could be an emotion, a story, an event, or any specific idea.",
+      "The melody might  include the mood of the melody (e.g., uplifting, melancholic), specific musical influences, or even instruments you'd like it to be associated with.",
+      "Detail the kind of rhythm you want for the song. This could include the tempo (e.g., fast-paced, slow and steady), the style of rhythm (e.g., jazzy, syncopated), or specific percussion instruments.",
+      "For example, \"The rhythm should be lively and upbeat, with a moderate tempo, using hand drums and tambourines.\""
+    ],
+    "input": {
+      "song_description" : "song_description"
+    },
+    "outcome": {
+      "theme": "theme",
+      "melody": "melody",
+      "rhythm": "rhythm"
+    }
+  },
+  "Cover Art": {
+    "type" : "art",
+    "assistant_role_name":"Music Publisher"
+  }
+}

@@ -16,12 +16,15 @@
 
 ## Introduction
 
+![Music Agent logo](Assets/musicagent.png)
+
 MusicAgent is a Python agent that programs songs in Sonic Pi. 
 It uses generative AI to generate song structures based on user preferences.
 This manual provides instructions on installation, configuration, and song generation.
-It does not yet generate singing voices, only instrumental versions.
+It does not yet generate singing voices (you cna include them using samples, only instrumental versions.
 
-![Music Agent logo](Assets/musicagent.png)
+![architect overview](Assets/architect_overview.png)
+
 
 ## How does it work?
 
@@ -40,11 +43,31 @@ Different roles are defined in [ArtistConfig.json](AgentConfig/mITyJohn/ArtistCo
 - Master Engineer
 - Music Publisher
 
+![Music Agent Flow](Assets/ma_flow.png)
+
 All roles take there part in different phases of composing a song.
 - Configuration of sequences in the chaing can be found in  [MusicCreationChainConfig.json](AgentConfig/mITyJohn/MusicCreationChainConfig.json).
 - Configuration and description of each phase is configured in [MusicCreationPhaseConfig.json](AgentConfig/mITyJohn/MusicCreationPhaseConfig.json).
 
-![Song Creation Flow](Assets/Flow-Creation.jpg)
+### 1. Design Phase
+![design phase](Assets/design_phase.png)
+
+
+### 2. Creation Phase
+The actual creation of the sonic pi script, initial playback, 
+iterating over agent or human review followed by code rewrite.
+
+![creation phase](Assets/creation_phase.png)
+
+### 3. Mastering Phase
+![cmastering phase](Assets/mix_master_phase.png)
+
+### 4. Publishing Phase
+
+Depending on artist configuration, includes sonic pi script file genration, album cover, booklet and optional song recording.
+
+![publishing phase](Assets/recording_publish_phase.png)
+
 
 The eventual output is a booklet with an album cover, and of course the coded song track in a *.rb file.
 
@@ -80,6 +103,7 @@ By default, the artist mITyJohn will be ran with the basic chain of music creati
 But if you want additional sonic pi evaluation or even start a recording you can choose on of the other agent configurations=
 - Eval: will evaluate your sonic pi code via sonic pi instance running on your machine
 - Full: will evaluate your sonic pi code via sonic pi instance running on your machine but will also start a recording (currently only on windows machine)
+- Art: limit to album cover generation based on artist configuration (no song generation)
 
 For these extended chains an additional setup is needed:
 
@@ -115,6 +139,7 @@ Once launched you'll be able to pass multiple criteria:
 ### Output
 MusicAgent will generate the following in the songs folder in a subdirectory called by trackname:
 - Track File Generated: the *.rb file can be found in the Songs directory. To play your track, simply load the file in SONIC PI.
+  - when using the "full artist" configuration, recording WAV file will be created additionally (without having to load it in sonic Pi afterwards) 
 - A booklet containing cover image (which resides in same subdirectory), lyrics & additional technical info on setup of the track
 - Music Agent logging file. If Track code got lost or is incomplete, you can verify the logs.
 

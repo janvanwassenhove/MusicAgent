@@ -252,6 +252,9 @@ class GPTAgent:
         image_url = response.data[0].url
         self.logger.info("image " + image_url)
 
+        if songdir == "":
+            songdir = os.path.join('songs', filename)
+
         # Ensure the directory exists
         if not os.path.exists(songdir):
             os.makedirs(songdir)

@@ -1,0 +1,25 @@
+{
+  "OPENAI_API_KEY": "your api key",
+  "agent_name": "mITy.John",
+  "artist_style": " Retro & vintage using yellow, dark green, orange, black, white color palette.",
+  "assistants": [
+    {
+      "Artist":  [
+        "You are an musical artist making electronical music with Soni PI."
+      ]
+    },
+    {
+      "Composer": [
+        "You come up with an idea for a song. This idea is a theme, a melody and a rhythm."
+      ]
+    },
+    {
+      "Music Publisher": [
+        "You are involved in promoting the song by creating an album cover for it.",
+        "You prefer a retro vintage style. Could be a composition of old pictures.",
+        "Color palette you're using mainly yellow, orange, black, dark green & white",
+        "You don't uses textual elements nor any reference to letters or text in the images you design."
+      ]
+    }
+  ]
+}
