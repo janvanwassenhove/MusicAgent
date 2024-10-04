@@ -21,6 +21,8 @@ It uses generative AI to generate song structures based on user preferences.
 This manual provides instructions on installation, configuration, and song generation.
 It does not yet generate singing voices, only instrumental versions.
 
+![Music Agent logo](Assets/musicagent.png)
+
 ## How does it work?
 
 We defined different assistants, all having a different role throughout the phases of composing and writing a song.
