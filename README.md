@@ -11,6 +11,7 @@
 4. [Configuration](#configuration)
 5. [Running the MusicAgent](#running-the-musicagent)
 6. [Output](#output)
+7. [Demo](#Demo)
 
 ---
 
@@ -143,4 +144,9 @@ MusicAgent will generate the following in the songs folder in a subdirectory cal
 - A booklet containing cover image (which resides in same subdirectory), lyrics & additional technical info on setup of the track
 - Music Agent logging file. If Track code got lost or is incomplete, you can verify the logs.
 
-![Record a WAV](Assets/WAV-recording.jpg)
+![Record a WAV within Sonic Pi](Assets/WAV-recording.jpg)
+
+If you're using [mITyJohn_Full](AgentConfig%2FmITyJohn_Full) configuration when running the agent, and your recording device is correctly configured (only on windows currently), a recording will be made automatically.
+
+
+
