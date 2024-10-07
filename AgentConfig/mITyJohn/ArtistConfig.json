@@ -1,6 +1,7 @@
 {
   "OPENAI_API_KEY": "your api key",
   "agent_name": "mITy.John",
+  "description": "Default MusicAgent configuration, if you're in need of a quick tune. Limited review/modification phase. Without recording & playback throughout the process flow.",
   "artist_style": " Retro & vintage using yellow, dark green, orange, black, white color palette.",
   "assistants": [
     {

@@ -137,6 +137,9 @@ Once launched you'll be able to pass multiple criteria:
 - Provide song details: name, duration, style
 - Optionally add specific requests like chord progressions or musical influences.
 
+
+Sonic PI examples can be found in 'SonicPi/Examples' folder.
+
 ### Output
 MusicAgent will generate the following in the songs folder in a subdirectory called by trackname:
 - Track File Generated: the *.rb file can be found in the Songs directory. To play your track, simply load the file in SONIC PI.
