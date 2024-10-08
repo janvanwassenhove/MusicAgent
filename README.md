@@ -19,8 +19,8 @@
 
 ![Music Agent logo](Assets/musicagent.png)
 
-MusicAgent is a Python agent that programs songs in Sonic Pi. 
-It uses generative AI to generate song structures based on user preferences.
+MusicAgent is a MAS (Multi Agent System) that programs songs in Sonic Pi. 
+It uses generative AI to generate song structures, arrangements, lyrics, ... based on user preferences.
 This manual provides instructions on installation, configuration, and song generation.
 It does not yet generate singing voices (you cna include them using samples, only instrumental versions.
 
