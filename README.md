@@ -12,6 +12,7 @@
 5. [Running the MusicAgent](#running-the-musicagent)
 6. [Output](#output)
 7. [Demo](#Demo)
+8. [About](#about)
 
 ---
 
@@ -26,8 +27,9 @@ It does not yet generate singing voices (you cna include them using samples, onl
 
 ![architect overview](Assets/architect_overview.png)
 
-
 ## How does it work?
+
+[Watch Music Agent in action](https://www.youtube.com/watch?v=rcfCjKbLkK0)
 
 We defined different assistants, all having a different role throughout the phases of composing and writing a song.
 The will handle the different steps, starting from the user's initial input.
@@ -69,8 +71,7 @@ Depending on artist configuration, includes sonic pi script file genration, albu
 
 ![publishing phase](Assets/recording_publish_phase.png)
 
-
-The eventual output is a booklet with an album cover, and of course the coded song track in a *.rb file.
+The eventual output is a booklet with an album cover (optionally a recording depending on chosen configuration), and of course the coded song track in a *.rb file.
 
 ## Using Music Agent
 ### Prerequisites
@@ -153,3 +154,7 @@ If you're using [mITyJohn_Full](AgentConfig%2FmITyJohn_Full) configuration when 
 
 
 
+## About
+
+Music Agent was originally developed by [mITyJohn](https://mityjohn.com/).
+The project is open-source and available on GitHub for the community for contributions and improvements (just because it's fun!).
