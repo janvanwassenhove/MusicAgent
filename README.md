@@ -12,6 +12,7 @@
 5. [Running the MusicAgent](#running-the-musicagent)
 6. [Output](#output)
 7. [Demo](#Demo)
+8. [About](#about)
 
 ---
 
@@ -19,15 +20,16 @@
 
 ![Music Agent logo](Assets/musicagent.png)
 
-MusicAgent is a Python agent that programs songs in Sonic Pi. 
-It uses generative AI to generate song structures based on user preferences.
+MusicAgent is a MAS (Multi Agent System) that programs songs in Sonic Pi. 
+It uses generative AI to generate song structures, arrangements, lyrics, ... based on user preferences.
 This manual provides instructions on installation, configuration, and song generation.
 It does not yet generate singing voices (you cna include them using samples, only instrumental versions.
 
 ![architect overview](Assets/architect_overview.png)
 
-
 ## How does it work?
+
+[Watch Music Agent in action](https://www.youtube.com/watch?v=rcfCjKbLkK0)
 
 We defined different assistants, all having a different role throughout the phases of composing and writing a song.
 The will handle the different steps, starting from the user's initial input.
@@ -69,8 +71,7 @@ Depending on artist configuration, includes sonic pi script file genration, albu
 
 ![publishing phase](Assets/recording_publish_phase.png)
 
-
-The eventual output is a booklet with an album cover, and of course the coded song track in a *.rb file.
+The eventual output is a booklet with an album cover (optionally a recording depending on chosen configuration), and of course the coded song track in a *.rb file.
 
 ## Using Music Agent
 ### Prerequisites
@@ -152,6 +153,9 @@ Once launched you'll be able to pass multiple criteria:
 - Provide song details: name, duration, style
 - Optionally add specific requests like chord progressions or musical influences.
 
+
+Sonic PI examples can be found in 'SonicPi/Examples' folder.
+
 ### Output
 MusicAgent will generate the following in the songs folder in a subdirectory called by trackname:
 - Track File Generated: the *.rb file can be found in the Songs directory. To play your track, simply load the file in SONIC PI.
@@ -165,3 +169,7 @@ If you're using [mITyJohn_Full](AgentConfig%2FmITyJohn_Full) configuration when 
 
 
 
+## About
+
+Music Agent was originally developed by [mITyJohn](https://mityjohn.com/).
+The project is open-source and available on GitHub for the community for contributions and improvements (just because it's fun!).
