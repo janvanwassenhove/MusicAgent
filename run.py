@@ -8,34 +8,39 @@ import json
 from agent import GPTAgent
 from song import Song
 
+def get_available_models():
+    return {
+        "openai": ["gpt-4o", "gpt-4o-mini", "gpt-3.5-turbo", "gpt-4", "gpt-4-32k"],
+        "anthropic": ["claude-3-5-sonnet-20240620", "claude-3-sonnet-20240229", "claude-3-haiku-20240307"]
+    }
+
+def get_user_input(prompt, options):
+    print(prompt)
+    for i, option in enumerate(options, 1):
+        print(f"{i}. {option}")
+
+    while True:
+        try:
+            choice = int(input("Enter your choice (number): "))
+            if 1 <= choice <= len(options):
+                selected = options[choice - 1]
+                print(f"You have selected: {selected}")
+                return selected
+            else:
+                print(f"Invalid selection. Please choose a number between 1 and {len(options)}.")
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+
 def main():
-
     print("\nWelcome to mITy John's music agent, let's make you a song!")
-    print("First let get you started, providing me some options to consider.")
 
-    # List of available OpenAI models
-    # available_models = ["gpt-3.5-turbo", "gpt-4", "gpt-4-turbo", "gpt-4o", "gpt-4o-mini"]
-    available_models = ["gpt-4o", "gpt-4o-mini"]
+    # Get user input for provider
+    available_providers = ["openai", "anthropic"]
+    provider = get_user_input("Choose API provider:", available_providers)
 
-    # Display the available models
-    print("\nAvailable OpenAI models:")
-    for index, model in enumerate(available_models, start=1):
-        print(f"{index}. {model}")
-
-    # Initialize the default model
-    selected_model = "gpt-4o-mini"
-
-    # Prompt the user to pick a model
-    try:
-        choice = int(input("Pick a number of the model to use: "))
-        if 1 <= choice <= len(available_models):
-            selected_model = available_models[choice - 1]
-            print(f"You have selected: {selected_model}")
-        else:
-            print("Invalid selection. Please choose a number from the list.")
-    except ValueError:
-        print("Invalid input. By default "+selected_model+"will be chosen.")
-        pass
+    # Get user input for model
+    available_models = get_available_models()[provider]
+    selected_model = get_user_input(f"Choose a model for {provider}:", available_models)
 
     # Path to the directory
     directory_path = 'AgentConfig'
@@ -78,11 +83,10 @@ def main():
     logger.info("Starting Song Generation")
 
     # Create a GPT agent
-    agent = GPTAgent(selected_model, logger, Song(song_name, logger), agenttype)
+    agent = GPTAgent(selected_model, logger, Song(song_name, logger), agenttype, provider)
 
     # Start the music composition chain
     agent.execute_composition_chain(genre, duration, additional_information)
-
 
 def setup_logger(song_name):
     # Create 'songs' directory if it doesn't exist

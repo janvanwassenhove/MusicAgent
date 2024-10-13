@@ -1,5 +1,6 @@
 {
-  "OPENAI_API_KEY": "your api key",
+  "OPENAI_API_KEY": "your Open AI api key",
+  "ANTHROPIC_API_KEY": "your Anthropic api key",
   "agent_name": "mITy.John",
   "artist_style": " Retro & vintage using yellow, dark green, orange, black, white color palette.",
   "assistants": [

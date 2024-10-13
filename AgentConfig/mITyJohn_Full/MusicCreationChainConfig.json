@@ -21,12 +21,12 @@
       "phaseType": "SimplePhase"
     },
     {
-      "phase": "Human Review",
+      "phase": "Song Code Review",
       "phaseType": "ComposedPhase",
-      "cycleNum": 2,
+      "cycleNum": 3,
       "Composition": [
         {
-          "phase": "Human Review",
+          "phase": "Code Review",
           "phaseType": "SimplePhase"
         },
         {
@@ -36,12 +36,12 @@
       ]
     },
     {
-      "phase": "Song Code Review",
+      "phase": "Human Review",
       "phaseType": "ComposedPhase",
       "cycleNum": 2,
       "Composition": [
         {
-          "phase": "Code Review",
+          "phase": "Human Review",
           "phaseType": "SimplePhase"
         },
         {

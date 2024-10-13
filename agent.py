@@ -1,43 +1,43 @@
 '''
-This file contains the GPTAgent class that interacts with the OpenAI API to generate song lyrics.
+This file contains the GPTAgent class that interacts with the OpenAI or Anthropic API to generate song lyrics.
 '''
 
 from openai import OpenAI
+from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
+from audiorecorder import AudioRecorder
+from songCreationData import SongCreationData
+from sonicPi import SonicPi
+from pythonosc import udp_client, dispatcher as osc_dispatcher, osc_server
+
 import json
 import os
 import requests
 import imghdr
 import re
-
-from audiorecorder import AudioRecorder
-from songCreationData import SongCreationData
-from sonicPi import SonicPi
-
-
-from pythonosc import udp_client, dispatcher as osc_dispatcher, osc_server
 import threading
 import time
 
-
 class GPTAgent:
-    def __init__(self, selected_model, logger, song, agentType):
+    def __init__(self, selected_model, logger, song, agentType, api_provider):
         self.selected_model = selected_model
         self.song_creation_data = SongCreationData(logger)
         self.stop_review_and_modify = False
         self.logger = logger
         self.song = song
         self.agentType = agentType
+        self.api_provider = api_provider
 
     def get_api_key(self):
         # Try to get the API key from an environment variable
-        api_key = os.getenv("OPENAI_API_KEY")
+        env_var = "OPENAI_API_KEY" if self.api_provider == 'openai' else "ANTHROPIC_API_KEY"
+        api_key = os.getenv(env_var)
 
         # If not found, fallback to the config file
         if not api_key:
             try:
                 with open('AgentConfig/'+self.agentType+'/ArtistConfig.json', 'r') as config_file:
                     config = json.load(config_file)
-                    api_key = config.get('OPENAI_API_KEY')
+                    api_key = config.get(env_var)
             except (FileNotFoundError, json.JSONDecodeError) as e:
                 print(f"Error reading config file: {e}")
                 return None
@@ -115,20 +115,38 @@ class GPTAgent:
         )
 
         messages = [
-            {"role": "system", "content": self.get_assistant_content(assistant_role_name, artist_config)},
             {"role": "user", "content": phase_prompt}
         ]
+
+        # Fetch the system message content
+        system_content = self.get_assistant_content(assistant_role_name, artist_config)
 
         retry_count = 0
         max_retries = 3
 
         while retry_count < max_retries:
             try:
-                completion = client.chat.completions.create(
-                    model=self.selected_model,
-                    messages=messages
-                )
-                response_text = completion.choices[0].message.content
+                if self.api_provider == 'openai':
+                    openai_messages = [
+                        {"role": "system", "content": system_content},
+                        {"role": "user", "content": phase_prompt}
+                    ]
+
+                    completion = client.chat.completions.create(
+                        model=self.selected_model,
+                        messages=openai_messages
+                    )
+                    response_text = completion.choices[0].message.content
+
+                elif self.api_provider == 'anthropic':  # Anthropic
+                    completion = client.messages.create(
+                        model=self.selected_model,
+                        system=system_content,  # Use top-level 'system' parameter in case of Anthropic
+                        messages=messages,
+                        max_tokens=4096,
+                    )
+                    response_text = completion.content[0].text
+
                 self.logger.info(f"Response (retry {retry_count}): {response_text}")
 
                 # Attempt to extract JSON object using regex if the response contains extra text
@@ -193,7 +211,6 @@ class GPTAgent:
                 code_to_retrieve = response_text[start:end]
                 self.logger.info(f"Code extracted via workaround: {code_to_retrieve}")
                 song_creation_data.set_parameter("sonicpi_code", code_to_retrieve)
-                return self.validate_and_execute_code(song_creation_data, artist_config, response_text)
             else:
                 self.logger.info("End marker not found for 'sonicpi_code'")
         else:
@@ -209,8 +226,10 @@ class GPTAgent:
         with open('AgentConfig/'+self.agentType+'/ArtistConfig.json') as file:
             artist_config = json.load(file)
 
-        client = OpenAI()
-        client.api_key = self.get_api_key()
+        if self.api_provider == 'openai':
+            client = OpenAI(api_key=self.get_api_key())
+        else:
+            client = Anthropic(api_key=self.get_api_key())
 
         song_description = f"I want to compose a brand new song. I like the "+genre+" genre. If I would describe the song, I would say: "+additional_information
 
@@ -220,6 +239,7 @@ class GPTAgent:
         # Iterate over phases
         for phase_info in compose_chain_config["chain"]:
             phase = phase_info["phase"]
+
             if phase_info["phaseType"] == "ComposedPhase":
                 # Iterating through cycles
                 for cycle_num in range(phase_info["cycleNum"]):
@@ -238,8 +258,13 @@ class GPTAgent:
                 self.execute_phase(client, phase, self.song_creation_data, artist_config, phase_config)
 
     def generate_and_download_image(self, prompt, filename, songdir):
-        client = OpenAI()
-        client.api_key = self.get_api_key()
+        if self.api_provider == 'openai':
+            client = OpenAI(api_key=self.get_api_key())
+        else:
+            # Anthropic doesn't have an image generation API, so we'll need to use an alternative
+            self.logger.info("Image generation not supported with Anthropic API.")
+            return
+
         response = client.images.generate(
             model="dall-e-3",
             prompt=prompt,
