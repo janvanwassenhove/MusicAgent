@@ -85,20 +85,22 @@ Music agents works as well with the OpenAI & Anthropic API (Anthropic currently 
 To switch in between both, make sure to set both variables in your config file or environment variables.
 
 - **OPENAI_API_KEY:** Set as a system environment variable or in `ArtistConfig/mITyJohn/ArtistConfig.json`.
-  On MAC
+
+  On MAC:
     ```bash
     export OPENAI_API_KEY='<your_api_key>'
     ```
-  On Windows (using PowerShell)
+  On Windows (using PowerShell):
     ```bash
     $env:OPENAI_API_KEY='<your_api_key>'
     ```
 - **ANTHROPIC_API_KEY:** Set as a system environment variable or in `ArtistConfig/mITyJohn/ArtistConfig.json`.
-  On MAC
+  
+  On MAC:
     ```bash
     export ANTHROPIC_API_KEY='<your_api_key>'
     ```
-  On Windows (using PowerShell)
+  On Windows (using PowerShell):
     ```bash
     $env:ANTHROPIC_API_KEY='<your_api_key>'
     ```
