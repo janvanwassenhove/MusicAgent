@@ -114,6 +114,8 @@ git clone [repository link]
 # Install dependencies
 pip install -r requirements.txt
 ```
+Because of anthropic dependencies, you'll also need to install RUST: https://www.rust-lang.org/tools/install
+
 ### Configuration
 Set **OPENAI_API_KEY** in `ArtistConfig/mITyJohn/ArtistConfig.json` if not set as a system variable.
 Adjust settings in ArtistConfig.json as needed.
