@@ -1,0 +1,142 @@
+/* General Theme Colors */
+body {
+    background-color: #1A4731; /* White background */
+    color: #000000; /* Black text color */
+}
+
+.container {
+    background-color: #FFFFFF;
+    border-top-left-radius: 15px; /* Rounded top left corner */
+    border-top-right-radius: 15px; /* Rounded top right corner */
+}
+
+/* Navbar Customization */
+.navbar {
+    background-color: #1A4731; /* Dark Green */
+    color: #FFFFFF; /* White text */
+}
+
+.navbar a {
+    color: #FFA500; /* Orange links */
+}
+
+.navbar a:hover {
+    color: #FFFFFF; /* White on hover */
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: #FFA500; /* Orange background */
+    border-color: #FFA500; /* Orange border */
+    color: #000000; /* Black text */
+}
+
+.btn-primary:hover {
+    background-color: #1A4731; /* Dark Green on hover */
+    border-color: #1A4731; /* Dark Green border */
+    color: #FFFFFF; /* White text */
+}
+
+/* Footer */
+.footer {
+    background-color: #1A4731; /* Dark Green background */
+    color: #FFFFFF; /* White text */
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+    color: #1A4731; /* Dark Green */
+}
+
+/* Links */
+a {
+    color: #1A4731; /* Orange */
+}
+
+a:hover {
+    color: #1A4731; /* Dark Green on hover */
+}
+
+.bg-primary {
+    background-color: #1A4731;
+}
+
+:root {
+    --bs-primary-rgb: 0, 100, 0; /* Green */
+}
+
+/* Badges */
+.badge {
+    background-color: #1A4731; /* Dark Green background */
+    color: #fff; /* White text */
+}
+
+.badge-warning {
+    background-color: #FFA500; /* Orange background */
+    color: #000000; /* Black text */
+}
+
+#log {
+    height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-top: 20px;
+}
+.cli-log {
+    background-color: #000;
+    color: #ffffff;
+    font-family: 'Courier New', Courier, monospace;
+    padding: 10px;
+    border-radius: 5px;
+    height: 300px;
+    overflow-y: auto;
+}
+
+.cli-log pre {
+    margin: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.cli-log code {
+    color: inherit;
+    background-color: transparent;
+    padding: 0;
+}
+
+.cli-log span {
+    display: block;
+    line-height: 1.5;
+}
+
+/* Add a blinking cursor effect */
+.cli-log pre::after {
+    content: '█';
+    animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+.json-textarea {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre;
+    overflow-wrap: normal;
+    overflow-x: auto;
+    background-color: #f8f9fa;
+    color: #212529;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    padding: 0.5rem;
+}
+
+.json-textarea:focus {
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    border-color: #80bdff;
+}

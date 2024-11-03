@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MusicAgent</title>
     <link rel="icon" type="image/x-icon" href="../static/favicon.ico">
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
@@ -14,79 +15,17 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script src="https://unpkg.com/vue@next"></script>
-    <style>
-        #log {
-            height: 300px;
-            overflow-y: auto;
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin-top: 20px;
-        }
-        .cli-log {
-            background-color: #000;
-            color: #ffffff;
-            font-family: 'Courier New', Courier, monospace;
-            padding: 10px;
-            border-radius: 5px;
-            height: 300px;
-            overflow-y: auto;
-        }
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
-        .cli-log pre {
-            margin: 0;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-        }
-
-        .cli-log code {
-            color: inherit;
-            background-color: transparent;
-            padding: 0;
-        }
-
-        .cli-log span {
-            display: block;
-            line-height: 1.5;
-        }
-
-        /* Add a blinking cursor effect */
-        .cli-log pre::after {
-            content: '█';
-            animation: blink 1s step-end infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
-        }
-
-        .json-textarea {
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 14px;
-            line-height: 1.5;
-            white-space: pre;
-            overflow-wrap: normal;
-            overflow-x: auto;
-            background-color: #f8f9fa;
-            color: #212529;
-            border: 1px solid #ced4da;
-            border-radius: 0.25rem;
-            padding: 0.5rem;
-        }
-
-        .json-textarea:focus {
-            outline: none;
-            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
-            border-color: #80bdff;
-        }
-    </style>
+    <link rel="stylesheet" href="../static/styles.css">
 </head>
 <body>
-<div id="app" class="container mt-5">
-    <h1 class="mb-4">MusicAgent</h1>
-
+<div class="text-center py-4 mb-4" style="background-color: #1A4731;">
+    <img src="../static/musicagent.png" alt="MusicAgent" style="max-width: 100%; height: 200px;">
+</div>
+<div id="app" class="container p-4">
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-6 py-4">
             <form  @submit.prevent="submitForm">
                 <h3>Song Configuration</h3>
                 <div class="row">
@@ -136,8 +75,11 @@
                         <div class="invalid-feedback" v-if="errors.genre" v-text="errors.genre"></div>
                     </div>
                     <div class="col-md-6 mb-3">
+<!--                        <label for="duration" class="form-label">Duration: {% raw %}<span id="durationValue">{{ formData.duration }}</span>{% endraw %} (seconds)</label>-->
+<!--                        <input v-model.number="formData.duration" type="range" class="form-range" id="duration" min="30" max="360" :class="{'is-invalid': errors.duration}" required value="180">-->
                         <label for="duration" class="form-label">Duration (seconds):</label>
                         <input v-model.number="formData.duration" type="number" id="duration" class="form-control" :class="{'is-invalid': errors.duration}" required value="180">
+
                         <div class="invalid-feedback" v-if="errors.duration" v-text="errors.duration"></div>
                     </div>
                     <div class="mb-3">
@@ -150,7 +92,7 @@
                 <button type="submit" class="btn btn-primary">Generate Music</button>
             </form>
         </div>
-        <div id="timeline" class="col-md-6">
+        <div id="timeline" class="col-md-6 py-4">
             <h3>Music Creation Timeline</h3>
             <ul class="list-group" v-if="agentInitialized">
                 {% raw %}
@@ -165,8 +107,11 @@
                             <span class="badge bg-primary rounded-pill me-2">{{ index + 1 }}</span>
                             {{ phase.phase }}
                         </span>
-                        <span v-if="phase.phaseType === 'ComposedPhase'" class="badge bg-info rounded-pill">
+                        <span v-if="phase.phaseType === 'ComposedPhase'" class="badge rounded-pill">
                             Cycles: {{ cycleCount(phase) }}/{{ phase.cycleNum }}
+                        </span>
+                        <span v-else-if="isSubphaseOfComposed(phase)" class="badge bg-secondary rounded-pill">
+                            Parent Cycles: {{ cycleCount(phase) }}
                         </span>
                     </div>
                     <ul v-if="phase.phaseType === 'ComposedPhase'" class="list-group mt-2">
@@ -189,7 +134,7 @@
     </div>
     <br/>
     <div class="row mt-4">
-        <div class="col-12">
+        <div class="col-12 py-4">
             <h3>Song Parameters</h3>
             <div id="parameters" class="border p-3 mb-3">
                 {% raw %}
@@ -207,14 +152,15 @@
     </div>
     <br/>
     <h3>Music Agent Logs</h3>
-    <div id="log" class="mt-4 cli-log">
+    <div id="log" class="mt-4 cli-log py-4">
         <pre><code><span v-for="(message, index) in logMessages" :key="index" v-text="message"></span></code></pre>
     </div>
+    <br/>
 
 </div>
 
 <div id="inputModal" class="modal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Input Required</h5>
@@ -249,7 +195,6 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 
     const { createApp, ref, onMounted, nextTick, reactive, computed } = Vue;
@@ -262,7 +207,7 @@
             const agentInitialized = ref(false);
             const formData = ref({
                 genre: '',
-                duration: 30,
+                duration: 180,
                 additional_information: '',
                 song_name: '',
                 agent_type: 'mITyJohn',
@@ -284,7 +229,38 @@
             const completedPhases = ref([]);
             const parameters = ref({});
             const currentCycle =  reactive({});
-            const cycleCount = computed(() => (phase) => {     return phase.phase in currentCycle ? currentCycle[phase.phase] : 0; });
+
+            const cycleCount = computed(() => (phase) => {
+                if (phase.phaseType === 'ComposedPhase') {
+                    const count = phase.phase in currentCycle ? currentCycle[phase.phase].count : 0;
+                    return count;
+                } else {
+                    // For SimplePhase, find the parent ComposedPhase
+                    const parentComposedPhase = timeline.value.find(p =>
+                        p.phaseType === 'ComposedPhase' &&
+                        p.Composition.some(subphase => subphase.phase === phase.phase)
+                    );
+                    if (parentComposedPhase) {
+                        const count = parentComposedPhase.phase in currentCycle ? currentCycle[parentComposedPhase.phase].count : 0;
+                        return count;
+                    }
+                    return 0;
+                }
+            });
+
+            const formattedDuration = computed(() => {
+                console.log('Computing formattedDuration', formData.value.duration);
+                const minutes = Math.floor(formData.value.duration / 60);
+                const seconds = formData.value.duration % 60;
+                return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            });
+
+            const isSubphaseOfComposed = (phase) => {
+                return timeline.value.some(p =>
+                    p.phaseType === 'ComposedPhase' &&
+                    p.Composition.some(subphase => subphase.phase === phase.phase)
+                );
+            };
 
             let eventSource = null;
             let socket = null;
@@ -436,48 +412,54 @@
                         const parameterRegex = /\[([A-Z_]+)\]:\[(.*?)\]/g;
                         const paramMatches = [...e.data.matchAll(parameterRegex)];
 
-                        console.log("Parameter matches:", paramMatches);
+                        // console.log("Parameter matches:", paramMatches);
 
                         if (paramMatches.length > 0) {
                             paramMatches.forEach(match => {
                                 const [, key, value] = match;
                                 parameters.value[key] = value.trim();
                             });
-                            console.log("Updated parameters:", parameters.value);
+                            // console.log("Updated parameters:", parameters.value);
                         } else {
-                            console.log("Received message pushing to logMessages");
+                            // console.log("Received message pushing to logMessages");
                             logMessages.value.push(e.data);
 
                             const phaseStartMatch = e.data.match(/Executing phase: \[(.+)\]/);
                             if (phaseStartMatch) {
                                 const newPhase = phaseStartMatch[1].trim();
-                                if (currentPhase.value) {
-                                    completedPhases.value.push(currentPhase.value);
-                                }
-                                currentPhase.value = newPhase;
 
-                                const composedPhase = timeline.value.find(phase => phase.phaseType === 'ComposedPhase' && phase.phase === newPhase);
+                                // Find the parent ComposedPhase
+                                const composedPhase = timeline.value.find(phase =>
+                                    phase.phaseType === 'ComposedPhase' &&
+                                    phase.Composition.some(subphase => subphase.phase === newPhase)
+                                );
+
                                 if (composedPhase) {
-                                    if (!(newPhase in currentCycle)) {
-                                        currentCycle[newPhase] = {
-                                            currentSubphase: '',
-                                            count: 0
+                                    const composedPhaseName = composedPhase.phase;
+                                    if (!(composedPhaseName in currentCycle)) {
+                                        console.log("Initializing currentCycle for", composedPhaseName);
+                                        currentCycle[composedPhaseName] = {
+                                            count: 0,
+                                            currentSubphase: ''
                                         };
                                     }
 
                                     // Check if we're starting the first subphase
-                                    const firstSubphase = composedPhase.Composition[0].phase;
-                                    if (newPhase === firstSubphase || currentCycle[newPhase].currentSubphase !== firstSubphase) {
-                                        currentCycle[newPhase].count++;
-                                        currentCycle[newPhase].currentSubphase = firstSubphase;
+                                    if (composedPhase.Composition[0].phase === newPhase &&
+                                        currentCycle[composedPhaseName].currentSubphase !== newPhase) {
+                                        currentCycle[composedPhaseName].count++;
+                                    }
+                                    currentCycle[composedPhaseName].currentSubphase = newPhase;
+
+                                    // Check if all cycles are finished
+                                    if (currentCycle[composedPhaseName].count === composedPhase.cycleNum) {
+                                        completedPhases.value.push(composedPhaseName);
                                     }
                                 }
 
-                                // Check if all cycles are finished
-                                if (currentCycle[newPhase].count === composedPhase.cycleNum) {
-                                    completedPhases.value.push(newPhase);
+                                if (currentPhase.value) {
+                                    completedPhases.value.push(currentPhase.value);
                                 }
-
                                 currentPhase.value = newPhase;
                             }
 
@@ -530,12 +512,19 @@
 
             onMounted(() => {
                 fetchAgentTypes();
-                inputModal.value = new bootstrap.Modal(document.getElementById('inputModal'));
+                inputModal.value = new bootstrap.Modal(document.getElementById('inputModal'), {
+                    backdrop: 'static',
+                    keyboard: false
+                });
+
                 document.getElementById('submitInput').addEventListener('click', submitUserInput);
                 setupSocketIO();
                 startEventSource();
 
-                configModal.value = new bootstrap.Modal(document.getElementById('configModal'));
+                configModal.value = new bootstrap.Modal(document.getElementById('configModal'), {
+                    backdrop: 'static',
+                    keyboard: false
+                });
                 document.getElementById('configModal').addEventListener('shown.bs.modal', () => {
                     // This ensures the textarea is updated after the modal is fully visible
                     nextTick(() => {
@@ -553,7 +542,7 @@
 
             return {
                 agentType, agentTypes, agentInitialized, initializeAgent,
-                formData,
+                formData, formattedDuration,
                 genres,
                 logMessages,
                 errors,
@@ -565,7 +554,7 @@
                 openConfigDialog,
                 saveConfig,
                 timeline, fetchTimeline,
-                currentPhase, completedPhases, resetCurrentPhase, currentCycle, cycleCount,
+                currentPhase, completedPhases, resetCurrentPhase, currentCycle, cycleCount, isSubphaseOfComposed,
                 availableModels, updateModelOptions,
                 parameters
 

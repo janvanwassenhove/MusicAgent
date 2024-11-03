@@ -116,6 +116,7 @@ class GPTAgent:
         # Replace placeholders in the prompt with actual values
         for key, value in phase_config[phase]["input"].items():
             param_value = song_creation_data.get_parameter(value)
+            self.logger.info(f"Parameter for discussion [{key.upper()}]:[{param_value}]")
             if param_value is not None:
                 phase_prompt = phase_prompt.replace(f"{{{key}}}", str(param_value))
 
@@ -263,7 +264,7 @@ class GPTAgent:
                             self.logger.info("Skip " + sub_phase)
                             break
                         else:
-                            self.logger.info("Starting subphase " + sub_phase)
+                            # self.logger.info("Starting subphase " + sub_phase)
                             self.execute_phase(client, sub_phase, self.song_creation_data, artist_config, phase_config)
             else:
                 self.execute_phase(client, phase, self.song_creation_data, artist_config, phase_config)
