@@ -16,6 +16,7 @@ import imghdr
 import re
 import threading
 import time
+import asyncio
 
 class GPTAgent:
     def __init__(self, selected_model, logger, song, agentType, api_provider):
@@ -26,6 +27,13 @@ class GPTAgent:
         self.song = song
         self.agentType = agentType
         self.api_provider = api_provider
+        self.input_callback = None
+
+    def get_user_input(self, prompt):
+        if self.input_callback:
+            return self.input_callback(prompt)
+        print("Input callback not set for webapp. Unable to get user input via modal.")
+        return input(prompt)
 
     def get_api_key(self):
         # Try to get the API key from an environment variable
@@ -53,6 +61,7 @@ class GPTAgent:
 
     def execute_phase(self, client, phase, song_creation_data, artist_config, phase_config):
         print("\nExecuting phase ["+phase+"]")
+        self.logger.info(f"Executing phase: [{phase}]")
 
         task_type = ''
         if phase in phase_config:
@@ -86,7 +95,7 @@ class GPTAgent:
 
     def human_discussion(self, artist_config):
         self.validate_and_execute_code(self.song_creation_data, artist_config, "")
-        review_user = input("\nPlease provide us your remarks on the song: ")
+        review_user = self.get_user_input("\nPlease provide us your remarks on the song: ")
         self.logger.info(f"Received user input: {review_user}")
 
         if review_user.strip():  # Check if the input is not empty or just whitespace

@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MusicAgent</title>
+    <link rel="icon" type="image/x-icon" href="../static/favicon.ico">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <!-- Vue.js 3.5.12 -->
+    <script src="https://unpkg.com/vue@3.5.12/dist/vue.global.js"></script>
+    <!-- Axios for HTTP requests -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script src="https://unpkg.com/vue@next"></script>
+    <style>
+        #log {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 20px;
+        }
+        .cli-log {
+            background-color: #000;
+            color: #ffffff;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 10px;
+            border-radius: 5px;
+            height: 300px;
+            overflow-y: auto;
+        }
+
+        .cli-log pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .cli-log code {
+            color: inherit;
+            background-color: transparent;
+            padding: 0;
+        }
+
+        .cli-log span {
+            display: block;
+            line-height: 1.5;
+        }
+
+        /* Add a blinking cursor effect */
+        .cli-log pre::after {
+            content: '█';
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+<div id="app" class="container mt-5">
+    <h1 class="mb-4">MusicAgent</h1>
+
+    <div class="row">
+        <div class="col-md-6">
+            <form  @submit.prevent="submitForm">
+                <h3>Song Configuration</h3>
+                <div class="col-md-8 mb-3">
+                    <label for="agent_type" class="form-label">Select Agent Type:</label>
+                    <div class="input-group">
+                        <select v-model="formData.agentType" id="agent_type" class="form-select" @change="initializeAgent">
+                            <option value="">Select an agent type</option>
+                            <option v-for="type in agentTypes" :key="type" :value="type" v-text="type"></option>
+                        </select>
+                        <button class="btn btn-outline-secondary" @click="openConfigDialog" :disabled="!formData.agentType">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="row" v-if="agentInitialized">
+                    <div class="mb-3">
+                        <label for="song_name" class="form-label">Song Name:</label>
+                        <input v-model="formData.song_name" type="text" id="song_name" class="form-control" :class="{'is-invalid': errors.song_name}" required>
+                        <div class="invalid-feedback" v-if="errors.song_name" v-text="errors.song_name"></div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="genre" class="form-label">Genre:</label>
+                        <select v-model="formData.genre" id="genre" class="form-select" :class="{'is-invalid': errors.genre}" required>
+                            <option v-for="genre in genres" :key="genre" :value="genre.genre" v-text="genre.genre"></option>
+                        </select>
+                        <div class="invalid-feedback" v-if="errors.genre" v-text="errors.genre"></div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="duration" class="form-label">Duration (seconds):</label>
+                        <input v-model.number="formData.duration" type="number" id="duration" class="form-control" :class="{'is-invalid': errors.duration}" required value="180">
+                        <div class="invalid-feedback" v-if="errors.duration" v-text="errors.duration"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="additional_information" class="form-label">Additional Information:</label>
+                        <textarea v-model="formData.additional_information" id="additional_information" class="form-control" :class="{'is-invalid': errors.additional_information}"></textarea>
+                        <div class="invalid-feedback" v-if="errors.additional_information" v-text="errors.additional_information"></div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Generate Music</button>
+            </form>
+        </div>
+        <div id="timeline" class="col-md-6">
+            <h3>Music Creation Timeline</h3>
+            <ul class="list-group" v-if="agentInitialized">
+                {% raw %}
+                <li v-for="(phase, index) in timeline" :key="index" class="list-group-item"
+                    :class="{
+                    'bg-info text-white': phase.phase === currentPhase,
+                    'bg-success text-white': completedPhases.includes(phase.phase),
+                    'bg-light': !completedPhases.includes(phase.phase) && phase.phase !== currentPhase
+                    }">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>
+                            <span class="badge bg-primary rounded-pill me-2">{{ index + 1 }}</span>
+                            {{ phase.phase }}
+                        </span>
+                        <span v-if="phase.phaseType === 'ComposedPhase'" class="badge bg-info rounded-pill">
+                            Cycles: {{ phase.cycleNum }}
+                        </span>
+                    </div>
+                    <ul v-if="phase.phaseType === 'ComposedPhase'" class="list-group mt-2">
+                        <li v-for="(subphase, subindex) in phase.Composition" :key="subindex"
+                            class="list-group-item list-group-item-secondary"
+                            :class="{
+                            'bg-info text-white': subphase.phase === currentPhase,
+                            'bg-success text-white': completedPhases.includes(subphase.phase),
+                            'bg-light': !completedPhases.includes(subphase.phase) && subphase.phase !== currentPhase
+                            }">
+                            <span class="badge bg-secondary rounded-pill me-2">{{ index + 1 }}.{{ subindex + 1 }}</span>
+                            {{ subphase.phase }}
+                        </li>
+                    </ul>
+                </li>
+                {% endraw %}
+            </ul>
+        </div>
+
+    </div>
+
+    <br>
+    <h3>Music Agent Logs</h3>
+    <div id="log" class="mt-4 cli-log">
+        <pre><code><span v-for="(message, index) in logMessages" :key="index" v-text="message"></span></code></pre>
+    </div>
+
+</div>
+
+<div id="inputModal" class="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Input Required</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="inputPrompt"></p>
+                <input type="text" id="userInput" class="form-control">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="submitInput">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="configModal" tabindex="-1" aria-labelledby="configModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                {% raw %}
+                <h5 class="modal-title" id="configModalLabel">Edit {{formData.agentType}} Configuration</h5>
+                {% endraw %}
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <textarea v-model="configJson" class="form-control" rows="20" style="max-height: 60vh; overflow-y: auto;"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" @click="saveConfig">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+
+    const { createApp, ref, onMounted, nextTick } = Vue;
+    const { watch } = Vue;
+
+    createApp({
+        setup() {
+            const agentType = ref('');
+            const agentTypes = ref([]);
+            const agentInitialized = ref(false);
+            const formData = ref({
+                genre: '',
+                duration: 30,
+                additional_information: '',
+                song_name: '',
+                agent_type: 'mITyJohn'
+            });
+            const genres = ref([]);
+            const logMessages = ref([]);
+            const inputModal = ref(null);
+            const inputPrompt = ref('');
+            const userInput = ref('');
+            const errors = ref({});
+
+            const configJson = ref('');
+            const configModal = ref(null);
+
+            const timeline = ref([]);
+            const currentPhase = ref('');
+            const completedPhases = ref([]);
+
+            let eventSource = null;
+            let socket = null;
+
+            const resetCurrentPhase = () => {   currentPhase.value = { name: '', index: -1 }; };
+
+            const fetchTimeline = async () => {
+                try {
+                    const response = await axios.get('/timeline', {
+                        params: { agent_type: formData.value.agentType }
+                    });
+                    timeline.value = response.data.chain;
+                } catch (error) {
+                    console.error('Error fetching timeline:', error);
+                }
+            };
+
+            const fetchAgentTypes = () => {
+                axios.get('/agent_types')
+                    .then(response => {
+                        if (response.data && response.data.agent_types) {
+                            agentTypes.value = response.data.agent_types;
+                        } else {
+                            console.error('Unexpected response format:', response.data);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching agent types:', error);
+                    });
+            };
+
+            const initializeAgent = () => {
+                axios.post('/init', { agent_type: agent_type.value })
+                    .then(response => {
+                        genres.value = response.data.genres;
+                        agentInitialized.value = true;
+                    })
+                    .catch(error => {
+                        console.error('Error initializing agent:', error);
+                    });
+            };
+
+            const validateForm = () => {
+                errors.value = {};
+                if (!formData.value.genre) {
+                    errors.value.genre = 'Please select a genre';
+                }
+                if (!formData.value.duration || formData.value.duration <= 0) {
+                    errors.value.duration = 'Please enter a valid duration';
+                }
+                if (!formData.value.song_name.trim()) {
+                    errors.value.song_name = 'Please enter a song name';
+                }
+                return Object.keys(errors.value).length === 0;
+            };
+
+            const submitForm = () => {
+                if (validateForm()) {
+                    axios.post('/', formData.value)
+                        .then(() => {
+                            logMessages.value = [];
+                            startEventSource();
+                        })
+                        .catch(error => {
+                            console.error('Error submitting form:', error);
+                        });
+                } else {
+                    console.log('Form validation failed');
+                }
+            };
+
+            const setupSocketIO = () => {
+                console.log('Setting up SocketIO');
+                socket = io();
+
+                socket.on('connect', () => {
+                    console.log('Connected to server');
+                });
+
+                socket.on('disconnect', () => {
+                    console.log('Disconnect from server');
+                });
+
+                socket.on('input_required', (data) => {
+                    console.log('Input required event received:', data);
+                    inputPrompt.value = data.prompt;
+                    nextTick(() => {
+                        inputModal.value.show();
+                    })
+                });
+
+                socket.on('process_complete', (data) => {
+                    console.log('Process complete:', data.message);
+                    logMessages.value.push(data.message);
+                    // You might want to do something else when the process is complete
+                });
+            };
+
+            const submitUserInput = () => {
+                const userInput = document.getElementById('userInput').value;
+                socket.emit('submit_input', { input: userInput });
+                inputModal.value.hide();
+            };
+
+            const startEventSource = () => {
+                if (eventSource) {
+                    eventSource.close();
+                }
+                eventSource = new EventSource("/stream");
+
+                eventSource.onopen = (e) => {         console.log("EventSource connection opened");     };
+
+                eventSource.onmessage = (e) => {
+                    console.log("Received message:", e.data);
+                    if (e.data === "DONE") {
+                        eventSource.close();
+                    } else if (e.data.startsWith("input_required|")) {
+                        const [, prompt] = e.data.split("|");
+                        inputPrompt.value = prompt;
+                        inputModal.value.show();
+                    } else {
+                        console.log("Received message pushing to logMessages");
+                        logMessages.value.push(e.data);
+
+                        const phaseStartMatch = e.data.match(/Executing phase: \[(.+)\]/);
+                        if (phaseStartMatch) {
+                            const newPhase = phaseStartMatch[1].trim();
+                            if (currentPhase.value) {
+                                completedPhases.value.push(currentPhase.value);
+                            }
+                            currentPhase.value = newPhase;
+                        }
+
+                        nextTick(() => {
+                            const logDiv = document.getElementById('log');
+                            logDiv.scrollTop = logDiv.scrollHeight;
+                        });
+                    }
+                };
+                eventSource.onerror = (e) => {
+                    console.error('EventSource error:', e);
+                    logMessages.value.push('Error in event stream. Please check server logs.');
+                    eventSource.close();
+                };
+            };
+
+            watch(() => formData.value.agentType, () => {
+                configJson.value = '';
+                resetCurrentPhase();
+                fetchTimeline();
+            });
+
+            const openConfigDialog = async () => {
+                if (!formData.value.agentType) return;
+
+                try {
+                    const response = await axios.get(`/agent_config/${formData.value.agentType}`);
+                    configJson.value = JSON.stringify(response.data, null, 2);
+                    nextTick(() => {
+                        configModal.value.show();
+                    });
+                } catch (error) {
+                    console.error('Error fetching agent config:', error);
+                }
+            };
+
+            const saveConfig = async () => {
+                try {
+                    const parsedConfig = JSON.parse(configJson.value);
+                    await axios.post(`/agent_config/${formData.value.agentType}`, parsedConfig);
+                    configModal.value.hide();
+                    initializeAgent();
+                } catch (error) {
+                    console.error('Error saving agent config:', error);
+                    alert('Invalid JSON or error saving configuration');
+                }
+            };
+
+            onMounted(() => {
+                fetchAgentTypes();
+                inputModal.value = new bootstrap.Modal(document.getElementById('inputModal'));
+                document.getElementById('submitInput').addEventListener('click', submitUserInput);
+                setupSocketIO();
+                startEventSource();
+
+                configModal.value = new bootstrap.Modal(document.getElementById('configModal'));
+                document.getElementById('configModal').addEventListener('shown.bs.modal', () => {
+                    // This ensures the textarea is updated after the modal is fully visible
+                    nextTick(() => {
+                        const textarea = document.querySelector('#configModal textarea');
+                        if (textarea) {
+                            textarea.value = configJson.value;
+                            textarea.style.height = 'auto';
+                            textarea.style.height = textarea.scrollHeight + 'px';
+                        }
+                    });
+                });
+
+                fetchTimeline();
+            });
+
+            return {
+                agentType,
+                agentTypes,
+                agentInitialized,
+                formData,
+                genres,
+                logMessages,
+                initializeAgent,
+                errors,
+                inputPrompt,
+                submitForm,
+                submitUserInput,
+                userInput,
+                configJson,
+                openConfigDialog,
+                saveConfig,
+                timeline,
+                fetchTimeline,
+                currentPhase,
+                completedPhases,
+                resetCurrentPhase
+
+            };
+        }
+    }).mount('#app');
+</script>
+</body>
+</html>
