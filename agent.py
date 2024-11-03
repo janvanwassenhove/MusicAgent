@@ -245,6 +245,8 @@ class GPTAgent:
         self.song_creation_data.set_parameter("song_description", song_description)
         self.song_creation_data.set_parameter("total_duration", str(duration))
 
+        self.logger.info(f"Parameter used [DURATION]:[{duration}], [GENRE]:[{genre}], [DESCRIPTION]:[{additional_information}]")
+
         # Iterate over phases
         for phase_info in compose_chain_config["chain"]:
             phase = phase_info["phase"]

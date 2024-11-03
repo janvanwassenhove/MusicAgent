@@ -94,9 +94,6 @@ def load_config(agent_type):
     agent_config_path = find_agent_config_dir()
     config_path = os.path.join(agent_config_path, agent_type, 'ArtistConfig.json')
 
-    # with open("AgentConfig/"+agenttype+"/ArtistConfig.json", "r") as file:
-    #     artist_config = json.load(file)
-
     try:
         with open(config_path, 'r') as config_file:
             config = json.load(config_file)
@@ -104,7 +101,7 @@ def load_config(agent_type):
     except FileNotFoundError:
         raise ValueError(f"Configuration file for {agent_type} // {config_path}  not found.")
 
-def initialize_agent(song_name, agent_type, input_callback):
+def initialize_agent(song_name, agent_type, input_callback, selected_model,api_provider ):
     # Set up logging
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
@@ -117,12 +114,13 @@ def initialize_agent(song_name, agent_type, input_callback):
 
     # Initialize the agent with default settings
     agent = GPTAgent(
-        selected_model="gpt-3.5-turbo",  # or whichever model you prefer
+        selected_model=selected_model,  # or whichever model you prefer
         logger=logger,
         song=song,
         agentType=agent_type,  # or whichever agent type you're using
-        api_provider="openai"  # or "anthropic" if you're using that
+        api_provider=api_provider  # or "anthropic" if you're using that
     )
+    logger.info(f"Initialized agent with [PROVIDER]:[{api_provider}] & [MODEL]:[{selected_model}]")
     logger.info(f"Initializing agent input_callback {input_callback} ")
     agent.input_callback = input_callback
     logger.info(f"input_callback set {agent.input_callback} ")
@@ -160,6 +158,8 @@ def index():
         additional_information = data.get('additional_information')
         song_name = data.get('song_name', 'Untitled')
         agent_type = data.get('agentType', 'mITyJohn')
+        selected_model = data['selected_model']
+        api_provider = data['api_provider']
 
         if duration is None:
             return jsonify({"error": "Duration is required"}), 400
@@ -174,7 +174,7 @@ def index():
             input_callback = create_input_callback()
 
             logger.info("Starting agent execution")
-            agent = initialize_agent(song_name, agent_type, input_callback)
+            agent = initialize_agent(song_name, agent_type, input_callback, selected_model, api_provider)
             agent.input_callback = input_callback
             logger.info("Starting agent execution with callback: " )
             result = agent.execute_composition_chain(genre, duration, additional_information)
