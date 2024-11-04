@@ -161,7 +161,7 @@ class GPTAgent:
 #                     f"\Assistant is {assistant_role_name}, questioned by {user_role_name}. \nPrompting:\n {phase_prompt}\n"
 #                 )
                 phase_prompt_single_line = phase_prompt.replace('\n', ' ')
-                self.logger.info(f"\[Questioner]({user_role_name}):[{phase_prompt}]")
+                self.logger.info(f"\[Questioner]({user_role_name}):[{phase_prompt_single_line}]")
                 response_text_single_line = response_text.replace('\n', ' ')
                 self.logger.info(f"\[Assistant]({assistant_role_name}):[{response_text_single_line}]")
 

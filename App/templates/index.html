@@ -448,6 +448,13 @@
                     } else {
 
                         // [Assistant]({assistant_role_name}):[{response_text}]
+                        // Split the message into smaller parts and print each part
+                        const maxLength = 1000; // Adjust the length as needed
+                        for (let i = 0; i < e.data.length; i += maxLength) {
+                            console.log("Received message part:", e.data.substring(i, i + maxLength));
+                        }
+
+                        // Existing code for handling other messages
                         const parameterRegexQuestioner = /\[Questioner\]\(([A-Za-z0-9_]+)\):\[(.*?)\]/g;
                         const matchesQuestioner = [...e.data.matchAll(parameterRegexQuestioner)];
                         const chatsDiv = document.getElementById('chats');
@@ -516,6 +523,7 @@
                             chatMessage.appendChild(img);
                             chatsDiv.appendChild(chatMessage);
                         });
+
 
                         const parameterRegex = /\[([A-Z_]+)\]:\[(.*?)\]/g;
                         const paramMatches = [...e.data.matchAll(parameterRegex)];
@@ -592,6 +600,11 @@
                 fetchTimeline();
             });
 
+            watch(genres, (newGenres) => {
+                if (newGenres.length > 0 && !formData.value.genre) {
+                    formData.value.genre = newGenres[0].genre;
+                }
+            });
             const openConfigDialog = async () => {
                 if (!formData.value.agentType) return;
 
@@ -646,6 +659,11 @@
                 });
                 updateModelOptions();
                 fetchTimeline();
+
+                // Set default genre if available
+                if (genres.value.length > 0) {
+                    formData.value.genre = genres.value[0].genre;
+                }
             });
 
             return {
