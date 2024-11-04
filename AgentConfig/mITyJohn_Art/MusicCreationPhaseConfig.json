@@ -22,6 +22,7 @@
   },
   "Cover Art": {
     "type" : "art",
-    "assistant_role_name":"Music Publisher"
+    "assistant_role_name":"Music Publisher",
+    "user_role_name": "Artist"
   }
 }

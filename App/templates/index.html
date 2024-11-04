@@ -14,13 +14,12 @@
     <!-- Axios for HTTP requests -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
-    <script src="https://unpkg.com/vue@next"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <link rel="stylesheet" href="../static/styles.css">
 </head>
 <body>
-<div class="text-center py-4 mb-4" style="background-color: #1A4731;">
+<div class="text-center py-2 mb-2" style="background-color: #1A4731;">
     <img src="../static/musicagent.png" alt="MusicAgent" style="max-width: 100%; height: 200px;">
 </div>
 <div id="app" class="container main_container p-4">
@@ -46,7 +45,6 @@
                         <label for="agent_type" class="form-label">Select Agent Type:</label>
                         <div class="input-group">
                             <select v-model="formData.agentType" id="agent_type" class="form-select" @change="initializeAgent">
-                                <option value="">Select an agent type</option>
                                 <option v-for="type in agentTypes" :key="type" :value="type" v-text="type"></option>
                             </select>
                             <button class="btn btn-outline-secondary" @click="openConfigDialog" :disabled="!formData.agentType">
@@ -111,7 +109,7 @@
     </div>
     <div class="row">
         <div id="songParameters" class="col-md-6 py-4 collapse show">
-            <h3>Song Parameters</h3>
+            <h3>Song Input Parameters</h3>
             <div id="parameters" class="border p-3 mb-3">
                 {% raw %}
                 <div v-if="Object.keys(parameters).length === 0">No parameters received yet.</div>
@@ -194,7 +192,8 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Input Required</h5>
+                <h5 class="modal-title">Your input is Required</h5>
+                <p>Please provide us your feedback:</p>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -216,7 +215,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <textarea v-model="configJson" class="form-control json-textarea" rows="20" style="max-height: 60vh; overflow-y: auto;"></textarea>
+                <textarea id="configJson" v-model="configJson" class="form-control json-textarea" rows="20" style="max-height: 60vh; overflow-y: auto;"></textarea>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -380,7 +379,7 @@
 
                     axios.post('/', formData.value)
                         .then(() => {
-                            logMessages.value = [];
+                            // logMessages.value = [];
                             startEventSource();
                         })
                         .catch(error => {
@@ -447,15 +446,7 @@
                         inputModal.value.show();
                     } else {
 
-                        // [Assistant]({assistant_role_name}):[{response_text}]
-                        // Split the message into smaller parts and print each part
-                        const maxLength = 1000; // Adjust the length as needed
-                        for (let i = 0; i < e.data.length; i += maxLength) {
-                            console.log("Received message part:", e.data.substring(i, i + maxLength));
-                        }
-
-                        // Existing code for handling other messages
-                        const parameterRegexQuestioner = /\[Questioner\]\(([A-Za-z0-9_]+)\):\[(.*?)\]/g;
+                        const parameterRegexQuestioner = /\[Questioner\]\(([A-Za-z0-9_\s]+)\):\[\[(.*?)\]\]/g;
                         const matchesQuestioner = [...e.data.matchAll(parameterRegexQuestioner)];
                         const chatsDiv = document.getElementById('chats');
                         matchesQuestioner.forEach(match => {
@@ -481,7 +472,11 @@
 
                             // Create the text content
                             const textContent = document.createElement('div');
-                            textContent.innerHTML = `<strong>${firstParam}:</strong> <em>${secondParam}</em>`;
+                            const maxLength = 1000; // Adjust the length as needed
+                            textContent.innerHTML = `<strong>${firstParam}:</strong> `;
+                            for (let i = 0; i < secondParam.length; i += maxLength) {
+                                textContent.innerHTML += `<em>${secondParam.substring(i, i + maxLength)}</em>`;
+                            }
 
                             // Append elements
                             textContainer.appendChild(textContent);
@@ -490,7 +485,7 @@
                             chatsDiv.appendChild(chatMessage);
                         });
 
-                        const parameterRegexAssistant = /\[Assistant\]\(([A-Za-z0-9_]+)\):\[(.*?)\]/g;
+                        const parameterRegexAssistant = /\[Assistant\]\(([A-Za-z0-9_\s]+)\):\[\[(.*?)\]\]/g;
                         const matchesAssistant = [...e.data.matchAll(parameterRegexAssistant)];
                         matchesAssistant.forEach(match => {
                             const firstParam = match[1];
@@ -506,7 +501,17 @@
 
                             // Create the text content
                             const textContent = document.createElement('div');
-                            textContent.innerHTML = `<strong>${firstParam}:</strong> <em>${secondParam}</em>`;
+                            const maxLength = 1000; // Adjust the length as needed
+
+                            if (secondParam.startsWith("Cover image generated https://")) {
+                                const url = secondParam.split(" ")[3];
+                                textContent.innerHTML = `<strong>${firstParam}:</strong> <em>Cover image generated:</em> <img src="${url}" alt="Cover Image" style="max-width: 100%; height: auto;">`;
+                            } else {
+                                textContent.innerHTML = `<strong>${firstParam}:</strong> `;
+                                for (let i = 0; i < secondParam.length; i += maxLength) {
+                                    textContent.innerHTML += `<em>${secondParam.substring(i, i + maxLength)}</em>`;
+                                }
+                            }
 
                             // Create the image element
                             const img = document.createElement('img');

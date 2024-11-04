@@ -258,18 +258,22 @@
   },
   "Song Track Creation": {
     "type" : "file",
-    "assistant_role_name":"Music Publisher"
+    "assistant_role_name":"Music Publisher",
+    "user_role_name": "Artist"
   },
   "Song Recording": {
     "type" : "recording",
-    "assistant_role_name":"Music Recording Studio"
+    "assistant_role_name":"Music Recording Studio",
+    "user_role_name": "Artist"
   },
   "Booklet Creation": {
     "type" : "readme",
-    "assistant_role_name":"Music Publisher"
+    "assistant_role_name":"Music Publisher",
+    "user_role_name": "Artist"
   },
   "Cover Art": {
     "type" : "art",
-    "assistant_role_name":"Music Publisher"
+    "assistant_role_name":"Music Publisher",
+    "user_role_name": "Artist"
   }
 }

@@ -71,18 +71,25 @@ class GPTAgent:
 
         self.logger.info("\n\nExecuting phase ["+phase+"] (type: " + task_type + ")")
 
+        assistant_role_name = phase_config[phase]["assistant_role_name"]
+        user_role_name = phase_config[phase]["user_role_name"]
+
         if task_type == "chat":
             self.discussion(client, phase, song_creation_data, artist_config, phase_config)
         elif task_type == "art":
             album_cover_style = artist_config.get('artist_style')
             image_prompt = "Album cover style defined as: " + album_cover_style + " / Song on the album described as " + self.song_creation_data.song_description
-            self.generate_and_download_image(image_prompt, self.song.name, self.song.get_song_dir())
+            self.generate_and_download_image(image_prompt, self.song.name, self.song.get_song_dir(), phase_config, phase)
         elif task_type == "readme":
+            self.logger.info(f"[Questioner]({user_role_name}):[[Create a Readme File containing cover, song parameters, lyrics and structure.]]")
             self.song.create_readme_file(self.song_creation_data)
+            self.logger.info(f"[Assistant]({assistant_role_name}):[[Readme file created at {self.song.song_dir} .]]")
         elif task_type == "file":
+            self.logger.info(f"[Questioner]({user_role_name}):[[Create the Ruby Song File based on song creation data.]]")
             self.song.create_song_file(self.song_creation_data)
+            self.logger.info(f"[Assistant]({assistant_role_name}):[[Ruby song file created at {self.song.song_dir} .]]")
         elif task_type == "human_chat":
-            self.human_discussion(artist_config)
+            self.human_discussion(artist_config, phase_config, phase)
         elif task_type == "recording":
             self.song_recording(artist_config, self.song_creation_data.total_duration)
         else:
@@ -93,10 +100,15 @@ class GPTAgent:
         recorder = AudioRecorder(self.logger, self.song, artist_config)
         recorder.run(duration=duration, specific_device_index=43)  # Adjust device index as needed
 
-    def human_discussion(self, artist_config):
+    def human_discussion(self, artist_config, phase_config, phase):
+        assistant_role_name = phase_config[phase]["assistant_role_name"]
+        user_role_name = phase_config[phase]["user_role_name"]
+
+        self.logger.info(f"[Questioner]({user_role_name}):[[Please provide us your remarks on the song]]")
         self.validate_and_execute_code(self.song_creation_data, artist_config, "")
         review_user = self.get_user_input("\nPlease provide us your remarks on the song: ")
         self.logger.info(f"Received user input: {review_user}")
+        self.logger.info(f"[Assistant]({assistant_role_name}):[[{review_user}]]")
 
         if review_user.strip():  # Check if the input is not empty or just whitespace
             self.song_creation_data.set_parameter("review", review_user)
@@ -161,9 +173,9 @@ class GPTAgent:
 #                     f"\Assistant is {assistant_role_name}, questioned by {user_role_name}. \nPrompting:\n {phase_prompt}\n"
 #                 )
                 phase_prompt_single_line = phase_prompt.replace('\n', ' ')
-                self.logger.info(f"\[Questioner]({user_role_name}):[{phase_prompt_single_line}]")
+                self.logger.info(f"[Questioner]({user_role_name}):[[{phase_prompt_single_line}]]")
                 response_text_single_line = response_text.replace('\n', ' ')
-                self.logger.info(f"\[Assistant]({assistant_role_name}):[{response_text_single_line}]")
+                self.logger.info(f"[Assistant]({assistant_role_name}):[[{response_text_single_line}]]")
 
                 self.logger.info(f"Response (retry {retry_count}): {response_text}")
 
@@ -277,7 +289,7 @@ class GPTAgent:
             else:
                 self.execute_phase(client, phase, self.song_creation_data, artist_config, phase_config)
 
-    def generate_and_download_image(self, prompt, filename, songdir):
+    def generate_and_download_image(self, prompt, filename, songdir, phase_config, phase):
         if self.api_provider == 'openai':
             client = OpenAI(api_key=self.get_api_key())
         else:
@@ -303,6 +315,11 @@ class GPTAgent:
         # Ensure the directory exists
         if not os.path.exists(songdir):
             os.makedirs(songdir)
+
+        assistant_role_name = phase_config[phase]["assistant_role_name"]
+        user_role_name = phase_config[phase]["user_role_name"]
+        self.logger.info(f"\[Questioner]({user_role_name}):[[{prompt}]]")
+        self.logger.info(f"\[Assistant]({assistant_role_name}):[[Cover image generated {image_url} .]]")
 
         # Download the image
         image_response = requests.get(image_url)
