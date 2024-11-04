@@ -188,8 +188,8 @@
   },
   "Human Review" : {
     "type" : "human_chat",
-    "assistant_role_name":"Artist",
-    "user_role_name": "Human reviewer"
+    "assistant_role_name":"Human reviewer",
+    "user_role_name": "Artist"
   },
   "Code Modification": {
     "type" : "chat",
