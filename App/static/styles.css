@@ -8,6 +8,9 @@ body {
     background-color: #FFFFFF;
     border-top-left-radius: 15px; /* Rounded top left corner */
     border-top-right-radius: 15px; /* Rounded top right corner */
+}
+
+.footer_container {
     border-bottom-left-radius: 15px; /* Rounded top left corner */
     border-bottom-right-radius: 15px; /* Rounded top right corner */
 }

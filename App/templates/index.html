@@ -78,7 +78,7 @@
                     <div class="col-md-3 mb-3">
                         <!--                        <label for="duration" class="form-label">Duration: {% raw %}<span id="durationValue">{{ formData.duration }}</span>{% endraw %} (seconds)</label>-->
                         <!--                        <input v-model.number="formData.duration" type="range" class="form-range" id="duration" min="30" max="360" :class="{'is-invalid': errors.duration}" required value="180">-->
-                        <label for="duration" class="form-label">Duration (seconds):</label>
+                        <label for="duration" class="form-label">Duration [seconds]:</label>
                         <input v-model.number="formData.duration" type="number" id="duration" class="form-control" :class="{'is-invalid': errors.duration}" required value="180">
                         <div class="invalid-feedback" v-if="errors.duration" v-text="errors.duration"></div>
                     </div>
@@ -158,8 +158,8 @@
     <br/>
 </div>
 
-<footer class="bg-dark text-white text-center py-3 mt-4">
-    <div class="container">
+<footer class="container footer_container bg-dark text-white text-center py-3  mb-4">
+    <div>
         <p class="mb-0">&copy; 2024 MusicAgent. All rights reserved.</p>
         <p class="mb-0">Follow mITy.John on
             <a href="https://www.instagram.com/mity.john/" class="text-white"><i class="fab fa-instagram"></i></a>
