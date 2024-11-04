@@ -103,10 +103,6 @@ def load_config(agent_type):
 
 def initialize_agent(song_name, agent_type, input_callback, selected_model,api_provider ):
     # Set up logging
-    logging.basicConfig(level=logging.INFO)
-    logger = logging.getLogger(__name__)
-    queue_handler = QueueHandler()
-    logger.addHandler(queue_handler)
     logger.info(f"Initializing agent {agent_type} for song: {song_name}")
 
     # Create a Song instance
@@ -211,7 +207,6 @@ def save_config(agent_type, new_config):
     config_path = os.path.join(agent_config_path, agent_type, 'ArtistConfig.json')
     with open(config_path, 'w') as config_file:
         json.dump(new_config, config_file, indent=2)
-
 
 @socketio.on('connect')
 def handle_connect():

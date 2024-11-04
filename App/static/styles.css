@@ -81,6 +81,34 @@ a:hover {
     color: #000000; /* Black text */
 }
 
+#chats {
+    height: 400px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-top: 20px;
+    background-color: #f3dac1;
+}
+
+.chat-message {
+    display: flex;
+    align-items: start;
+    margin-bottom: 1rem;
+}
+
+.chat-image {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+.chat-text {
+    background-color: #f1f1f1;
+    border-radius: 10px;
+    padding: 10px;
+    max-width: 80%;
+}
+
 #log {
     height: 300px;
     overflow-y: auto;

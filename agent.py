@@ -121,7 +121,7 @@ class GPTAgent:
                 phase_prompt = phase_prompt.replace(f"{{{key}}}", str(param_value))
 
         self.logger.info(
-            f"\nAssistant is {assistant_role_name}, questioned by {user_role_name}. \nPrompting:\n {phase_prompt}\n"
+            f"\Assistant is {assistant_role_name}, questioned by {user_role_name}. \nPrompting:\n {phase_prompt}\n"
         )
 
         messages = [
@@ -156,6 +156,14 @@ class GPTAgent:
                         max_tokens=4096,
                     )
                     response_text = completion.content[0].text
+
+#                 self.logger.info(
+#                     f"\Assistant is {assistant_role_name}, questioned by {user_role_name}. \nPrompting:\n {phase_prompt}\n"
+#                 )
+                phase_prompt_single_line = phase_prompt.replace('\n', ' ')
+                self.logger.info(f"\[Questioner]({user_role_name}):[{phase_prompt}]")
+                response_text_single_line = response_text.replace('\n', ' ')
+                self.logger.info(f"\[Assistant]({assistant_role_name}):[{response_text_single_line}]")
 
                 self.logger.info(f"Response (retry {retry_count}): {response_text}")
 

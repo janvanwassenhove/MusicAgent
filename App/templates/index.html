@@ -95,8 +95,22 @@
         </div>
     </div>
     <hr>
+    <div class="d-flex justify-content-between mb-3">
+        <button class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#songParameters" aria-expanded="true" aria-controls="songParameters">
+            <i class="fas fa-music"></i> Song Parameters
+        </button>
+        <button class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#timeline" aria-expanded="true" aria-controls="timeline">
+            <i class="fas fa-stream"></i> Music Creation Timeline
+        </button>
+        <button class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#agentConversations" aria-expanded="true" aria-controls="agentConversations">
+            <i class="fas fa-comments"></i> Agent Conversations
+        </button>
+        <button class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#musicAgentLogs" aria-expanded="true" aria-controls="musicAgentLogs">
+            <i class="fas fa-file-alt"></i> Music Agent Logs
+        </button>
+    </div>
     <div class="row">
-        <div class="col-md-6 py-4">
+        <div id="songParameters" class="col-md-6 py-4 collapse show">
             <h3>Song Parameters</h3>
             <div id="parameters" class="border p-3 mb-3">
                 {% raw %}
@@ -111,7 +125,7 @@
                 {% endraw %}
             </div>
         </div>
-        <div id="timeline" class="col-md-6 py-4">
+        <div id="timeline" class="col-md-6 py-4 collapse show">
             <h3>Music Creation Timeline</h3>
             <ul class="list-group" v-if="agentInitialized">
                 {% raw %}
@@ -151,11 +165,17 @@
         </div>
     </div>
 
-    <h3>Music Agent Logs</h3>
-    <div id="log" class="mt-4 cli-log py-4">
-        <pre><code><span v-for="(message, index) in logMessages" :key="index" v-text="message"></span></code></pre>
+    <div id="agentConversations" class="collapse show">
+        <h3>Agent Conversations</h3>
+        <div id="chats" class="mt-4 mb-4 py-4"></div>
     </div>
-    <br/>
+
+    <div id="musicAgentLogs" class="collapse show">
+        <h3>Music Agent Logs</h3>
+        <div id="log" class="mt-4 cli-log py-4">
+            <pre><code><span v-for="(message, index) in logMessages" :key="index" v-text="message"></span></code></pre>
+        </div>
+    </div>
 </div>
 
 <footer class="container footer_container bg-dark text-white text-center py-3  mb-4">
@@ -204,6 +224,10 @@
             </div>
         </div>
     </div>
+</div>
+<div class="alert alert-success alert-dismissible fade show" role="alert" id="completionAlert" style="display: none;">
+    Song creation is finished!
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 
 <script>
@@ -414,12 +438,85 @@
                 eventSource.onmessage = (e) => {
                     console.log("Received message:", e.data);
                     if (e.data === "DONE") {
-                        eventSource.close();
+                        const completionAlert = document.getElementById('completionAlert');
+                        completionAlert.style.display = 'block';
+                        // eventSource.close();
                     } else if (e.data.startsWith("input_required|")) {
                         const [, prompt] = e.data.split("|");
                         inputPrompt.value = prompt;
                         inputModal.value.show();
                     } else {
+
+                        // [Assistant]({assistant_role_name}):[{response_text}]
+                        const parameterRegexQuestioner = /\[Questioner\]\(([A-Za-z0-9_]+)\):\[(.*?)\]/g;
+                        const matchesQuestioner = [...e.data.matchAll(parameterRegexQuestioner)];
+                        const chatsDiv = document.getElementById('chats');
+                        matchesQuestioner.forEach(match => {
+                            const firstParam = match[1];
+                            const secondParam = match[2];
+
+                            // Create the container for the chat message
+                            const chatMessage = document.createElement('div');
+                            chatMessage.className = 'chat-message d-flex align-items-start mb-3';
+
+                            // Create the image element
+                            const img = document.createElement('img');
+                            img.src = `../static/assistants/${firstParam}.webp`;
+                            img.onerror = () => {
+                                img.src = '../static/assistants/Unknown.webp';
+                            };
+                            img.alt = firstParam;
+                            img.className = 'chat-image me-3';
+
+                            // Create the text container
+                            const textContainer = document.createElement('div');
+                            textContainer.className = 'chat-text p-3 rounded';
+
+                            // Create the text content
+                            const textContent = document.createElement('div');
+                            textContent.innerHTML = `<strong>${firstParam}:</strong> <em>${secondParam}</em>`;
+
+                            // Append elements
+                            textContainer.appendChild(textContent);
+                            chatMessage.appendChild(img);
+                            chatMessage.appendChild(textContainer);
+                            chatsDiv.appendChild(chatMessage);
+                        });
+
+                        const parameterRegexAssistant = /\[Assistant\]\(([A-Za-z0-9_]+)\):\[(.*?)\]/g;
+                        const matchesAssistant = [...e.data.matchAll(parameterRegexAssistant)];
+                        matchesAssistant.forEach(match => {
+                            const firstParam = match[1];
+                            const secondParam = match[2];
+
+                            // Create the container for the chat message
+                            const chatMessage = document.createElement('div');
+                            chatMessage.className = 'chat-message d-flex align-items-start justify-content-end mb-3';
+
+                            // Create the text container
+                            const textContainer = document.createElement('div');
+                            textContainer.className = 'chat-text p-3 rounded me-3';
+
+                            // Create the text content
+                            const textContent = document.createElement('div');
+                            textContent.innerHTML = `<strong>${firstParam}:</strong> <em>${secondParam}</em>`;
+
+                            // Create the image element
+                            const img = document.createElement('img');
+                            img.src = `../static/assistants/${firstParam}.webp`;
+                            img.onerror = () => {
+                                img.src = '../static/assistants/Unknown.webp';
+                            };
+                            img.alt = firstParam;
+                            img.className = 'chat-image';
+
+                            // Append elements
+                            textContainer.appendChild(textContent);
+                            chatMessage.appendChild(textContainer);
+                            chatMessage.appendChild(img);
+                            chatsDiv.appendChild(chatMessage);
+                        });
+
                         const parameterRegex = /\[([A-Z_]+)\]:\[(.*?)\]/g;
                         const paramMatches = [...e.data.matchAll(parameterRegex)];
 
