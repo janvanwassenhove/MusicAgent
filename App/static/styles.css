@@ -4,10 +4,12 @@ body {
     color: #000000; /* Black text color */
 }
 
-.container {
+.main_container {
     background-color: #FFFFFF;
     border-top-left-radius: 15px; /* Rounded top left corner */
     border-top-right-radius: 15px; /* Rounded top right corner */
+    border-bottom-left-radius: 15px; /* Rounded top left corner */
+    border-bottom-right-radius: 15px; /* Rounded top right corner */
 }
 
 /* Navbar Customization */

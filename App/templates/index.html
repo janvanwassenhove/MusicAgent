@@ -23,24 +23,36 @@
 <div class="text-center py-4 mb-4" style="background-color: #1A4731;">
     <img src="../static/musicagent.png" alt="MusicAgent" style="max-width: 100%; height: 200px;">
 </div>
-<div id="app" class="container p-4">
-    <div class="row">
-        <div class="col-md-6 py-4">
+<div id="app" class="container main_container p-4">
+    <div class="row mt-4">
+        <div class="col-12 py-4">
             <form  @submit.prevent="submitForm">
                 <h3>Song Configuration</h3>
                 <div class="row">
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-4 mb-3">
                         <label for="api_provider" class="form-label">API Provider:</label>
                         <select v-model="formData.api_provider" id="api_provider" class="form-select" @change="updateModelOptions" required>
                             <option value="openai">OpenAI</option>
                             <option value="anthropic">Anthropic</option>
                         </select>
                     </div>
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-4 mb-3">
                         <label for="selected_model" class="form-label">Model:</label>
                         <select v-model="formData.selected_model" id="selected_model" class="form-select" required>
                             <option v-for="model in availableModels" :key="model" :value="model" v-text="model"></option>
                         </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="agent_type" class="form-label">Select Agent Type:</label>
+                        <div class="input-group">
+                            <select v-model="formData.agentType" id="agent_type" class="form-select" @change="initializeAgent">
+                                <option value="">Select an agent type</option>
+                                <option v-for="type in agentTypes" :key="type" :value="type" v-text="type"></option>
+                            </select>
+                            <button class="btn btn-outline-secondary" @click="openConfigDialog" :disabled="!formData.agentType">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                        </div>
                     </div>
                     <div v-if="formData.api_provider === 'anthropic'" class="col-12 mb-3">
                         <div class="alert alert-warning" role="alert">
@@ -49,48 +61,55 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-8 mb-3">
-                    <label for="agent_type" class="form-label">Select Agent Type:</label>
-                    <div class="input-group">
-                        <select v-model="formData.agentType" id="agent_type" class="form-select" @change="initializeAgent">
-                            <option value="">Select an agent type</option>
-                            <option v-for="type in agentTypes" :key="type" :value="type" v-text="type"></option>
-                        </select>
-                        <button class="btn btn-outline-secondary" @click="openConfigDialog" :disabled="!formData.agentType">
-                            <i class="fas fa-cog"></i>
-                        </button>
-                    </div>
-                </div>
+
                 <div class="row" v-if="agentInitialized">
-                    <div class="mb-3">
+                    <div class="col-md-6 mb-3">
                         <label for="song_name" class="form-label">Song Name:</label>
                         <input v-model="formData.song_name" type="text" id="song_name" class="form-control" :class="{'is-invalid': errors.song_name}" required>
                         <div class="invalid-feedback" v-if="errors.song_name" v-text="errors.song_name"></div>
                     </div>
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-3 mb-3">
                         <label for="genre" class="form-label">Genre:</label>
                         <select v-model="formData.genre" id="genre" class="form-select" :class="{'is-invalid': errors.genre}" required>
                             <option v-for="genre in genres" :key="genre" :value="genre.genre" v-text="genre.genre"></option>
                         </select>
                         <div class="invalid-feedback" v-if="errors.genre" v-text="errors.genre"></div>
                     </div>
-                    <div class="col-md-6 mb-3">
-<!--                        <label for="duration" class="form-label">Duration: {% raw %}<span id="durationValue">{{ formData.duration }}</span>{% endraw %} (seconds)</label>-->
-<!--                        <input v-model.number="formData.duration" type="range" class="form-range" id="duration" min="30" max="360" :class="{'is-invalid': errors.duration}" required value="180">-->
+                    <div class="col-md-3 mb-3">
+                        <!--                        <label for="duration" class="form-label">Duration: {% raw %}<span id="durationValue">{{ formData.duration }}</span>{% endraw %} (seconds)</label>-->
+                        <!--                        <input v-model.number="formData.duration" type="range" class="form-range" id="duration" min="30" max="360" :class="{'is-invalid': errors.duration}" required value="180">-->
                         <label for="duration" class="form-label">Duration (seconds):</label>
                         <input v-model.number="formData.duration" type="number" id="duration" class="form-control" :class="{'is-invalid': errors.duration}" required value="180">
-
                         <div class="invalid-feedback" v-if="errors.duration" v-text="errors.duration"></div>
                     </div>
-                    <div class="mb-3">
-                        <label for="additional_information" class="form-label">Additional Information:</label>
+                    <div class="col-md-6 mb-3 ">
+                        <label for="additional_information" class="form-label ">How do you imagine your song?</label>
                         <textarea v-model="formData.additional_information" id="additional_information" class="form-control" :class="{'is-invalid': errors.additional_information}"></textarea>
                         <div class="invalid-feedback" v-if="errors.additional_information" v-text="errors.additional_information"></div>
                     </div>
+                    <div class="col-md-6 mb-3 justify-content-end  d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary">Generate Music</button>
+                    </div>
                 </div>
-
-                <button type="submit" class="btn btn-primary">Generate Music</button>
             </form>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col-md-6 py-4">
+            <h3>Song Parameters</h3>
+            <div id="parameters" class="border p-3 mb-3">
+                {% raw %}
+                <div v-if="Object.keys(parameters).length === 0">No parameters received yet.</div>
+                <div v-else>
+                    <div v-for="(value, key) in parameters" :key="key" class="mb-2">
+                        <strong>{{ key || 'undefined key' }}:</strong> {{ value || 'undefined value' }}
+                    </div>
+                    <!--                    <div>Debug - Raw parameters: {{ JSON.stringify(parameters) }}</div>-->
+                    <!--                    <div>Debug - Number of parameters: {{ Object.keys(parameters).length }}</div>-->
+                </div>
+                {% endraw %}
+            </div>
         </div>
         <div id="timeline" class="col-md-6 py-4">
             <h3>Music Creation Timeline</h3>
@@ -130,34 +149,26 @@
                 {% endraw %}
             </ul>
         </div>
+    </div>
 
-    </div>
-    <br/>
-    <div class="row mt-4">
-        <div class="col-12 py-4">
-            <h3>Song Parameters</h3>
-            <div id="parameters" class="border p-3 mb-3">
-                {% raw %}
-                <div v-if="Object.keys(parameters).length === 0">No parameters yet.</div>
-                <div v-else>
-                    <div v-for="(value, key) in parameters" :key="key" class="mb-2">
-                        <strong>{{ key || 'undefined key' }}:</strong> {{ value || 'undefined value' }}
-                    </div>
-<!--                    <div>Debug - Raw parameters: {{ JSON.stringify(parameters) }}</div>-->
-<!--                    <div>Debug - Number of parameters: {{ Object.keys(parameters).length }}</div>-->
-                </div>
-                {% endraw %}
-            </div>
-        </div>
-    </div>
-    <br/>
     <h3>Music Agent Logs</h3>
     <div id="log" class="mt-4 cli-log py-4">
         <pre><code><span v-for="(message, index) in logMessages" :key="index" v-text="message"></span></code></pre>
     </div>
     <br/>
-
 </div>
+
+<footer class="bg-dark text-white text-center py-3 mt-4">
+    <div class="container">
+        <p class="mb-0">&copy; 2024 MusicAgent. All rights reserved.</p>
+        <p class="mb-0">Follow mITy.John on
+            <a href="https://www.instagram.com/mity.john/" class="text-white"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.linkedin.com/in/jan-van-wassenhove-9b49893/" class="text-white"><i class="fab fa-linkedin"></i></a>
+            <a href="https://mityjohn.com/" class="text-white"><i class="fab fa-wordpress"></i></a>
+            <a href="https://x.com/mity_john" class="text-white"><i class="fab fa-twitter"></i></a>
+        </p>
+    </div>
+</footer>
 
 <div id="inputModal" class="modal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
