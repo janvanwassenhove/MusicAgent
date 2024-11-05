@@ -133,7 +133,7 @@ class GPTAgent:
                 phase_prompt = phase_prompt.replace(f"{{{key}}}", str(param_value))
 
         self.logger.info(
-            f"\Assistant is {assistant_role_name}, questioned by {user_role_name}. \nPrompting:\n {phase_prompt}\n"
+            f"Assistant is {assistant_role_name}, questioned by {user_role_name}. \nPrompting:\n {phase_prompt}\n"
         )
 
         messages = [
@@ -145,7 +145,6 @@ class GPTAgent:
 
         retry_count = 0
         max_retries = 3
-
         while retry_count < max_retries:
             try:
                 if self.api_provider == 'openai':
@@ -192,10 +191,14 @@ class GPTAgent:
                         + self.song_creation_data.sonicpi_code
                     )
                     self.stop_review_and_modify = True
-                elif 'sonicpi_code' in response_data and isinstance(response_data['sonicpi_code'], list):
-                    code_to_retrieve = '\n'.join(response_data['sonicpi_code'])
-                    self.logger.info(f"Code successfully retrieved from array: {code_to_retrieve}")
+                elif 'sonicpi_code' in response_data:
+                    if isinstance(response_data['sonicpi_code'], list):
+                        code_to_retrieve = '\n'.join(response_data['sonicpi_code'])
+                    elif isinstance(response_data['sonicpi_code'], str):
+                        code_to_retrieve = response_data['sonicpi_code']
+                    self.logger.info(f"Code successfully retrieved: {code_to_retrieve}")
                     song_creation_data.set_parameter("sonicpi_code", code_to_retrieve)
+                    self.song.create_song_file(song_creation_data)
                 else:
                     song_creation_data.update_parameters_from_response(response_data)
 
@@ -241,6 +244,7 @@ class GPTAgent:
                 code_to_retrieve = response_text[start:end]
                 self.logger.info(f"Code extracted via workaround: {code_to_retrieve}")
                 song_creation_data.set_parameter("sonicpi_code", code_to_retrieve)
+                self.song.create_song_file(song_creation_data)
             else:
                 self.logger.info("End marker not found for 'sonicpi_code'")
         else:

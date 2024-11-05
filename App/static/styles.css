@@ -88,6 +88,7 @@ a:hover {
     padding: 10px;
     margin-top: 20px;
     background-color: #f3dac1;
+    border-radius: 8px;
 }
 
 .chat-message {
@@ -114,7 +115,7 @@ a:hover {
     overflow-y: auto;
     border: 1px solid #ccc;
     padding: 10px;
-    margin-top: 20px;
+    margin-top: 20px
 }
 .cli-log {
     background-color: #000;
@@ -172,4 +173,37 @@ a:hover {
     outline: none;
     box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
     border-color: #80bdff;
+}
+
+.sonic-pi-code {
+    background-color: #000000; /* Dark background similar to Sonic Pi IDE */
+    color: #f8f8f2; /* Light text */
+    padding: 16px;
+    border-radius: 8px;
+    font-family: 'Courier New', Courier, monospace; /* Monospace font */
+    overflow-x: auto;
+    white-space: pre-wrap;
+}
+.sonic-pi-code code {
+    color: #f8f8f2; /* Ensuring code text is light */
+}
+
+.sonic-pi-code pre {
+    margin: 0;
+}
+.sonic-pi-code .keyword {
+    color: #fff;
+}
+.sonic-pi-code .function {
+    color: #ea1b8f;
+}
+.sonic-pi-code .number {
+    color: #4a6ff4;
+}
+.sonic-pi-code .comment {
+    color: #79887a;
+    font-style: italic;
+}
+.sonic-pi-code .doend {
+    color: #ffe007;
 }

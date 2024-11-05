@@ -237,5 +237,15 @@ def stream():
 def get_genres():
     return jsonify({"genres": song_config['genres']})
 
+@app.route('/get_sonicpi_code/<songname>', methods=['GET'])
+def get_sonicpi_code(songname):
+    filepath = os.path.join('songs', songname, f'{songname}.rb')
+    if os.path.exists(filepath):
+        with open(filepath, 'r') as file:
+            code = file.read()
+        return jsonify({'sonicpi_code': code})
+    else:
+        return jsonify({'error': 'File not found'}), 404
+
 if __name__ == '__main__':
     socketio.run(app, debug=True)

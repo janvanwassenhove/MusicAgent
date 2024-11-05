@@ -106,6 +106,9 @@
         <button class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#musicAgentLogs" aria-expanded="true" aria-controls="musicAgentLogs">
             <i class="fas fa-file-alt"></i> Music Agent Logs
         </button>
+        <button class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#sonicPiCode" aria-expanded="true" aria-controls="sonicPiCode">
+            <i class="fas fa-code"></i> Sonic Pi Code
+        </button>
     </div>
     <div class="row">
         <div id="songParameters" class="col-md-6 py-4 collapse show">
@@ -163,15 +166,25 @@
         </div>
     </div>
 
-    <div id="agentConversations" class="collapse show">
+    <div id="agentConversations" class="py-4 collapse show">
         <h3>Agent Conversations</h3>
         <div id="chats" class="mt-4 mb-4 py-4"></div>
     </div>
 
-    <div id="musicAgentLogs" class="collapse show">
+    <div id="musicAgentLogs" class="py-4 collapse show">
         <h3>Music Agent Logs</h3>
         <div id="log" class="mt-4 cli-log py-4">
             <pre><code><span v-for="(message, index) in logMessages" :key="index" v-text="message"></span></code></pre>
+        </div>
+    </div>
+
+    <div id="sonicPiCode" class="py-4 collapse show">
+        <h3>Sample Sonic Pi Code</h3>
+        <div class="mt-4 sonic-pi-code py-4">
+            <div>
+                <ul class="nav nav-tabs" id="sonicPiCodeTabs" role="tablist"></ul>
+                <div class="tab-content" id="sonicPiCodeContent"></div>
+            </div>
         </div>
     </div>
 </div>
@@ -231,6 +244,20 @@
 
 <script>
 
+    function parseSonicPiCode(code) {
+        const keywordRegex = /\b(live_loop|play|sleep)\b/g;
+        const numberRegex = /\b\d+(\.\d+)?\b/g;
+        const functionRegex = /(:\w+)/g;
+        const doendRegex = /\b(do|end)\b/g;
+
+        code = code.replace(keywordRegex, '<span class="keyword">$&</span>');
+        code = code.replace(numberRegex, '<span class="number">$&</span>');
+        code = code.replace(functionRegex, '<span class="function">$&</span>');
+        code = code.replace(doendRegex, '<span class="doend">$&</span>');
+
+        return code;
+    }
+
     const { createApp, ref, onMounted, nextTick, reactive, computed } = Vue;
     const { watch } = Vue;
 
@@ -239,6 +266,7 @@
             const agentType = ref('');
             const agentTypes = ref([]);
             const agentInitialized = ref(false);
+            const formSubmitted = ref(false);
             const formData = ref({
                 genre: '',
                 duration: 180,
@@ -321,6 +349,14 @@
                 this.completedPhases = [];
             };
 
+            const resetDivsForNewSong = () => {
+                resetCurrentPhase();
+                this.timeline = [];
+                this.parameters = {};
+                const chatsDiv = document.getElementById('chats');
+                chatsDiv.innerHTML = '';
+            };
+
             const fetchTimeline = async () => {
                 try {
                     const response = await axios.get('/timeline', {
@@ -375,11 +411,12 @@
 
             const submitForm = () => {
                 if (validateForm()) {
+                    formSubmitted.value = true;
                     resetCurrentPhase();
+                    resetDivsForNewSong();
 
                     axios.post('/', formData.value)
                         .then(() => {
-                            // logMessages.value = [];
                             startEventSource();
                         })
                         .catch(error => {
@@ -423,6 +460,70 @@
                 inputModal.value.hide();
             };
 
+            let sonicPiCodeVersions = [];
+
+            const fetchSonicPiCode = async (songname) => {
+                try {
+                    const response = await axios.get(`/get_sonicpi_code/${songname}`);
+                    console.info('Polling for sonic pi file');
+                    if (response.data.sonicpi_code) {
+                        const newCode = response.data.sonicpi_code;
+                        if (!sonicPiCodeVersions.includes(newCode)) {
+                            console.info('New Version Code Found:', newCode);
+                            sonicPiCodeVersions.push(newCode);
+                            updateSonicPiCodeTabs();
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error fetching Sonic Pi code:', error);
+                }
+            };
+
+            const updateSonicPiCodeTabs = () => {
+                const tabsContainer = document.getElementById('sonicPiCodeTabs');
+                const contentContainer = document.getElementById('sonicPiCodeContent');
+                tabsContainer.innerHTML = '';
+                contentContainer.innerHTML = '';
+
+                sonicPiCodeVersions.forEach((code, index) => {
+                    const tabId = `sonicPiCodeTab${index}`;
+                    const contentId = `sonicPiCodeContent${index}`;
+
+                    // Create tab
+                    const tab = document.createElement('button');
+                    tab.className = 'nav-link';
+                    tab.id = `${tabId}-tab`;
+                    tab.setAttribute('data-bs-toggle', 'tab');
+                    tab.setAttribute('data-bs-target', `#${contentId}`);
+                    tab.type = 'button';
+                    tab.role = 'tab';
+                    tab.ariaControls = contentId;
+                    tab.ariaSelected = index === 0 ? 'true' : 'false';
+                    tab.innerText = `Version ${index + 1}`;
+                    tabsContainer.appendChild(tab);
+
+                    // Create content
+                    const content = document.createElement('div');
+                    content.className = 'tab-pane fade';
+                    content.id = contentId;
+                    content.role = 'tabpanel';
+                    content.ariaLabelledby = `${tabId}-tab`;
+                    content.innerHTML = `<pre><code><br/>${parseSonicPiCode(code)}</code></pre>`;
+                    contentContainer.appendChild(content);
+
+                    if (index === 0) {
+                        tab.classList.add('active');
+                        content.classList.add('show', 'active');
+                    }
+                });
+
+                // Re-initialize Bootstrap tab functionality
+                const tabElements = document.querySelectorAll('#sonicPiCodeTabs button[data-bs-toggle="tab"]');
+                tabElements.forEach(tab => {
+                    new bootstrap.Tab(tab);
+                });
+            };
+
             const startEventSource = () => {
                 if (eventSource) {
                     eventSource.close();
@@ -436,9 +537,14 @@
 
                 eventSource.onmessage = (e) => {
                     console.log("Received message:", e.data);
+                    if (formSubmitted.value && e.data.includes('"sonicpi_code"')) {
+                        fetchSonicPiCode(formData.value.song_name);
+                    }
                     if (e.data === "DONE") {
                         const completionAlert = document.getElementById('completionAlert');
                         completionAlert.style.display = 'block';
+                        formSubmitted.value = false;
+                        fetchSonicPiCode(formData.value.song_name);
                         // eventSource.close();
                     } else if (e.data.startsWith("input_required|")) {
                         const [, prompt] = e.data.split("|");
