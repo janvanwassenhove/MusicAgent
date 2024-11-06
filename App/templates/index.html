@@ -508,7 +508,7 @@
                     content.id = contentId;
                     content.role = 'tabpanel';
                     content.ariaLabelledby = `${tabId}-tab`;
-                    content.innerHTML = `<pre><code><br/>${parseSonicPiCode(code)}</code></pre>`;
+                    content.innerHTML = `<pre><code>${parseSonicPiCode(code)}</code></pre>`;
                     contentContainer.appendChild(content);
 
                     if (index === 0) {
