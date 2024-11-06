@@ -322,8 +322,8 @@ class GPTAgent:
 
         assistant_role_name = phase_config[phase]["assistant_role_name"]
         user_role_name = phase_config[phase]["user_role_name"]
-        self.logger.info(f"\[Questioner]({user_role_name}):[[{prompt}]]")
-        self.logger.info(f"\[Assistant]({assistant_role_name}):[[Cover image generated {image_url} .]]")
+        self.logger.info(f"[Questioner]({user_role_name}):[[{prompt}]]")
+        self.logger.info(f"[Assistant]({assistant_role_name}):[[Cover image generated {image_url} .]]")
 
         # Download the image
         image_response = requests.get(image_url)

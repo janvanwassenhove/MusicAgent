@@ -479,9 +479,17 @@
                 }
             };
 
+            document.addEventListener('DOMContentLoaded', () => {     updateSonicPiCodeTabs(); });
+
             const updateSonicPiCodeTabs = () => {
                 const tabsContainer = document.getElementById('sonicPiCodeTabs');
                 const contentContainer = document.getElementById('sonicPiCodeContent');
+
+                if (!tabsContainer || !contentContainer) {
+                    console.error('Tabs or content container not found in the DOM.');
+                    return; // Exit the function if elements are not found
+                }
+
                 tabsContainer.innerHTML = '';
                 contentContainer.innerHTML = '';
 
@@ -502,27 +510,69 @@
                     tab.innerText = `Version ${index + 1}`;
                     tabsContainer.appendChild(tab);
 
-                    // Create content
                     const content = document.createElement('div');
                     content.className = 'tab-pane fade';
                     content.id = contentId;
                     content.role = 'tabpanel';
                     content.ariaLabelledby = `${tabId}-tab`;
-                    content.innerHTML = `<pre><code>${parseSonicPiCode(code)}</code></pre>`;
+                    content.innerHTML = `
+                        <div class="code-container">
+                            <button class="copy-icon" title="Copy to clipboard"><i class="fas fa-copy"></i></button>
+                            <pre class="sonic-pi-code"><code>${parseSonicPiCode(code)}</code></pre>
+                        </div>`;
+
                     contentContainer.appendChild(content);
 
+
+                    // Set active class for the first tab and content only
                     if (index === 0) {
                         tab.classList.add('active');
                         content.classList.add('show', 'active');
                     }
+
+                    // Add click event listener to manage active class
+                    tab.addEventListener('click', () => {
+                        // Remove active class from all tabs
+                        const allTabs = document.querySelectorAll('#sonicPiCodeTabs .nav-link');
+                        allTabs.forEach(t => {
+                            t.classList.remove('active');
+                            t.setAttribute('aria-selected', 'false');
+                        });
+
+                        // Add active class to the clicked tab
+                        tab.classList.add('active');
+                        tab.setAttribute('aria-selected', 'true');
+
+                        // Remove active class from all content
+                        const allContents = document.querySelectorAll('#sonicPiCodeContent .tab-pane');
+                        allContents.forEach(c => {
+                            c.classList.remove('show', 'active');
+                        });
+
+                        // Show the corresponding content
+                        content.classList.add('show', 'active');
+                    });
+
+                    content.querySelector('.copy-icon').addEventListener('click', () => {
+                        const codeText = content.querySelector('code').innerText; // Get the code text
+                        navigator.clipboard.writeText(codeText).then(() => {
+                            alert('Sonic Pi Code copied to clipboard!'); // Optional: Show a success message
+                        }).catch(err => {
+                            console.error('Failed to copy the Sonic Pi code: ', err);
+                        });
+                    });
+
                 });
 
-                // Re-initialize Bootstrap tab functionality
-                const tabElements = document.querySelectorAll('#sonicPiCodeTabs button[data-bs-toggle="tab"]');
-                tabElements.forEach(tab => {
-                    new bootstrap.Tab(tab);
+                // Set up the event listener for tab changes
+                document.addEventListener('shown.bs.tab', (event) => {
+                    const activeTab = event.target; // Newly activated tab
+                    const previousTab = event.relatedTarget; // Previous active tab
+                    console.log(`Activated tab: ${activeTab.innerText}, Previous tab: ${previousTab ? previousTab.innerText : 'None'}`);
                 });
             };
+
+            updateSonicPiCodeTabs();
 
             const startEventSource = () => {
                 if (eventSource) {

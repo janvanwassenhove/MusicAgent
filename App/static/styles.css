@@ -182,7 +182,6 @@ a:hover {
     border-radius: 8px;
     font-family: 'Courier New', Courier, monospace; /* Monospace font */
     overflow-x: auto;
-    white-space: pre-wrap;
 }
 .sonic-pi-code code {
     color: #f8f8f2; /* Ensuring code text is light */
@@ -206,4 +205,24 @@ a:hover {
 }
 .sonic-pi-code .doend {
     color: #ffe007;
+}
+
+.code-container {
+    position: relative;
+}
+
+.copy-icon {
+    position: absolute;
+    top: 10px; /* Adjust as needed */
+    right: 10px; /* Adjust as needed */
+    display: none; /* Hidden by default */
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2em; /* Adjust size as needed */
+    color: #ffffff; /* Change color as needed */
+}
+
+.code-container:hover .copy-icon {
+    display: block; /* Show on hover */
 }
