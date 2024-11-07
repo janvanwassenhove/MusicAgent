@@ -242,7 +242,49 @@
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 
+<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="errorModalLabel">Error</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="errorMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <script>
+
+    const showErrorModal = (message) => {
+        document.getElementById('errorMessage').innerText = message;
+        const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+        errorModal.show();
+    };
+
+    function sendCodeToSonicPi(code) {
+        const songName = document.getElementById('song_name').value || 'Untitled';
+        const agentType = document.getElementById('agent_type').value || 'mITyJohn';
+
+        axios.post('/send_to_sonicpi', {
+            code: code,
+            song_name: songName,
+            agent_type: agentType
+        })
+        .then(response => {
+            console.info('Code sent to Sonic Pi: ' + response.data.message);
+        })
+        .catch(error => {
+            console.error('Error sending code to Sonic Pi:', error);
+            showErrorModal('Failed to send the code to Sonic Pi, did you run SonicPi/Setup/recording.rb in Sonic Pi?');
+        });
+    }
 
     function parseSonicPiCode(code) {
         const keywordRegex = /\b(live_loop|play|sleep)\b/g;
@@ -518,6 +560,7 @@
                     content.innerHTML = `
                         <div class="code-container">
                             <button class="copy-icon" title="Copy to clipboard"><i class="fas fa-copy"></i></button>
+                            <button class="send-icon" title="Send to Sonic Pi"><i class="fas fa-play"></i></button>
                             <pre class="sonic-pi-code"><code>${parseSonicPiCode(code)}</code></pre>
                         </div>`;
 
@@ -560,6 +603,10 @@
                         }).catch(err => {
                             console.error('Failed to copy the Sonic Pi code: ', err);
                         });
+                    });
+                    content.querySelector('.send-icon').addEventListener('click', () => {
+                        const codeText = content.querySelector('code').innerText; // Get the code text
+                        sendCodeToSonicPi(codeText);
                     });
 
                 });

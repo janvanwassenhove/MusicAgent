@@ -70,7 +70,7 @@ class SonicPi:
                 print(f"Error starting OSC server: {e}")
 
                 if attempt < 2:  # If not the last attempt, retry
-                    print(f"Port 4559 in use, retrying in 2 seconds... (Attempt {attempt + 1}/3)")
+                    print(f"Port in use, retrying in 2 seconds... (Attempt {attempt + 1}/3)")
 
                     # Shutdown server before retrying if on second attempt
                     if attempt == 1:

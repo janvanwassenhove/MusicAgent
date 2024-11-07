@@ -8,6 +8,7 @@ import traceback
 import time
 import asyncio
 from flask_socketio import SocketIO, emit
+from pythonosc import udp_client
 
 # Add the parent directory to the Python path
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -246,6 +247,29 @@ def get_sonicpi_code(songname):
         return jsonify({'sonicpi_code': code})
     else:
         return jsonify({'error': 'File not found'}), 404
+
+@app.route('/send_to_sonicpi', methods=['POST'])
+def send_to_sonicpi():
+    data = request.json
+    if not data or 'code' not in data:
+        return jsonify({"error": "No code provided"}), 400
+
+    code = data['code']
+    song_name = data.get('song_name', 'Untitled')
+    agent_type = data.get('agent_type', 'mITyJohn')
+    try:
+        artist_config = load_config(agent_type)
+        client = udp_client.SimpleUDPClient(artist_config["sonic_pi_IP"], int(artist_config["sonic_pi_port"]))
+
+        script_file_path = f"{os.path.dirname(current_dir)}\\songs\\{song_name}\\{song_name}.rb"
+        with open(script_file_path, 'r') as file:
+            full_script = file.read()
+
+        client.send_message('/run-code', full_script)
+        return jsonify({"message": "Code sent to Sonic Pi"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)

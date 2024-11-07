@@ -4,6 +4,8 @@
   "agent_name": "mITy.John",
   "description": "Default MusicAgent configuration, if you're in need of a quick tune. Limited review/modification phase. Without recording & playback throughout the process flow.",
   "artist_style": " Retro & vintage using yellow, dark green, orange, black, white color palette.",
+  "sonic_pi_IP" : "192.168.0.209",
+  "sonic_pi_port" : "4560",
   "assistants": [
     {
       "Artist":  [

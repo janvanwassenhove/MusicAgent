@@ -211,7 +211,7 @@ a:hover {
     position: relative;
 }
 
-.copy-icon {
+.copy-icon{
     position: absolute;
     top: 10px; /* Adjust as needed */
     right: 10px; /* Adjust as needed */
@@ -224,9 +224,27 @@ a:hover {
     z-index: 10; /* Ensure the icon is above other elements */
 }
 
+.send-icon {
+    position: absolute;
+    top: 10px; /* Adjust as needed */
+    right: 40px; /* Adjust as needed */
+    display: none; /* Hidden by default */
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2em; /* Adjust size as needed */
+    color: #ffffff; /* Change color as needed */
+    z-index: 10; /* Ensure the icon is above other elements */
+}
+
 .code-container:hover .copy-icon {
     display: block; /* Show on hover */
 }
+
+.code-container:hover .send-icon {
+    display: block; /* Show on hover */
+}
+
 
 .tab-pane {
     max-height: 400px; /* Limit the height to 400 pixels */
