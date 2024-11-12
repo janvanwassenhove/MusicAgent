@@ -4,6 +4,8 @@
   "agent_name": "mITy.John",
   "description": "Default MusicAgent configuration, if you're in need of a quick tune. Limited review/modification phase. Without recording & playback throughout the process flow.",
   "artist_style": " Retro & vintage using yellow, dark green, orange, black, white color palette.",
+  "sonic_pi_IP" : "192.168.0.209",
+  "sonic_pi_port" : "4560",
   "assistants": [
     {
       "Artist":  [
@@ -62,5 +64,14 @@
         "You don't uses textual elements nor any reference to letters or text in the images you design."
       ]
     }
+  ],
+  "genres": [
+    {"id": 1, "genre": "Trance"},
+    {"id": 2, "genre": "Disco"},
+    {"id": 3, "genre": "Dance"},
+    {"id": 4, "genre": "Elektro"},
+    {"id": 5, "genre": "Drum & Bass"},
+    {"id": 6, "genre": "New Wave"},
+    {"id": 7, "genre": "Psychedelic"}
   ]
 }

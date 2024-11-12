@@ -16,6 +16,7 @@ import imghdr
 import re
 import threading
 import time
+import asyncio
 
 class GPTAgent:
     def __init__(self, selected_model, logger, song, agentType, api_provider):
@@ -26,6 +27,13 @@ class GPTAgent:
         self.song = song
         self.agentType = agentType
         self.api_provider = api_provider
+        self.input_callback = None
+
+    def get_user_input(self, prompt):
+        if self.input_callback:
+            return self.input_callback(prompt)
+        print("Input callback not set for webapp. Unable to get user input via modal.")
+        return input(prompt)
 
     def get_api_key(self):
         # Try to get the API key from an environment variable
@@ -53,6 +61,7 @@ class GPTAgent:
 
     def execute_phase(self, client, phase, song_creation_data, artist_config, phase_config):
         print("\nExecuting phase ["+phase+"]")
+        self.logger.info(f"Executing phase: [{phase}]")
 
         task_type = ''
         if phase in phase_config:
@@ -62,18 +71,25 @@ class GPTAgent:
 
         self.logger.info("\n\nExecuting phase ["+phase+"] (type: " + task_type + ")")
 
+        assistant_role_name = phase_config[phase]["assistant_role_name"]
+        user_role_name = phase_config[phase]["user_role_name"]
+
         if task_type == "chat":
             self.discussion(client, phase, song_creation_data, artist_config, phase_config)
         elif task_type == "art":
             album_cover_style = artist_config.get('artist_style')
             image_prompt = "Album cover style defined as: " + album_cover_style + " / Song on the album described as " + self.song_creation_data.song_description
-            self.generate_and_download_image(image_prompt, self.song.name, self.song.get_song_dir())
+            self.generate_and_download_image(image_prompt, self.song.name, self.song.get_song_dir(), phase_config, phase)
         elif task_type == "readme":
+            self.logger.info(f"[Questioner]({user_role_name}):[[Create a Readme File containing cover, song parameters, lyrics and structure.]]")
             self.song.create_readme_file(self.song_creation_data)
+            self.logger.info(f"[Assistant]({assistant_role_name}):[[Readme file created at {self.song.song_dir} .]]")
         elif task_type == "file":
+            self.logger.info(f"[Questioner]({user_role_name}):[[Create the Ruby Song File based on song creation data.]]")
             self.song.create_song_file(self.song_creation_data)
+            self.logger.info(f"[Assistant]({assistant_role_name}):[[Ruby song file created at {self.song.song_dir} .]]")
         elif task_type == "human_chat":
-            self.human_discussion(artist_config)
+            self.human_discussion(artist_config, phase_config, phase)
         elif task_type == "recording":
             self.song_recording(artist_config, self.song_creation_data.total_duration)
         else:
@@ -84,10 +100,15 @@ class GPTAgent:
         recorder = AudioRecorder(self.logger, self.song, artist_config)
         recorder.run(duration=duration, specific_device_index=43)  # Adjust device index as needed
 
-    def human_discussion(self, artist_config):
+    def human_discussion(self, artist_config, phase_config, phase):
+        assistant_role_name = phase_config[phase]["assistant_role_name"]
+        user_role_name = phase_config[phase]["user_role_name"]
+
+        self.logger.info(f"[Questioner]({user_role_name}):[[Please provide us your remarks on the song]]")
         self.validate_and_execute_code(self.song_creation_data, artist_config, "")
-        review_user = input("\nPlease provide us your remarks on the song: ")
+        review_user = self.get_user_input("\nPlease provide us your remarks on the song: ")
         self.logger.info(f"Received user input: {review_user}")
+        self.logger.info(f"[Assistant]({assistant_role_name}):[[{review_user}]]")
 
         if review_user.strip():  # Check if the input is not empty or just whitespace
             self.song_creation_data.set_parameter("review", review_user)
@@ -107,11 +128,12 @@ class GPTAgent:
         # Replace placeholders in the prompt with actual values
         for key, value in phase_config[phase]["input"].items():
             param_value = song_creation_data.get_parameter(value)
+            self.logger.info(f"Parameter for discussion [{key.upper()}]:[{param_value}]")
             if param_value is not None:
                 phase_prompt = phase_prompt.replace(f"{{{key}}}", str(param_value))
 
         self.logger.info(
-            f"\nAssistant is {assistant_role_name}, questioned by {user_role_name}. \nPrompting:\n {phase_prompt}\n"
+            f"Assistant is {assistant_role_name}, questioned by {user_role_name}. \nPrompting:\n {phase_prompt}\n"
         )
 
         messages = [
@@ -123,7 +145,6 @@ class GPTAgent:
 
         retry_count = 0
         max_retries = 3
-
         while retry_count < max_retries:
             try:
                 if self.api_provider == 'openai':
@@ -147,6 +168,14 @@ class GPTAgent:
                     )
                     response_text = completion.content[0].text
 
+#                 self.logger.info(
+#                     f"\Assistant is {assistant_role_name}, questioned by {user_role_name}. \nPrompting:\n {phase_prompt}\n"
+#                 )
+                phase_prompt_single_line = phase_prompt.replace('\n', ' ')
+                self.logger.info(f"[Questioner]({user_role_name}):[[{phase_prompt_single_line}]]")
+                response_text_single_line = response_text.replace('\n', ' ')
+                self.logger.info(f"[Assistant]({assistant_role_name}):[[{response_text_single_line}]]")
+
                 self.logger.info(f"Response (retry {retry_count}): {response_text}")
 
                 # Attempt to extract JSON object using regex if the response contains extra text
@@ -162,10 +191,14 @@ class GPTAgent:
                         + self.song_creation_data.sonicpi_code
                     )
                     self.stop_review_and_modify = True
-                elif 'sonicpi_code' in response_data and isinstance(response_data['sonicpi_code'], list):
-                    code_to_retrieve = '\n'.join(response_data['sonicpi_code'])
-                    self.logger.info(f"Code successfully retrieved from array: {code_to_retrieve}")
+                elif 'sonicpi_code' in response_data:
+                    if isinstance(response_data['sonicpi_code'], list):
+                        code_to_retrieve = '\n'.join(response_data['sonicpi_code'])
+                    elif isinstance(response_data['sonicpi_code'], str):
+                        code_to_retrieve = response_data['sonicpi_code']
+                    self.logger.info(f"Code successfully retrieved: {code_to_retrieve}")
                     song_creation_data.set_parameter("sonicpi_code", code_to_retrieve)
+                    self.song.create_song_file(song_creation_data)
                 else:
                     song_creation_data.update_parameters_from_response(response_data)
 
@@ -211,6 +244,7 @@ class GPTAgent:
                 code_to_retrieve = response_text[start:end]
                 self.logger.info(f"Code extracted via workaround: {code_to_retrieve}")
                 song_creation_data.set_parameter("sonicpi_code", code_to_retrieve)
+                self.song.create_song_file(song_creation_data)
             else:
                 self.logger.info("End marker not found for 'sonicpi_code'")
         else:
@@ -236,6 +270,8 @@ class GPTAgent:
         self.song_creation_data.set_parameter("song_description", song_description)
         self.song_creation_data.set_parameter("total_duration", str(duration))
 
+        self.logger.info(f"Parameter used [DURATION]:[{duration}], [GENRE]:[{genre}], [DESCRIPTION]:[{additional_information}]")
+
         # Iterate over phases
         for phase_info in compose_chain_config["chain"]:
             phase = phase_info["phase"]
@@ -252,12 +288,12 @@ class GPTAgent:
                             self.logger.info("Skip " + sub_phase)
                             break
                         else:
-                            self.logger.info("Starting subphase " + sub_phase)
+                            # self.logger.info("Starting subphase " + sub_phase)
                             self.execute_phase(client, sub_phase, self.song_creation_data, artist_config, phase_config)
             else:
                 self.execute_phase(client, phase, self.song_creation_data, artist_config, phase_config)
 
-    def generate_and_download_image(self, prompt, filename, songdir):
+    def generate_and_download_image(self, prompt, filename, songdir, phase_config, phase):
         if self.api_provider == 'openai':
             client = OpenAI(api_key=self.get_api_key())
         else:
@@ -283,6 +319,11 @@ class GPTAgent:
         # Ensure the directory exists
         if not os.path.exists(songdir):
             os.makedirs(songdir)
+
+        assistant_role_name = phase_config[phase]["assistant_role_name"]
+        user_role_name = phase_config[phase]["user_role_name"]
+        self.logger.info(f"[Questioner]({user_role_name}):[[{prompt}]]")
+        self.logger.info(f"[Assistant]({assistant_role_name}):[[Cover image generated {image_url} .]]")
 
         # Download the image
         image_response = requests.get(image_url)

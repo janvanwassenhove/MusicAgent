@@ -10,6 +10,8 @@
     - [Installation](#installation)
 4. [Configuration](#configuration)
 5. [Running the MusicAgent](#running-the-musicagent)
+   - [Web Application](#web-application)
+   - [CLI](#cli)
 6. [Output](#output)
 7. [Demo](#Demo)
 8. [About](#about)
@@ -149,6 +151,27 @@ or just load `Sonicpi/Setup/recording.rb` in your Sonic PI.
 4. Once launched, you'll notice the listener in your Cues being launched. This will enable Sonic Pi to play your music file and send feedback to MusicAgent.
 
 ### Running the MusicAgent
+
+MusicAgent can be run in 2 different ways: via the CLI or via the web application.
+#### Web Application
+
+Running the web application will allow you to interact with the MusicAgent via a web interface.
+```bash
+python app.py
+```
+The app visualizes the different phases of the music creation process and allows you to interact with the MusicAgent.
+You'll also be able to go through the chat conversation with the different agents.
+
+![Music Agent Web App](Assets/ma_webapp.png)
+
+Additionally, you can check out the different Sonic Pi versions, sending them even to the Sonic PI IDE.
+
+More elaborate information on how to use the Music Agent web application can be found in [Music Agent App README](App/README.md)
+
+
+#### CLI
+
+Running the CLI will allow you to interact with the MusicAgent via the command line.
 ```bash
 python run.py
 ```
