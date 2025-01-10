@@ -184,26 +184,6 @@
         "Track Type": "Instrumentals Only"
     },
     {
-        "Filename": "Synth/Moog Model D PLUCK Alloy Low - C.wav",
-        "Duration": 1.11,
-        "BPM": 0.0,
-        "Key": "A# minor",
-        "Vibe": "The track has a Relaxed tempo at 0 BPM, featuring a bright and high energy sound. It feels soft and smooth with a A# minor tonality.",
-        "Tags": [
-            "Relaxed",
-            "bright",
-            "high energy",
-            "soft and smooth",
-            "A# minor",
-            "Whale vocalization",
-            "Hammond organ",
-            "Ukulele",
-            "Chirp tone",
-            "Music"
-        ],
-        "Description": "A bright, high energy track with a Relaxed tempo and a A# minor tonality."
-    },
-    {
         "Filename": "Synth/Oberheim OB-8 BASS Incredible - C.wav",
         "Duration": 16.64,
         "BPM": 130.81,
@@ -266,46 +246,6 @@
         "Track Type": "Instrumentals Only"
     },
     {
-        "Filename": "Synth/Oberheim OB-8 PLUCK Bell High - C.wav",
-        "Duration": 2.25,
-        "BPM": 0.0,
-        "Key": "A# minor",
-        "Vibe": "The track has a Relaxed tempo at 0 BPM, featuring a warm and low energy sound. It feels soft and smooth with a A# minor tonality.",
-        "Tags": [
-            "Relaxed",
-            "warm",
-            "low energy",
-            "soft and smooth",
-            "A# minor",
-            "Tearing",
-            "Ping",
-            "Silence",
-            "Whale vocalization",
-            "Harp"
-        ],
-        "Description": "A warm, low energy track with a Relaxed tempo and a A# minor tonality."
-    },
-    {
-        "Filename": "Synth/Oberheim OB-8 PLUCK Bell Low - C.wav",
-        "Duration": 2.59,
-        "BPM": 0.0,
-        "Key": "A# minor",
-        "Vibe": "The track has a Relaxed tempo at 0 BPM, featuring a warm and low energy sound. It feels soft and smooth with a A# minor tonality.",
-        "Tags": [
-            "Relaxed",
-            "warm",
-            "low energy",
-            "soft and smooth",
-            "A# minor",
-            "Tubular bells",
-            "xylophone",
-            "Harpsichord",
-            "Whale vocalization",
-            "Mallet percussion"
-        ],
-        "Description": "A warm, low energy track with a Relaxed tempo and a A# minor tonality."
-    },
-    {
         "Filename": "Synth/Oberheim OB-X BASS 2 Pole Pulse - C.wav",
         "Duration": 14.0,
         "BPM": 120.19,
@@ -345,26 +285,6 @@
             "Whale vocalization"
         ],
         "Description": "A warm, high energy track with a Energetic tempo and a A minor tonality."
-    },
-    {
-        "Filename": "Synth/Oberheim OB-X PLUCK Narrow Pulse - C.wav",
-        "Duration": 1.73,
-        "BPM": 120.19,
-        "Key": "A minor",
-        "Vibe": "The track has a Energetic tempo at 120 BPM, featuring a warm and low energy sound. It feels soft and smooth with a A minor tonality.",
-        "Tags": [
-            "Energetic",
-            "warm",
-            "low energy",
-            "soft and smooth",
-            "A minor",
-            "Car",
-            "Air brake",
-            "Music",
-            "Pulse",
-            "French horn"
-        ],
-        "Description": "A warm, low energy track with a Energetic tempo and a A minor tonality."
     },
     {
         "Filename": "Synth/Oberheim OB-X STRINGS Pulse Saw - C.wav",
@@ -426,27 +346,6 @@
             "Whale vocalization"
         ],
         "Description": "A warm, high energy track with a Relaxed tempo and a E minor tonality."
-    },
-    {
-        "Filename": "Synth/Prologue LEAD Digikordion - C.wav",
-        "Duration": 2.43,
-        "BPM": 215.33,
-        "Key": "E minor",
-        "Vibe": "The track has a Energetic tempo at 215 BPM, featuring a warm and high energy sound. It feels soft and smooth with a E minor tonality.",
-        "Tags": [
-            "Energetic",
-            "warm",
-            "high energy",
-            "soft and smooth",
-            "E minor",
-            "Whale vocalization",
-            "Hammond organ",
-            "Ukulele",
-            "Music",
-            "Synthesizer"
-        ],
-        "Description": "A warm, high energy track with a Energetic tempo and a E minor tonality.",
-        "Track Type": "Instrumentals Only"
     },
     {
         "Filename": "Synth/Prologue PAD Phase - C.wav",
@@ -616,47 +515,6 @@
         "Track Type": "Instrumentals Only"
     },
     {
-        "Filename": "Synth/Prophet 5 LEAD Wavey High - C.wav",
-        "Duration": 2.33,
-        "BPM": 122.28,
-        "Key": "F minor",
-        "Vibe": "The track has a Energetic tempo at 122 BPM, featuring a bright and high energy sound. It feels soft and smooth with a F minor tonality.",
-        "Tags": [
-            "Energetic",
-            "bright",
-            "high energy",
-            "soft and smooth",
-            "F minor",
-            "Whale vocalization",
-            "Car",
-            "Music",
-            "Ukulele",
-            "Keyboard (musical)"
-        ],
-        "Description": "A bright, high energy track with a Energetic tempo and a F minor tonality."
-    },
-    {
-        "Filename": "Synth/Prophet 5 LEAD Wavey Low - C.wav",
-        "Duration": 2.13,
-        "BPM": 110.29,
-        "Key": "E minor",
-        "Vibe": "The track has a Moderate tempo at 110 BPM, featuring a warm and high energy sound. It feels soft and smooth with a E minor tonality.",
-        "Tags": [
-            "Moderate",
-            "warm",
-            "high energy",
-            "soft and smooth",
-            "E minor",
-            "Whale vocalization",
-            "Hammond organ",
-            "Ukulele",
-            "Music",
-            "Synthesizer"
-        ],
-        "Description": "A warm, high energy track with a Moderate tempo and a E minor tonality.",
-        "Track Type": "Instrumentals Only"
-    },
-    {
         "Filename": "Synth/Prophet 5 PAD Mellow - C.wav",
         "Duration": 14.71,
         "BPM": 117.19,
@@ -779,27 +637,6 @@
             "Synthesizer"
         ],
         "Description": "A warm, high energy track with a Energetic tempo and a A minor tonality.",
-        "Track Type": "Instrumentals Only"
-    },
-    {
-        "Filename": "Synth/Prophet REV2 BASS Flame - C.wav",
-        "Duration": 1.33,
-        "BPM": 120.19,
-        "Key": "E minor",
-        "Vibe": "The track has a Energetic tempo at 120 BPM, featuring a bright and high energy sound. It feels soft and smooth with a E minor tonality.",
-        "Tags": [
-            "Energetic",
-            "bright",
-            "high energy",
-            "soft and smooth",
-            "E minor",
-            "Whale vocalization",
-            "Hammond organ",
-            "Synthesizer",
-            "Ukulele",
-            "Music"
-        ],
-        "Description": "A bright, high energy track with a Energetic tempo and a E minor tonality.",
         "Track Type": "Instrumentals Only"
     },
     {
@@ -964,26 +801,6 @@
             "Conversation"
         ],
         "Description": "A bright, low energy track with a Relaxed tempo and a C# minor tonality."
-    },
-    {
-        "Filename": "Synth/Purple 155 BPM G# Min Juno-60 Chords.wav",
-        "Duration": 24.77,
-        "BPM": 38.57,
-        "Key": "C# minor",
-        "Vibe": "The track has a Relaxed tempo at 39 BPM, featuring a bright and very low energy sound. It feels soft and smooth with a C# minor tonality.",
-        "Tags": [
-            "Relaxed",
-            "bright",
-            "very low energy",
-            "soft and smooth",
-            "C# minor",
-            "Whale vocalization",
-            "xylophone",
-            "Tubular bells",
-            "Mallet percussion",
-            "Harpsichord"
-        ],
-        "Description": "A bright, very low energy track with a Relaxed tempo and a C# minor tonality."
     },
     {
         "Filename": "Synth/Purple 155 BPM G# Min Juno-60 Lead.wav",

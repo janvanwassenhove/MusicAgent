@@ -8,6 +8,7 @@
 3. [Using Music Agent](#using-music-agent)
     - [Prerequisites](#prerequisites)
     - [Installation](#installation)
+    - [Samples](#samples)
 4. [Configuration](#configuration)
 5. [Running the MusicAgent](#running-the-musicagent)
    - [Web Application](#web-application)
@@ -117,6 +118,39 @@ git clone [repository link]
 pip install -r requirements.txt
 ```
 Because of anthropic dependencies, you'll also need to install RUST: https://www.rust-lang.org/tools/install
+
+### Samples
+
+To use samples in your composition, we need a correct description of the samples. 
+This listing will be provided to our agents to be taken into account when generating new music.
+When adding new Sample packs, you can generate the metadata listing by launching the script.
+```bash 
+python SampleMedataListing.py
+```
+This will generate a JSON file with the samples metadata listing. 
+
+    {
+        "Filename": "Synth/Prophet REV2 KEYS Echo Low - C.wav",
+        "Duration": 3.2,
+        "BPM": 161.5,
+        "Key": "A minor",
+        "Vibe": "The track has a Energetic tempo at 161 BPM, featuring a warm and high energy sound. It feels soft and smooth with a A minor tonality.",
+        "Tags": [
+            "Energetic",
+            "warm",
+            "high energy",
+            "soft and smooth",
+            "A minor",
+            "Whale vocalization",
+            "Keyboard (musical)",
+            "Piano",
+            "Ukulele",
+            "Music"
+        ],
+        "Description": "A warm, high energy track with a Energetic tempo and a A minor tonality.",
+        "Track Type": "Instrumentals Only"
+    }    
+Yamnet is used to classify the samples. Read more about Yamnet in the [Yamnet README](Inc/yamnet-tensorflow2-yamnet-v1/README.md).
 
 ### Configuration
 Set **OPENAI_API_KEY** in `ArtistConfig/mITyJohn/ArtistConfig.json` if not set as a system variable.
