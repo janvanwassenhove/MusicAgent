@@ -8,7 +8,7 @@ from audiorecorder import AudioRecorder
 from songCreationData import SongCreationData
 from sonicPi import SonicPi
 from pythonosc import udp_client, dispatcher as osc_dispatcher, osc_server
-
+import tiktoken
 import json
 import os
 import requests
@@ -17,8 +17,24 @@ import re
 import threading
 import time
 import asyncio
+import datetime
+import faiss
+import numpy as np
+from sentence_transformers import SentenceTransformer
 
 class GPTAgent:
+
+    MAX_TOKENS = {
+        "gpt-4o": {"tokens": 8192, "content_length": 4096000},
+        "gpt-4o-mini": {"tokens": 4096, "content_length": 2048000},
+        "gpt-3.5-turbo": {"tokens": 4096, "content_length": 2048000},
+        "gpt-4": {"tokens": 8192, "content_length": 4096000},
+        "gpt-4-32k": {"tokens": 32768, "content_length": 16384000},
+        "claude-3-5-sonnet-20240620": {"tokens": 8192, "content_length": 4096000},
+        "claude-3-sonnet-20240229": {"tokens": 8192, "content_length": 4096000},
+        "claude-3-haiku-20240307": {"tokens": 8192, "content_length": 4096000}
+    }
+
     def __init__(self, selected_model, logger, song, agentType, api_provider):
         self.selected_model = selected_model
         self.song_creation_data = SongCreationData(logger)
@@ -28,6 +44,52 @@ class GPTAgent:
         self.agentType = agentType
         self.api_provider = api_provider
         self.input_callback = None
+        self.conversation_history = []  # Store the conversation history here
+        self.max_context_length = self.MAX_TOKENS[selected_model]["content_length"]
+
+    def log_request_response(self, provider, request_data, response_data, cost, token_count, char_count):
+        songs_dir = 'songs'
+        if not os.path.exists(songs_dir):
+            os.makedirs(songs_dir)
+        song_log_directory = os.path.join('songs', self.song.name)
+        if not os.path.exists(song_log_directory):
+            os.makedirs(song_log_directory)
+
+        log_file = os.path.join(song_log_directory, 'api_requests.log')
+
+        with open(log_file, 'a') as f:
+            f.write(f"Timestamp: {datetime.datetime.now()}\n")
+            f.write(f"Provider: {provider}\n")
+            f.write(f"Request Data: {json.dumps(request_data, indent=2)}\n")
+            f.write(f"Response Data: {json.dumps(response_data, indent=2)}\n")
+            f.write(f"Cost: {cost}\n")
+            f.write(f"Token Count: {token_count}\n")
+            f.write(f"Character Count: {char_count}\n")
+            f.write("\n" + "-"*80 + "\n\n")
+
+    def count_tokens(self, content, model):
+        encoding = tiktoken.encoding_for_model(model)
+        tokens = encoding.encode(content)
+        return len(tokens)
+
+    def check_token_limit(self, system_content, phase_prompt, model):
+        if model not in self.MAX_TOKENS:
+            print(f"Model {model} not recognized.")
+            return False
+
+        combined_content = system_content + phase_prompt
+        max_content_length = self.MAX_TOKENS[model]["content_length"]
+        if len(combined_content) > max_content_length:
+            print(f"Combined content ({combined_content}) length exceeds the maximum allowed length of {max_content_length} characters.")
+            return False
+
+        token_count = self.count_tokens(combined_content, model)
+        if token_count <= self.MAX_TOKENS[model]["tokens"]:
+            print(f"Combined content is within the token limit for {model}. Token count: {token_count}, max is {self.MAX_TOKENS[model]["tokens"]}")
+            return True
+        else:
+            print(f"Combined content exceeds the token limit for {model}. Token count: {token_count}, max is {self.MAX_TOKENS[model]["tokens"]}")
+            return False
 
     def get_user_input(self, prompt):
         if self.input_callback:
@@ -49,14 +111,16 @@ class GPTAgent:
             except (FileNotFoundError, json.JSONDecodeError) as e:
                 print(f"Error reading config file: {e}")
                 return None
-
         return api_key
 
     # Function to get assistant content from ArtistConfig
     def get_assistant_content(self, role_name, artist_config):
         for assistant in artist_config["assistants"]:
-            if role_name in assistant:
-                return assistant[role_name][0]  # Assuming single item in each role's array
+            if assistant["name"] == role_name:
+                system_instructions = "\n".join(assistant["system_instruction"])
+                if "sample_content" in assistant:
+                    self.logger.info(f"additional content")
+                return system_instructions
         return None
 
     def execute_phase(self, client, phase, song_creation_data, artist_config, phase_config):
@@ -76,6 +140,8 @@ class GPTAgent:
 
         if task_type == "chat":
             self.discussion(client, phase, song_creation_data, artist_config, phase_config)
+        elif task_type == "local_chat":
+            self.local_discussion(client, phase, song_creation_data, artist_config, phase_config)
         elif task_type == "art":
             album_cover_style = artist_config.get('artist_style')
             image_prompt = "Album cover style defined as: " + album_cover_style + " / Song on the album described as " + self.song_creation_data.song_description
@@ -115,6 +181,80 @@ class GPTAgent:
         else:
             self.logger.info("No review provided, 'review' parameter will not be set.")
 
+    def handle_anthropic_request(self, client, system_content, phase_prompt):
+        request_data = {
+            "model": self.selected_model,
+            "system": system_content,
+            "messages": [{"role": "user", "content": phase_prompt}],
+            "max_tokens": self.MAX_TOKENS[self.selected_model],
+        }
+        completion = client.messages.create(**request_data)
+        response_text = completion.content[0].text
+
+        token_count = self.count_tokens(system_content + phase_prompt, self.selected_model)
+        char_count = len(system_content + phase_prompt)
+        cost = self.calculate_cost(token_count)
+        self.log_request_response('anthropic', request_data, completion.content[0].text, cost, token_count, char_count)
+
+        return response_text
+
+    def handle_openai_request(self, client, system_content, phase_prompt, openai_messages):
+        completion = client.chat.completions.create(
+            model=self.selected_model,
+            messages=openai_messages
+        )
+        response_text = completion.choices[0].message.content
+
+        token_count = self.count_tokens(system_content + phase_prompt, self.selected_model)
+        char_count = len(system_content + phase_prompt)
+        cost = self.calculate_cost(token_count)
+
+        self.log_request_response('openai', openai_messages, completion.choices[0].message.content, cost, token_count, char_count)
+        return response_text
+
+    def local_discussion(self, client, phase, song_creation_data, artist_config, phase_config):
+        if phase not in phase_config:
+            self.logger.info(f"No configuration found for phase: {phase}")
+            return
+
+        assistant_role_name = phase_config[phase]["assistant_role_name"]
+        user_role_name = phase_config[phase]["user_role_name"]
+        phase_prompt = ''.join(phase_config[phase]["phase_prompt"])
+
+        # Replace placeholders in the prompt with actual values
+        for key, value in phase_config[phase]["input"].items():
+            param_value = song_creation_data.get_parameter(value)
+            if param_value is not None:
+                self.logger.info(f"Parameter for discussion [{key.upper()}]:[{param_value}]")
+                phase_prompt = phase_prompt.replace(f"{{{key}}}", str(param_value))
+
+        self.logger.info(
+            f"Assistant is {assistant_role_name}, questioned by {user_role_name}. \nPrompting:\n {phase_prompt}\n"
+        )
+
+        # Load the FAISS index and metadata
+        index = faiss.read_index("Samples/sample_index.faiss")
+        with open("Samples/sample_metadata.json", "r") as f:
+            metadata = json.load(f)
+
+        # Initialize the model for generating embeddings
+        model = SentenceTransformer('all-MiniLM-L6-v2')
+
+        # Generate an embedding for the query
+        query = "We are creating a new song with the following details: - Theme: Hope and transformation. - Melody: Uplifting and bright, featuring synth arpeggios and soaring lead lines. - Rhythm: A mix of syncopated strumming, dynamic shifts, and four-on-the-floor beats. - Song Structure: - Intro (20s): Soft piano, lush pads, ethereal vocal samples, progression Cmaj - Gmaj - Amin - Fmaj. - Verse 1 (30s): Acoustic guitar, rhythmic synth bass, soft percussion, progression Amin - Fmaj - Cmaj - Gmaj. - Chorus (30s): Punchy kick drum, layered synths, claps, progression Fmaj - Cmaj - Amin - Gmaj. - Solo (20s): Uplifting synth arpeggios, resonating lead synth. - Bridge (20s): Ambient pads, soft piano, counterpoint melody. The total duration is 170 seconds. Please suggest suitable samples with tags matching the mood, progression, and instrumentation described above."
+        query_embedding = model.encode(query)  # Generate embedding locally
+        query_embedding = np.array([query_embedding]).astype("float32")
+
+        # Search for the nearest neighbors
+        k = artist_config.get("samples_max", 5)  # Number of results to retrieve (reduced because of token limit)
+        self.logger.info(f"Number of samples that will be retrieved: {k}")
+        distances, indices = index.search(query_embedding, k)
+
+        results = []
+        for i in range(k):
+            results.append(metadata[indices[0][i]])
+
+        song_creation_data.samples = json.dumps(results, separators=(',', ':'))
 
     def discussion(self, client, phase, song_creation_data, artist_config, phase_config):
         if phase not in phase_config:
@@ -136,41 +276,32 @@ class GPTAgent:
             f"Assistant is {assistant_role_name}, questioned by {user_role_name}. \nPrompting:\n {phase_prompt}\n"
         )
 
-        messages = [
-            {"role": "user", "content": phase_prompt}
-        ]
+        system_content = ''
+        response_text = ''
 
-        # Fetch the system message content
-        system_content = self.get_assistant_content(assistant_role_name, artist_config)
+        for assistant in artist_config["assistants"]:
+            if assistant["name"] == assistant_role_name:
+                print(f"found assistant {assistant_role_name}")
+                system_instructions = "\n".join(assistant["system_instruction"])
+                system_content = system_instructions
 
         retry_count = 0
         max_retries = 3
         while retry_count < max_retries:
             try:
+
                 if self.api_provider == 'openai':
                     openai_messages = [
                         {"role": "system", "content": system_content},
                         {"role": "user", "content": phase_prompt}
                     ]
-
-                    completion = client.chat.completions.create(
-                        model=self.selected_model,
-                        messages=openai_messages
-                    )
-                    response_text = completion.choices[0].message.content
+                    if self.check_token_limit(system_content, phase_prompt, self.selected_model):
+                        response_text = self.handle_openai_request(client, system_content, phase_prompt, openai_messages)
 
                 elif self.api_provider == 'anthropic':  # Anthropic
-                    completion = client.messages.create(
-                        model=self.selected_model,
-                        system=system_content,  # Use top-level 'system' parameter in case of Anthropic
-                        messages=messages,
-                        max_tokens=4096,
-                    )
-                    response_text = completion.content[0].text
+                    if self.check_token_limit(system_content, phase_prompt, self.selected_model):
+                        response_text = self.handle_anthropic_request(client, system_content, phase_prompt)
 
-#                 self.logger.info(
-#                     f"\Assistant is {assistant_role_name}, questioned by {user_role_name}. \nPrompting:\n {phase_prompt}\n"
-#                 )
                 phase_prompt_single_line = phase_prompt.replace('\n', ' ')
                 self.logger.info(f"[Questioner]({user_role_name}):[[{phase_prompt_single_line}]]")
                 response_text_single_line = response_text.replace('\n', ' ')
@@ -251,7 +382,6 @@ class GPTAgent:
             self.logger.info("Start marker not found for 'sonicpi_code'")
         return False
 
-
     def execute_composition_chain(self, genre, duration, additional_information):
         with open('AgentConfig/'+self.agentType+'/MusicCreationPhaseConfig.json') as file:
             phase_config = json.load(file)
@@ -306,7 +436,7 @@ class GPTAgent:
             prompt=prompt,
             n=1,
             size="1024x1024",
-            quality="standard",
+            quality="standard", # hd
         )
 
         # Extract image URL from response
@@ -345,6 +475,33 @@ class GPTAgent:
         else:
             self.logger.info("Failed to download image")
 
+    def calculate_cost(self, token_count):
+        pricing = {
+            'openai': {
+                'gpt-4o': 0.0001,
+                'gpt-4o-mini': 0.00005,
+                'gpt-3.5-turbo': 0.00002,
+                'gpt-4': 0.0002,
+                'gpt-4-32k': 0.0004
+            },
+            'anthropic': {
+                'claude-3-5-sonnet-20240620': 0.00015,
+                'claude-3-sonnet-20240229': 0.0001,
+                'claude-3-haiku-20240307': 0.00005
+            }
+        }
+
+        provider_pricing = pricing.get(self.api_provider, {})
+        model_pricing = provider_pricing.get(self.selected_model, 0.0001)  # Default to 0.0001 if not found
+        return token_count * model_pricing
+
+    def get_image_type(self, image_content):
+        try:
+            with Image.open(image_content) as img:
+                return img.format  # Returns the image format (e.g., 'JPEG', 'PNG')
+        except Exception as e:
+            print(f"Error: {e}")
+            return None
 
     def run_sonic_pi_script(self, song, artist_config):
         sonic_pi = SonicPi(self.logger)

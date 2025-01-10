@@ -17,6 +17,10 @@
       "phaseType": "SimplePhase"
     },
     {
+      "phase": "Sampling",
+      "phaseType": "SimplePhase"
+    },
+    {
       "phase": "Initial Song Coding",
       "phaseType": "SimplePhase"
     },
@@ -24,7 +28,7 @@
     {
       "phase": "Song Code Review",
       "phaseType": "ComposedPhase",
-      "cycleNum": 5,
+      "cycleNum": 2,
       "Composition": [
         {
           "phase": "Code Review",

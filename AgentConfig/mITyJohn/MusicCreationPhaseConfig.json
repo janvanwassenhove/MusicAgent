@@ -61,7 +61,7 @@
       "Given this information determine the duration of the different segments in the songs. Segments are based on the song structure. ",
       "Provide a response in JSON format with separate field for segments. The json fields segments holds the information on the segements.",
       "The response should be formatted as a JSON-compatible string, ready to be parsed. ",
-      "Please provide the response in strict JSON format without any additional text, explanations, or comments. The JSON should include fields for \"lyrics\" and \"structure\", with each section properly formatted as a JSON object.\n",
+      "Please provide the response in strict JSON format without any additional text, explanations, or comments. The JSON should include a field for \"segments\", with each section properly formatted as a JSON object.\n",
       "Here is an example of the expected JSON format:\n{\n  \"segments\": \"Intro - Verse 1 - Chorus - Verse 2 - Chorus - Solo - Bridge - Chorus - Outro\"\n}\nPlease ensure your response follows this structure.\n"
     ],
     "input": {
@@ -92,7 +92,7 @@
       "Try to arrange multiple instruments to get a fuller sound across the song.",
       "Provide a response in JSON format with a separate field for arrangements. The response should be formatted as a JSON-compatible string, ready to be parsed. ",
       "The response should be formatted as a JSON-compatible string, ready to be parsed. ",
-      "Please provide the response in strict JSON format without any additional text, explanations, or comments. The JSON should include fields for \"lyrics\" and \"structure\", with each section properly formatted as a JSON object.\n"
+      "Please provide the response in strict JSON format without any additional text, explanations, or comments. The JSON should include fields for \"arrangements\", with each section properly formatted as a JSON object.\n"
     ],
     "input": {
       "type" : "chat",
@@ -108,6 +108,26 @@
       "arrangements": "arrangements"
     }
   },
+  "Sampling": {
+    "type" : "local_chat",
+    "assistant_role_name": "Arranger",
+    "user_role_name": "Composer",
+    "phase_prompt": [
+      "The theme ois {theme}. ",
+      "The melody is described as: {melody}. ",
+      "Rhythm elements include: {rhythm}. ",
+      "The arrangements are: {arrangements}."
+    ],
+    "input": {
+      "type" : "local_chat",
+      "theme": "theme",
+      "melody": "melody",
+      "arrangements": "arrangements"
+    },
+    "outcome": {
+      "samples": "samples"
+    }
+  },
   "Initial Song Coding": {
     "type" : "chat",
     "assistant_role_name":"Sonic PI coder",
@@ -116,19 +136,25 @@
       "We are developing a song using SONIC PI.",
       "The melody is defined as: {melody}.",
       "Rhythm: {rhythm}.",
-      "The structure of the song is defined as {structure}.",
+      "The structure of the song is defined as: {structure}.",
       "The song has to have a total duration of {total_duration} seconds.",
       "The song is divided into different segments with their own individual timings (in seconds): {segments}.",
       "For the complete song, as for the individual segments, the following arrangements were defined: {arrangements}.",
-      "Given this information, code the song using the Sonic PI programming language.",
-      "Please generate Sonic Pi code that plays a continuous, fluent melody with no silent gaps or separate blocks, but without using live loops (instead you can use e.g. in_thread or sync).",
-      "Instead, use other techniques such as functions, threads, sleeps, and timed sequences to manage the flow and ensure that the total duration of the song does not exceed {total_duration} seconds.",
-      "The composition should feel complete and cohesive, with a consistent tempo and flow.",
-      "Translate the arrangements within the limitations (instruments, samples, etc.) of Sonic Pi and aim to play multiple instruments in parallel where possible to achieve a fuller sound.",
-      "Provide a response in JSON format with a separate field for 'sonicpi_code'. This field should hold the complete Sonic Pi code (written in Ruby).",
-      "The response should be formatted as a JSON-compatible string, ready to be parsed. Please format the response like this: {\"sonicpi_code\": \"<complete code here>\"}",
-      "Do not include additional text, explanations, or comments outside of the JSON format.",
-      "Ensure the generated Sonic Pi code adheres strictly to the provided total duration, rhythm, and structure constraints."
+      "You can use the following additional samples (external to Sonic Pi) that match the mood, progression, and instrumentation described above: {samples}.",
+      "**GIVEN THIS INFORMATION, CODE THE SONG USING THE SONIC PI PROGRAMMING LANGUAGE.**",
+      "\n**KEY REQUIREMENTS:**",
+      "1. **PARALLEL INSTRUMENTATION**: During key segments (e.g., verses, choruses, solos), ensure multiple instruments (e.g., melody, bassline, chords, and drum patterns) are **PLAYED SIMULTANEOUSLY** to create a **FULLER, RICHER SOUND**.",
+      "2. **BACKGROUND CONTINUITY**: Ensure background elements like drum patterns, recurring beats, or basslines **RUN CONTINUOUSLY** during segments to support the main melody or chords.",
+      "3. **DYNAMIC LAYERING**: During segments such as the **CHORUS**, introduce additional layers (e.g., harmony, effects like reverb or distortion, or more complex rhythms) to enhance the sound.",
+      "4. **NO SILENT GAPS**: The song must have a **CONTINUOUS, FLUENT MELODY** with no silent gaps or separate blocks.",
+      "5. **AVOID LIVE LOOPS**: Do not use live loops. Instead, use techniques like `in_thread`, `sync`, `sleep`, and timed sequences to manage the flow.",
+      "6. **TRANSLATION OF ARRANGEMENTS**: Translate the arrangements within the limitations of Sonic Pi, balancing instruments and effects effectively for each segment.",
+      "\nThe composition should feel complete and cohesive, with a consistent tempo and flow.",
+      "Provide a response in JSON format with a separate field for 'sonicpi_code'.",
+      "The 'sonicpi_code' field should hold the complete Sonic Pi code (written in Ruby).",
+      "The response should be formatted as a JSON-compatible string, ready to be parsed. Format the response like this: {\"sonicpi_code\": \"<complete code here>\"}.",
+      "**DO NOT** include any additional text, explanations, or comments outside of the JSON format.",
+      "**ENSURE** the generated Sonic Pi code adheres strictly to the provided total duration, rhythm, and structure constraints."
     ],
     "input": {
       "theme": "theme",
@@ -137,7 +163,8 @@
       "structure": "structure",
       "total_duration": "total_duration",
       "segments": "segments",
-      "arrangements": "arrangements"
+      "arrangements": "arrangements",
+      "samples": "samples"
     },
     "outcome": {
       "sonicpi_code": "sonicpi_code"
@@ -149,28 +176,29 @@
     "assistant_role_name":"Sonic PI reviewer",
     "user_role_name": "Sonic PI coder",
     "phase_prompt": [
-      "We have following Sonic PI code: {sonicpi_code}.",
-      "The initial demand was to code a song using Sonic PI programming language. ",
-      "Therefore following requirements were provided:",
-      "1) The melody: {melody}; ",
-      "2) Rhythm: {rhythm};",
-      "3) Song structure: {structure};",
-      "4) Total duration: {total_duration} seconds;",
-      "5) The song is divided in different segments with their own individual timings (in seconds): {segments};",
-      "6) For the complete song, as for the individual segments, following arrangements were defined: {arrangements};",
-      "Review the code regarding following regulations:",
-      "1) The script uses correct sonic pi code. ",
-      "2) All methods should be implemented; Verify for phrases in style of \"# Apply\", \"Add code here\", \"arrangement goes here\" or \"Sonic Pi code for\" or other references that mention code still should be implemented;",
-      "3) The total_duration of the song is approximately {total_duration} seconds; ",
-      "4) no potential bugs; ",
-      "5) check for # Add code patterns , if this is the case code still needs to be implemented on these places and the song won't work; ",
-      "6) most importantly, do not only check the errors in the code, but also the logic of code. Make sure that the song is coded without losing any feature of the requirements.",
-      "Provide a response in JSON format with separate field for review. The review field is a single string field.",
-      "The review provides clear instructions on the corrections that need to be made.",
-      "The review will be used to correct the code, only provide a review if the code needs to be corrected, else return the review field as \"no further code changes are required\". ",
-      "The response should be formatted as a JSON-compatible string, ready to be parsed. Please format the response like this: {\"review\": \"<complete review here>\"}",
-      "The response should be formatted as a JSON-compatible string, ready to be parsed. ",
-      "Please provide the response in strict JSON format without any additional text, explanations, or comments. The JSON should include fields for \"lyrics\" and \"structure\", with each section properly formatted as a JSON object.\n"
+      "We have the following Sonic PI code: {sonicpi_code}.",
+      "The initial requirement was to code a song using the Sonic PI programming language.",
+      "The following requirements were provided for the code:",
+      "1) **Melody**: {melody};",
+      "2) **Rhythm**: {rhythm};",
+      "3) **Song structure**: {structure};",
+      "4) **Total duration**: {total_duration} seconds;",
+      "5) **Segments**: The song is divided into different segments with their own individual timings (in seconds): {segments};",
+      "6) **Arrangements**: For the complete song and its individual segments, the following arrangements were defined: {arrangements};",
+      "7) **Additional Samples**: You can use the following additional samples (external to Sonic Pi) that match the mood, progression, and instrumentation described above: {samples}.",
+      "Review the code against the following criteria:",
+      "1) **Sonic Pi Code Validity**: Verify that the script uses correct Sonic Pi code syntax and is free of errors.",
+      "2) **Implementation Completeness**: Ensure all methods and functions are fully implemented. Check for placeholder phrases like \"# Apply\", \"# Add code here\", \"# Arrangement goes here\", or similar comments that indicate incomplete code.",
+      "3) **Duration Compliance**: Confirm that the total duration of the song is approximately {total_duration} seconds, as specified.",
+      "4) **Bug-Free**: Ensure there are no potential bugs in the code that would prevent it from running as intended.",
+      "5) **Logic Validation**: Beyond syntax, evaluate the logic of the code. Verify that it meets the requirements without losing any features, such as playing multiple instruments in parallel or adhering to the provided arrangements and structure.",
+      "6) **Placeholder Detection**: Check for patterns like \"# Add code\" or similar placeholders that indicate incomplete code. If found, note that these sections must be implemented to make the song functional.",
+      "Provide a response in **JSON format** with a single field for \"review\". The review should:",
+      "1) Provide clear and actionable instructions for correcting any issues found in the code.",
+      "2) If no corrections are needed, return the review field as: \"no further code changes are required\".",
+      "3) Be formatted as a JSON-compatible string, ready to be parsed. The format should be as follows: {\"review\": \"<complete review here>\"}.",
+      "DO NOT include any additional text, explanations, or comments outside of the JSON format.",
+      "Ensure the JSON strictly includes only the \"review\" field, properly formatted and containing either the necessary corrections or the statement \"no further code changes are required\"."
     ],
     "input": {
       "theme": "theme",
@@ -180,6 +208,7 @@
       "total_duration": "total_duration",
       "segments": "segments",
       "arrangements": "arrangements",
+      "samples": "samples",
       "sonicpi_code": "sonicpi_code"
     },
     "outcome": {
@@ -191,22 +220,23 @@
     "assistant_role_name":"Sonic PI coder",
     "user_role_name": "Sonic PI reviewer",
     "phase_prompt": [
-      "We have following Sonic PI code {sonicpi_code} . ",
-      "The code was reviewed with following comments: {review}. ",
+      "We have the following Sonic PI code: {sonicpi_code}.",
+      "The code was reviewed with the following comments: {review}.",
       "The initial requirements were defined as follows:",
-      "1) The melody: {melody}; ",
-      "2) Rhythm: {rhythm};",
-      "3) Song structure: {structure};",
-      "4) Total duration: {total_duration} seconds;",
-      "5) The song is divided in different segments with their own individual timings (in seconds): {segments};",
-      "6) For the complete song, as for the individual segments, following arrangements were defined: {arrangements};",
-      "Correct the code according to the review. ",
-      "If according to the review \"no further code changes are required\", keep the code an return the complete code unchanged. ",
-      "Provide a response in JSON format with separate field for sonicpi_code. This field holds the complete sonic pi code.",
-      "In the sonicpi_code field, you should return the complete sonic pi code (not only the revised code, but the entire song code, written in ruby). Make sure you output the complete code and not only parts.",
-      "The response should be formatted as a JSON-compatible string, ready to be parsed. Please format the response like this: {\"sonicpi_code\": \"<complete code here>\"}",
-      "The response should be formatted as a JSON-compatible string, ready to be parsed. ",
-      "Please provide the response in strict JSON format without any additional text, explanations, or comments. The JSON should include fields for \"lyrics\" and \"structure\", with each section properly formatted as a JSON object.\n"
+      "1) **Melody**: {melody};",
+      "2) **Rhythm**: {rhythm};",
+      "3) **Song structure**: {structure};",
+      "4) **Total duration**: {total_duration} seconds;",
+      "5) **Segments**: The song is divided into different segments with their own individual timings (in seconds): {segments};",
+      "6) **Arrangements**: For the complete song, as well as its individual segments, the following arrangements were defined: {arrangements};",
+      "7) **Additional Samples**: You can use the following additional samples (external to Sonic Pi) that match the mood, progression, and instrumentation described above: {samples}.",
+      "Modify the code according to the provided review comments.",
+      "If the review states \"no further code changes are required\", keep the code unchanged and return the complete code as it is.",
+      "Your task is to ensure the final code adheres to the initial requirements and resolves all issues or suggestions mentioned in the review.",
+      "Provide a response in **JSON format** with a single field for \"sonicpi_code\". This field must contain the **entire Sonic Pi code** (not just the revisions or parts, but the full code for the entire song written in Ruby).",
+      "The response should be formatted as a JSON-compatible string, ready to be parsed. Format it as follows: {\"sonicpi_code\": \"<complete code here>\"}.",
+      "Do not include any additional text, explanations, or comments outside of the JSON format.",
+      "Ensure the JSON strictly includes only the \"sonicpi_code\" field, properly formatted and containing the final, complete code."
     ],
     "input": {
       "theme": "theme",
@@ -216,6 +246,7 @@
       "total_duration": "total_duration",
       "segments": "segments",
       "arrangements": "arrangements",
+      "samples": "samples",
       "sonicpi_code": "sonicpi_code",
       "review": "review"
     },
@@ -229,22 +260,27 @@
     "assistant_role_name":"Sonic PI Mix Engineer",
     "user_role_name": "Sonic PI coder",
     "phase_prompt": [
-      "We have following Sonic PI code {sonicpi_code}. As ",
-      "As a MIX engineer you make sure the song is setup correctly. ",
-      "Make sure the song has a total duration of: {total_duration} seconds;",
-      "Verify the different segments with their own individual timings (in seconds): {segments};",
-      "For the complete song, as for the individual segments, following arrangements were defined: {arrangements};",
-      "Validate and correct if needed the sonic pi code so it answers to these criteria. Also make sure intro fades in and outro fades out.",
-      "Provide a response in JSON format with separate field for sonicpi_code. This field holds the complete script of sonic pi code.",
-      "In the sonicpi_code field, you should return the complete sonic pi code (not only the revised code, but the entire song code). Make sure you output the complete code (written in ruby) and not only parts.",
-      "The response should be formatted as a JSON-compatible string, ready to be parsed. Please format the response like this: {\"sonicpi_code\": \"<complete code here>\"}",
-      "The response should be formatted as a JSON-compatible string, ready to be parsed. ",
-      "Please provide the response in strict JSON format without any additional text, explanations, or comments. The JSON should include fields for \"lyrics\" and \"structure\", with each section properly formatted as a JSON object.\n"
+      "We have the following Sonic PI code: {sonicpi_code}.",
+      "As a MIX engineer, your task is to ensure the song is set up and mixed correctly.",
+      "The song must meet the following criteria:",
+      "1) **Total Duration**: The song should have a total duration of: {total_duration} seconds.",
+      "2) **Segment Timing**: Verify that the song is divided into the defined segments with their own individual timings (in seconds): {segments}.",
+      "3) **Arrangements**: Ensure that the arrangements for the complete song and its segments match the provided details: {arrangements}.",
+      "4) **Continuous Playback**: Ensure the song plays smoothly, without any gaps between or within segments. Overlap or sustain instruments and effects (e.g., reverb, delay) to create seamless transitions between sections.",
+      "5) **Layering**: Verify that multiple instruments (e.g., melody, chords, drum patterns) are layered correctly during segments to create a fuller, richer sound.",
+      "6) **Intro and Outro**: Ensure the intro fades in smoothly and the outro fades out seamlessly. Use techniques like gradually increasing or decreasing volume or applying effects (e.g., fade envelopes).",
+      "7) **Samples**: Incorporate the additional samples (external to Sonic Pi) that match the mood, progression, and instrumentation described above: {samples}.",
+      "If the song does not meet these criteria, validate and correct the Sonic PI code to fix these issues.",
+      "Provide a response in **JSON format** with a single field for \"sonicpi_code\". This field must contain the **entire Sonic Pi code** (not just the revisions or parts, but the full code for the entire song written in Ruby).",
+      "The response should be formatted as a JSON-compatible string, ready to be parsed. Format it as follows: {\"sonicpi_code\": \"<complete code here>\"}.",
+      "DO NOT include any additional text, explanations, or comments outside of the JSON format.",
+      "Ensure the JSON strictly includes only the \"sonicpi_code\" field, properly formatted and containing the final, complete code."
     ],
     "input": {
       "total_duration": "total_duration",
       "segments": "segments",
       "arrangements": "arrangements",
+      "samples": "samples",
       "sonicpi_code": "sonicpi_code"
     },
     "outcome": {

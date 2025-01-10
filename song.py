@@ -2,6 +2,10 @@
 This file contains the Song class that represents a song and handles the creation of the song file.
 '''
 import os
+import re
+
+from typing_extensions import final
+
 from songCreationData import SongCreationData
 class Song:
     def __init__(self, name, logger):
@@ -29,14 +33,22 @@ class Song:
         if not song_creation_data.sonicpi_code.startswith(header):
             song_creation_data.sonicpi_code = header + song_creation_data.sonicpi_code
 
+        # Full path samples in the sonic pi code for song (excluded from parameter to avoid sending to openai, anthropic, ...)
+        project_directory = os.path.join(os.getcwd(), "Samples")
+        finalcode = re.sub(
+            r'sample\s+"([^"]+)"',
+            lambda match: f'sample "{os.path.normpath(f"{project_directory}/{match.group(1)}").replace("\\", "\\\\")}"',
+            song_creation_data.sonicpi_code
+        )
+
         self.song_dir = song_directory
         self.logger.info("Writing song to directory: " + self.song_dir)
-        self.logger.info("sonic pi code " + song_creation_data.sonicpi_code)
+        self.logger.info("sonic pi code " + finalcode)
 
         # Create the song file
         song_file = os.path.join(self.song_dir, self.name + '.rb')
         with open(song_file, 'w') as f:
-            f.write(song_creation_data.sonicpi_code)
+            f.write(finalcode)
 
     def create_readme_file(self, song_creation_data):
         readme_file = os.path.join(self.song_dir, 'README.md')

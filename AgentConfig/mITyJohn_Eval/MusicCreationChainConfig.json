@@ -17,13 +17,17 @@
       "phaseType": "SimplePhase"
     },
     {
+      "phase": "Sampling",
+      "phaseType": "SimplePhase"
+    },
+    {
       "phase": "Initial Song Coding",
       "phaseType": "SimplePhase"
     },
     {
       "phase": "Human Review",
       "phaseType": "ComposedPhase",
-      "cycleNum": 2,
+      "cycleNum": 3,
       "Composition": [
         {
           "phase": "Human Review",

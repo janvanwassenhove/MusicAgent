@@ -17,6 +17,10 @@
       "phaseType": "SimplePhase"
     },
     {
+      "phase": "Sampling",
+      "phaseType": "SimplePhase"
+    },
+    {
       "phase": "Initial Song Coding",
       "phaseType": "SimplePhase"
     },

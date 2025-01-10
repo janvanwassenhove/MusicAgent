@@ -79,7 +79,7 @@ The eventual output is a booklet with an album cover (optionally a recording dep
 ### Prerequisites
 
 - **Sonic Pi:** Must be installed on your system (needed to run the *.rb files): https://sonic-pi.net/
-- **Python** Must be installed on your machine
+- **Python** Must be installed on your machine (Currently MusicAgent supports v12)
 
 #### Model API
 
@@ -195,6 +195,42 @@ MusicAgent will generate the following in the songs folder in a subdirectory cal
 If you're using [mITyJohn_Full](AgentConfig%2FmITyJohn_Full) configuration when running the agent, and your recording device is correctly configured (only on windows currently), a recording will be made automatically.
 
 
+## Sample Creation
+
+To use sample in you composition, we need  a correct description of the samples. 
+This listing will be provided to or agents to be taken into account when generating new music.
+
+Samples listing can be added by launching the  script.
+This will generate a JSON file with the samples listing in the correct format.
+
+```bash
+python SampleMedataListing.py
+```
+Example Listing
+```bash
+    {
+        "Filename": "C:\\...\\Melody Loop - 110 BPM E Min.wav",
+        "Duration": 8.73,
+        "BPM": 109.96,
+        "Vibe": "The track has a Moderate tempo at 110 BPM, featuring a warm and high energy sound. It feels soft and smooth with a A minor tonality.",
+        "Key": "A",
+        "Tags": [
+            "Moderate",
+            "warm",
+            "high energy",
+            "soft and smooth",
+            "A minor",
+            "Whale vocalization",
+            "Hammond organ",
+            "Ukulele",
+            "Opera",
+            "Music"
+        ],
+        "Description": "A warm, high energy track with a Moderate tempo and a A minor tonality."
+    }
+```
+For Metadata generation, Yamnet is used to classify the samples. 
+For more information on Yamnet, please refer to the [Yamnet README](Inc/yamnet-tensorflow2-yamnet-v1/README.md).
 
 ## About
 

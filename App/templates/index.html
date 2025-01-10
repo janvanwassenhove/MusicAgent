@@ -82,7 +82,9 @@
                     </div>
                     <div class="col-md-6 mb-3 ">
                         <label for="additional_information" class="form-label ">How do you imagine your song?</label>
-                        <textarea v-model="formData.additional_information" id="additional_information" class="form-control" :class="{'is-invalid': errors.additional_information}"></textarea>
+                        <textarea v-model="formData.additional_information" id="additional_information" class="form-control"
+                                  :class="{'is-invalid': errors.additional_information}"
+                                  placeholder="The track opens with a rich, atmospheric intro, blending soft ambient pads with subtle rhythmic clicks that evolve into a groovy, energetic beat. The song transitions into a dynamic arrangement, combining uplifting melodies with deep basslines, creating a captivating interplay of light and intensity. The middle section introduces a vocal chop or melodic hook that becomes the centerpiece of the track. The bridge brings a stripped-back moment, offering a reflective pause before a climactic, high-energy finale. The overall mood is empowering and celebratory, perfect for a vibrant dance floor or a driving anthem."></textarea>
                         <div class="invalid-feedback" v-if="errors.additional_information" v-text="errors.additional_information"></div>
                     </div>
                     <div class="col-md-6 mb-3 justify-content-end  d-flex align-items-end">
@@ -528,7 +530,7 @@
                 const contentContainer = document.getElementById('sonicPiCodeContent');
 
                 if (!tabsContainer || !contentContainer) {
-                    console.error('Tabs or content container not found in the DOM.');
+                    console.debug('Tabs or content container not found in the DOM.');
                     return; // Exit the function if elements are not found
                 }
 
