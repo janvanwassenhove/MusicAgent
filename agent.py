@@ -31,7 +31,7 @@ class GPTAgent:
         "gpt-4": {"tokens": 8192, "content_length": 4096000},
         "gpt-4-32k": {"tokens": 32768, "content_length": 16384000},
         "claude-3-5-sonnet-20240620": {"tokens": 8192, "content_length": 4096000},
-        "claude-3-sonnet-20240229": {"tokens": 8192, "content_length": 4096000},
+        "claude-3-sonnet-20240307": {"tokens": 8192, "content_length": 4096000},
         "claude-3-haiku-20240307": {"tokens": 8192, "content_length": 4096000}
     }
 
@@ -68,7 +68,10 @@ class GPTAgent:
             f.write("\n" + "-"*80 + "\n\n")
 
     def count_tokens(self, content, model):
-        encoding = tiktoken.encoding_for_model(model)
+        try:
+            encoding = tiktoken.encoding_for_model(model)
+        except KeyError:
+            encoding = tiktoken.get_encoding("o200k_base")
         tokens = encoding.encode(content)
         return len(tokens)
 
@@ -186,7 +189,7 @@ class GPTAgent:
             "model": self.selected_model,
             "system": system_content,
             "messages": [{"role": "user", "content": phase_prompt}],
-            "max_tokens": self.MAX_TOKENS[self.selected_model],
+            "max_tokens": self.MAX_TOKENS[self.selected_model]["tokens"]
         }
         completion = client.messages.create(**request_data)
         response_text = completion.content[0].text
