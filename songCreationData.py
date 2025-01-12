@@ -13,6 +13,7 @@ class SongCreationData:
         self.review = ""
         self.album_url = ""
         self.logger = logger
+        self.samples = ""
 
     def set_parameter(self, param_name, value):
         if hasattr(self, param_name):

@@ -8,6 +8,7 @@
 3. [Using Music Agent](#using-music-agent)
     - [Prerequisites](#prerequisites)
     - [Installation](#installation)
+    - [Samples](#samples)
 4. [Configuration](#configuration)
 5. [Running the MusicAgent](#running-the-musicagent)
    - [Web Application](#web-application)
@@ -48,6 +49,8 @@ Different roles are defined in [ArtistConfig.json](AgentConfig/mITyJohn/ArtistCo
 - Master Engineer
 - Music Publisher
 
+The JSON definition for artist configuration can be found in [ArtistConfig.json](Assets/AgentConfig/ArtistConfig.json)
+
 ![Music Agent Flow](Assets/ma_flow.png)
 
 All roles take there part in different phases of composing a song.
@@ -79,7 +82,7 @@ The eventual output is a booklet with an album cover (optionally a recording dep
 ### Prerequisites
 
 - **Sonic Pi:** Must be installed on your system (needed to run the *.rb files): https://sonic-pi.net/
-- **Python** Must be installed on your machine
+- **Python** Must be installed on your machine (Currently MusicAgent supports v12)
 
 #### Model API
 
@@ -117,6 +120,43 @@ git clone [repository link]
 pip install -r requirements.txt
 ```
 Because of anthropic dependencies, you'll also need to install RUST: https://www.rust-lang.org/tools/install
+
+### Samples
+
+New samples can be added to the `Samples` folder. 
+The folder already consists of a base set, but can be easily extended by dropping new sample files in this folder depending on your flavour and needs.
+
+To use samples in your composition, we need a correct description of the samples. 
+This listing will be provided to our agents to be taken into account when generating new music.
+
+When adding new Sample packs, you can regenerate the metadata listing by launching the script:
+```bash 
+python SampleMedataListing.py
+```
+This will generate a JSON file with the samples metadata listing. 
+
+    {
+        "Filename": "Synth/Prophet REV2 KEYS Echo Low - C.wav",
+        "Duration": 3.2,
+        "BPM": 161.5,
+        "Key": "A minor",
+        "Vibe": "The track has a Energetic tempo at 161 BPM, featuring a warm and high energy sound. It feels soft and smooth with a A minor tonality.",
+        "Tags": [
+            "Energetic",
+            "warm",
+            "high energy",
+            "soft and smooth",
+            "A minor",
+            "Whale vocalization",
+            "Keyboard (musical)",
+            "Piano",
+            "Ukulele",
+            "Music"
+        ],
+        "Description": "A warm, high energy track with a Energetic tempo and a A minor tonality.",
+        "Track Type": "Instrumentals Only"
+    }    
+Yamnet is used to classify the samples. Read more about Yamnet in the [Yamnet README](Inc/yamnet-tensorflow2-yamnet-v1/README.md).
 
 ### Configuration
 Set **OPENAI_API_KEY** in `ArtistConfig/mITyJohn/ArtistConfig.json` if not set as a system variable.
@@ -195,6 +235,42 @@ MusicAgent will generate the following in the songs folder in a subdirectory cal
 If you're using [mITyJohn_Full](AgentConfig%2FmITyJohn_Full) configuration when running the agent, and your recording device is correctly configured (only on windows currently), a recording will be made automatically.
 
 
+## Sample Creation
+
+To use sample in you composition, we need  a correct description of the samples. 
+This listing will be provided to or agents to be taken into account when generating new music.
+
+Samples listing can be added by launching the  script.
+This will generate a JSON file with the samples listing in the correct format.
+
+```bash
+python SampleMedataListing.py
+```
+Example Listing
+```bash
+    {
+        "Filename": "C:\\...\\Melody Loop - 110 BPM E Min.wav",
+        "Duration": 8.73,
+        "BPM": 109.96,
+        "Vibe": "The track has a Moderate tempo at 110 BPM, featuring a warm and high energy sound. It feels soft and smooth with a A minor tonality.",
+        "Key": "A",
+        "Tags": [
+            "Moderate",
+            "warm",
+            "high energy",
+            "soft and smooth",
+            "A minor",
+            "Whale vocalization",
+            "Hammond organ",
+            "Ukulele",
+            "Opera",
+            "Music"
+        ],
+        "Description": "A warm, high energy track with a Moderate tempo and a A minor tonality."
+    }
+```
+For Metadata generation, Yamnet is used to classify the samples. 
+For more information on Yamnet, please refer to the [Yamnet README](Inc/yamnet-tensorflow2-yamnet-v1/README.md).
 
 ## About
 

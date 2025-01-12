@@ -1,0 +1,14 @@
+[
+    {
+        "subfolder": "Bass",
+        "file_location": "Samples/Bass/Bass_metadata.json"
+    },
+    {
+        "subfolder": "House",
+        "file_location": "Samples/House/House_metadata.json"
+    },
+    {
+        "subfolder": "Synth",
+        "file_location": "Samples/Synth/Synth_metadata.json"
+    }
+]

@@ -1,38 +1,166 @@
 {
-  "structures": [
-    {"id": 1, "name": "Verse-Chorus (common in POP music)", "definition":"Verse - Chorus - Verse - Chorus - Bridge - Chorus", "duration": 180},
-    {"id": 2, "name": "Verse-Chorus-Bridge (Like in Rock Music)", "definition": "Intro - Verse - Chorus - Verse - Chorus - Solo - Bridge - Chorus - Outro","duration": 150},
-    {"id": 3, "name": "Storytelling (Like in Folk Music)", "definition":"Intro - Verse - Verse - Chorus - Verse - Verse - Chorus - Outro", "duration": 160},
-    {"id": 4, "name": "Complex (often used for Heavy Metal)", "definition":"Intro - Verse - Chorus - Verse - Chorus - Bridge - Solo - Chorus - Outro", "duration": 120},
-    {"id": 5, "name": "Simple and Fast", "definition":"Intro - Verse - Chorus - Verse - Chorus - Solo - Chorus - Outro", "duration": 120},
-    {"id": 6, "name": "Verse-Chorus with Bridge (e.g. in R1B or soul)", "definition":"Verse - Chorus - Verse - Chorus - Bridge - Chorus - Outro", "duration": 180},
-    {"id": 7, "name": "Verse-Break-Verse (e.g. as in Hip-Hop and Rap)", "definition":"Intro - Verse - Hook - Verse - Hook - Bridge - Hook - Outro", "duration": 140},
-    {"id": 8, "name": "Sonata (more in classical music)", "definition":"Exposition - Development - Recapitulation", "duration": 180},
-    {"id": 9, "name": "Head-Solos-Head Structure (common in jazz)", "definition":"Head - Solo 1 - Solo 2 - Solo 3 - Head", "duration": 210},
-    {"id": 10, "name": "12-Bar Blues", "definition":"A repeating 12-bar pattern, for example: AAB pattern where each section is 4 bars, with a specific chord progression.", "duration": 180},
-    {"id": 11, "name": "Electronic Dance Music (EDM)", "definition":"Head - Solo 1 - Solo 2 - Solo 3 - Head", "duration": 240},
-    {"id": 12, "name": "Groove-Centric", "definition":"Intro - Verse - Chorus - Verse - Chorus - Bridge - Chorus - Outro" , "duration": 180},
-    {"id": 13, "name": "Dance-Focused", "definition":"Intro - Verse - Chorus - Verse - Chorus - Bridge - Instrumental - Chorus - Outro" , "duration": 180},
-    {"id": 14, "name": "Varied (like in Indie Rock)", "definition":"Intro - Verse - Pre-Chorus - Chorus - Verse - Pre-Chorus - Chorus - Bridge - Chorus - Outro" , "duration": 180},
-    {"id": 15, "name": "Textural (like in ambient)", "definition":"Slow Evolution - Climax - Slow Decline" , "duration": 180},
-    {"id": 16, "name": "Custom", "definition":"intro-verse-bridge-intro-bridge-intro-chorus-melody-verse-chorus-bridge-chorus-chorus-melody-outro-chorus-bridge-chorus-melody-outro" , "duration": 180}
-  ],
-  "genres": [
-    {"id": 1, "genre": "Rock"},
-    {"id": 2, "genre": "Grunge"},
-    {"id": 3, "genre": "Dance"},
-    {"id": 4, "genre": "Elektro"},
-    {"id": 5, "genre": "Drum & Bass"},
-    {"id": 6, "genre": "New Wave"},
-    {"id": 7, "genre": "Gothic"},
-    {"id": 8, "genre": "Punk"},
-    {"id": 9, "genre": "Psychedelic"},
-    {"id": 10, "genre": "Pop"},
-    {"id": 11, "genre": "Reggae"},
-    {"id": 12, "genre": "Disco"},
-    {"id": 13, "genre": "Ambient"},
-    {"id": 14, "genre": "Indie Rock"},
-    {"id": 15, "genre": "Heavy Metal"},
-    {"id": 16, "genre": "Trance"}
-  ]
+    "structures": [
+        {
+            "id": 1,
+            "name": "Verse-Chorus (common in POP music)",
+            "definition": "Verse - Chorus - Verse - Chorus - Bridge - Chorus",
+            "duration": 180
+        },
+        {
+            "id": 2,
+            "name": "Verse-Chorus-Bridge (Like in Rock Music)",
+            "definition": "Intro - Verse - Chorus - Verse - Chorus - Solo - Bridge - Chorus - Outro",
+            "duration": 150
+        },
+        {
+            "id": 3,
+            "name": "Storytelling (Like in Folk Music)",
+            "definition": "Intro - Verse - Verse - Chorus - Verse - Verse - Chorus - Outro",
+            "duration": 160
+        },
+        {
+            "id": 4,
+            "name": "Complex (often used for Heavy Metal)",
+            "definition": "Intro - Verse - Chorus - Verse - Chorus - Bridge - Solo - Chorus - Outro",
+            "duration": 120
+        },
+        {
+            "id": 5,
+            "name": "Simple and Fast",
+            "definition": "Intro - Verse - Chorus - Verse - Chorus - Solo - Chorus - Outro",
+            "duration": 120
+        },
+        {
+            "id": 6,
+            "name": "Verse-Chorus with Bridge (e.g. in R1B or soul)",
+            "definition": "Verse - Chorus - Verse - Chorus - Bridge - Chorus - Outro",
+            "duration": 180
+        },
+        {
+            "id": 7,
+            "name": "Verse-Break-Verse (e.g. as in Hip-Hop and Rap)",
+            "definition": "Intro - Verse - Hook - Verse - Hook - Bridge - Hook - Outro",
+            "duration": 140
+        },
+        {
+            "id": 8,
+            "name": "Sonata (more in classical music)",
+            "definition": "Exposition - Development - Recapitulation",
+            "duration": 180
+        },
+        {
+            "id": 9,
+            "name": "Head-Solos-Head Structure (common in jazz)",
+            "definition": "Head - Solo 1 - Solo 2 - Solo 3 - Head",
+            "duration": 210
+        },
+        {
+            "id": 10,
+            "name": "12-Bar Blues",
+            "definition": "A repeating 12-bar pattern, for example: AAB pattern where each section is 4 bars, with a specific chord progression.",
+            "duration": 180
+        },
+        {
+            "id": 11,
+            "name": "Electronic Dance Music (EDM)",
+            "definition": "Head - Solo 1 - Solo 2 - Solo 3 - Head",
+            "duration": 240
+        },
+        {
+            "id": 12,
+            "name": "Groove-Centric",
+            "definition": "Intro - Verse - Chorus - Verse - Chorus - Bridge - Chorus - Outro",
+            "duration": 180
+        },
+        {
+            "id": 13,
+            "name": "Dance-Focused",
+            "definition": "Intro - Verse - Chorus - Verse - Chorus - Bridge - Instrumental - Chorus - Outro",
+            "duration": 180
+        },
+        {
+            "id": 14,
+            "name": "Varied (like in Indie Rock)",
+            "definition": "Intro - Verse - Pre-Chorus - Chorus - Verse - Pre-Chorus - Chorus - Bridge - Chorus - Outro",
+            "duration": 180
+        },
+        {
+            "id": 15,
+            "name": "Textural (like in ambient)",
+            "definition": "Slow Evolution - Climax - Slow Decline",
+            "duration": 180
+        },
+        {
+            "id": 16,
+            "name": "Custom",
+            "definition": "intro-verse-bridge-intro-bridge-intro-chorus-melody-verse-chorus-bridge-chorus-chorus-melody-outro-chorus-bridge-chorus-melody-outro",
+            "duration": 180
+        }
+    ],
+    "genres": [
+        {
+            "id": 1,
+            "genre": "Rock"
+        },
+        {
+            "id": 2,
+            "genre": "Grunge"
+        },
+        {
+            "id": 3,
+            "genre": "Dance"
+        },
+        {
+            "id": 4,
+            "genre": "Elektro"
+        },
+        {
+            "id": 5,
+            "genre": "Drum & Bass"
+        },
+        {
+            "id": 6,
+            "genre": "New Wave"
+        },
+        {
+            "id": 7,
+            "genre": "Gothic"
+        },
+        {
+            "id": 8,
+            "genre": "Punk"
+        },
+        {
+            "id": 9,
+            "genre": "Psychedelic"
+        },
+        {
+            "id": 10,
+            "genre": "Pop"
+        },
+        {
+            "id": 11,
+            "genre": "Reggae"
+        },
+        {
+            "id": 12,
+            "genre": "Disco"
+        },
+        {
+            "id": 13,
+            "genre": "Ambient"
+        },
+        {
+            "id": 14,
+            "genre": "Indie Rock"
+        },
+        {
+            "id": 15,
+            "genre": "Heavy Metal"
+        },
+        {
+            "id": 16,
+            "genre": "Trance"
+        }
+    ]
 }

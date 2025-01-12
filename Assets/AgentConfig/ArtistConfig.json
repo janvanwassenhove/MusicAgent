@@ -1,0 +1,91 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Schema definition for a music agent configuration file.",
+  "properties": {
+    "OPENAI_API_KEY": {
+      "type": "string",
+      "description": "The API key for accessing OpenAI's services (if not defined as an environment variable)."
+    },
+    "ANTHROPIC_API_KEY": {
+      "type": "string",
+      "description": "The API key for accessing Anthropic's services (if not defined as an environment variable)."
+    },
+    "agent_name": {
+      "type": "string",
+      "description": "The name of the music agent."
+    },
+    "description": {
+      "type": "string",
+      "description": "A detailed description of the music agent's functionality and usage instructions."
+    },
+    "artist_style": {
+      "type": "string",
+      "description": "The preferred artistic style for compositions (e.g., retro, vintage, etc.)."
+    },
+    "sonic_pi_IP": {
+      "type": "string",
+      "format": "ipv4",
+      "description": "The IP address of the Sonic Pi server."
+    },
+    "sonic_pi_port": {
+      "type": "string",
+      "pattern": "^[0-9]+$",
+      "description": "The port number used to communicate with the Sonic Pi server."
+    },
+    "samples_max": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "The maximum number of samples allowed for the music agent to process during on step (limited because of character & token limitation). A max will be defined based on the given input using SentenceTransformer('all-MiniLM-L6-v2')."
+    },
+    "assistants": {
+      "type": "array",
+      "description": "List of assistant roles and their corresponding instructions.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the assistant role."
+          },
+          "system_instruction": {
+            "type": "array",
+            "description": "The instructions or tasks assigned to this assistant to provide a dedicated context (and improve prompt results).",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["name", "system_instruction"]
+      }
+    },
+    "genres": {
+      "type": "array",
+      "description": "List of available music genres.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "The unique identifier for the genre."
+          },
+          "genre": {
+            "type": "string",
+            "description": "The name of the music genre."
+          }
+        },
+        "required": ["id", "genre"]
+      }
+    }
+  },
+  "required": [
+    "OPENAI_API_KEY",
+    "ANTHROPIC_API_KEY",
+    "agent_name",
+    "artist_style",
+    "sonic_pi_IP",
+    "sonic_pi_port",
+    "samples_max",
+    "assistants"
+  ]
+}
