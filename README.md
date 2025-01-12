@@ -123,9 +123,13 @@ Because of anthropic dependencies, you'll also need to install RUST: https://www
 
 ### Samples
 
+New samples can be added to the `Samples` folder. 
+The folder already consists of a base set, but can be easily extended by dropping new sample files in this folder depending on your flavour and needs.
+
 To use samples in your composition, we need a correct description of the samples. 
 This listing will be provided to our agents to be taken into account when generating new music.
-When adding new Sample packs, you can generate the metadata listing by launching the script.
+
+When adding new Sample packs, you can regenerate the metadata listing by launching the script:
 ```bash 
 python SampleMedataListing.py
 ```
