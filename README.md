@@ -49,6 +49,8 @@ Different roles are defined in [ArtistConfig.json](AgentConfig/mITyJohn/ArtistCo
 - Master Engineer
 - Music Publisher
 
+The JSON definition for artist configuration can be found in [ArtistConfig.json](Assets/AgentConfig/ArtistConfig.json)
+
 ![Music Agent Flow](Assets/ma_flow.png)
 
 All roles take there part in different phases of composing a song.
