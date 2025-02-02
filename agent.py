@@ -235,9 +235,16 @@ class GPTAgent:
             f"Assistant is {assistant_role_name}, questioned by {user_role_name}. \nPrompting:\n {phase_prompt}\n"
         )
 
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        project_root = current_dir  # Set project_root to the current directory
+
+        # Correct the path to the FAISS index file
+        faiss_index_path = os.path.join(project_root, 'Samples', 'sample_index.faiss')
+        metadata_path = os.path.join(project_root, 'Samples', 'sample_metadata.json')
+
         # Load the FAISS index and metadata
-        index = faiss.read_index("Samples/sample_index.faiss")
-        with open("Samples/sample_metadata.json", "r") as f:
+        index = faiss.read_index(faiss_index_path)
+        with open(metadata_path, "r") as f:
             metadata = json.load(f)
 
         # Initialize the model for generating embeddings
@@ -386,11 +393,14 @@ class GPTAgent:
         return False
 
     def execute_composition_chain(self, genre, duration, additional_information):
-        with open('AgentConfig/'+self.agentType+'/MusicCreationPhaseConfig.json') as file:
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        project_root = current_dir
+
+        with open(os.path.join(project_root, 'AgentConfig', self.agentType, 'MusicCreationPhaseConfig.json')) as file:
             phase_config = json.load(file)
-        with open('AgentConfig/'+self.agentType+'/MusicCreationChainConfig.json') as file:
+        with open(os.path.join(project_root, 'AgentConfig', self.agentType, 'MusicCreationChainConfig.json')) as file:
             compose_chain_config = json.load(file)
-        with open('AgentConfig/'+self.agentType+'/ArtistConfig.json') as file:
+        with open(os.path.join(project_root, 'AgentConfig', self.agentType, 'ArtistConfig.json')) as file:
             artist_config = json.load(file)
 
         if self.api_provider == 'openai':

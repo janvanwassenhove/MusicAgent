@@ -1,277 +1,277 @@
 /* General Theme Colors */
 body {
-    background-color: #1A4731; /* White background */
-    color: #000000; /* Black text color */
+    background-color: #1A4731 !important; /* White background */
+    color: #000000 !important; /* Black text color */
 }
 
 .main_container {
-    background-color: #FFFFFF;
-    border-top-left-radius: 15px; /* Rounded top left corner */
-    border-top-right-radius: 15px; /* Rounded top right corner */
+    background-color: #FFFFFF !important;
+    border-top-left-radius: 15px !important; /* Rounded top left corner */
+    border-top-right-radius: 15px !important; /* Rounded top right corner */
 }
 
 .footer_container {
-    border-bottom-left-radius: 15px; /* Rounded top left corner */
-    border-bottom-right-radius: 15px; /* Rounded top right corner */
+    border-bottom-left-radius: 15px !important; /* Rounded top left corner */
+    border-bottom-right-radius: 15px !important; /* Rounded top right corner */
 }
 
 /* Navbar Customization */
 .navbar {
-    background-color: #1A4731; /* Dark Green */
-    color: #FFFFFF; /* White text */
+    background-color: #1A4731 !important; /* Dark Green */
+    color: #FFFFFF !important; /* White text */
 }
 
 .navbar a {
-    color: #FFA500; /* Orange links */
+    color: #FFA500 !important; /* Orange links */
 }
 
 .navbar a:hover {
-    color: #FFFFFF; /* White on hover */
+    color: #FFFFFF !important; /* White on hover */
 }
 
 /* Buttons */
 .btn-primary {
-    background-color: #FFA500; /* Orange background */
-    border-color: #FFA500; /* Orange border */
-    color: #000000; /* Black text */
+    background-color: #FFA500 !important; /* Orange background */
+    border-color: #FFA500 !important; /* Orange border */
+    color: #000000 !important; /* Black text */
 }
 
 .btn-primary:hover {
-    background-color: #1A4731; /* Dark Green on hover */
-    border-color: #1A4731; /* Dark Green border */
-    color: #FFFFFF; /* White text */
+    background-color: #1A4731 !important; /* Dark Green on hover */
+    border-color: #1A4731 !important; /* Dark Green border */
+    color: #FFFFFF !important; /* White text */
 }
 
 /* Footer */
 .footer {
-    background-color: #1A4731; /* Dark Green background */
-    color: #FFFFFF; /* White text */
+    background-color: #1A4731 !important; /* Dark Green background */
+    color: #FFFFFF !important; /* White text */
 }
 
 /* Headings */
 h1, h2, h3, h4, h5, h6 {
-    color: #1A4731; /* Dark Green */
+    color: #1A4731 !important; /* Dark Green */
 }
 
 /* Links */
 a {
-    color: #1A4731; /* Orange */
+    color: #1A4731 !important; /* Orange */
 }
 
 a:hover {
-    color: #1A4731; /* Dark Green on hover */
+    color: #1A4731 !important; /* Dark Green on hover */
 }
 
 .bg-primary {
-    background-color: #1A4731;
+    background-color: #1A4731 !important;
 }
 
 :root {
-    --bs-primary-rgb: 0, 100, 0; /* Green */
+    --bs-primary-rgb: 0, 100, 0 !important; /* Green */
 }
 
 /* Badges */
 .badge {
-    background-color: #1A4731; /* Dark Green background */
-    color: #fff; /* White text */
+    background-color: #1A4731 !important; /* Dark Green background */
+    color: #fff !important; /* White text */
 }
 
 .badge-warning {
-    background-color: #FFA500; /* Orange background */
-    color: #000000; /* Black text */
+    background-color: #FFA500 !important; /* Orange background */
+    color: #000000 !important; /* Black text */
 }
 
 #chats {
-    height: 400px;
-    overflow-y: auto;
-    border: 1px solid #ccc;
-    padding: 10px;
-    margin-top: 20px;
-    background-color: #f3dac1;
-    border-radius: 8px;
+    height: 400px !important;
+    overflow-y: auto !important;
+    border: 1px solid #ccc !important;
+    padding: 10px !important;
+    margin-top: 20px !important;
+    background-color: #f3dac1 !important;
+    border-radius: 8px !important;
 }
 
 .chat-message {
-    display: flex;
-    align-items: start;
-    margin-bottom: 1rem;
+    display: flex !important;
+    align-items: start !important;
+    margin-bottom: 1rem !important;
 }
 
 .chat-image {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
+    width: 50px !important;
+    height: 50px !important;
+    border-radius: 50% !important;
 }
 
 .chat-text {
-    background-color: #f1f1f1;
-    border-radius: 10px;
-    padding: 10px;
-    max-width: 80%;
+    background-color: #f1f1f1 !important;
+    border-radius: 10px !important;
+    padding: 10px !important;
+    max-width: 80% !important;
 }
 
 #log {
-    height: 300px;
-    overflow-y: auto;
-    border: 1px solid #ccc;
-    padding: 10px;
+    height: 300px !important;
+    overflow-y: auto !important;
+    border: 1px solid #ccc !important;
+    padding: 10px !important;
     margin-top: 20px
 }
 .cli-log {
-    background-color: #000;
-    color: #ffffff;
-    font-family: 'Courier New', Courier, monospace;
-    padding: 10px;
-    border-radius: 5px;
-    height: 300px;
-    overflow-y: auto;
+    background-color: #000 !important;
+    color: #ffffff !important;
+    font-family: 'Courier New', Courier, monospace !important;
+    padding: 10px !important;
+    border-radius: 5px !important;
+    height: 300px !important;
+    overflow-y: auto !important;
 }
 
 .cli-log pre {
-    margin: 0;
-    white-space: pre-wrap;
-    word-wrap: break-word;
+    margin: 0 !important;
+    white-space: pre-wrap !important;
+    word-wrap: break-word !important;
 }
 
 .cli-log code {
-    color: inherit;
-    background-color: transparent;
-    padding: 0;
+    color: inherit !important;
+    background-color: transparent !important;
+    padding: 0 !important;
 }
 
 .cli-log span {
-    display: block;
-    line-height: 1.5;
+    display: block !important;
+    line-height: 1.5 !important;
 }
 
 /* Add a blinking cursor effect */
 .cli-log pre::after {
-    content: '█';
-    animation: blink 1s step-end infinite;
+    content: '█' !important;
+    animation: blink 1s step-end infinite !important;
 }
 
 @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
+    0%, 100% { opacity: 1 !important; }
+    50% { opacity: 0 !important; }
 }
 
 .json-textarea {
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 14px;
-    line-height: 1.5;
-    white-space: pre;
-    overflow-wrap: normal;
-    overflow-x: auto;
-    background-color: #f8f9fa;
-    color: #212529;
-    border: 1px solid #ced4da;
-    border-radius: 0.25rem;
-    padding: 0.5rem;
+    font-family: 'Courier New', Courier, monospace !important;
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+    white-space: pre !important;
+    overflow-wrap: normal !important;
+    overflow-x: auto !important;
+    background-color: #f8f9fa !important;
+    color: #212529 !important;
+    border: 1px solid #ced4da !important;
+    border-radius: 0.25rem !important;
+    padding: 0.5rem !important;
 }
 
 .json-textarea:focus {
-    outline: none;
-    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
-    border-color: #80bdff;
+    outline: none !important;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25) !important;
+    border-color: #80bdff !important;
 }
 
 .sonic-pi-code {
-    background-color: #000000; /* Dark background similar to Sonic Pi IDE */
-    color: #f8f8f2; /* Light text */
-    padding: 16px;
-    border-radius: 8px;
-    font-family: 'Courier New', Courier, monospace; /* Monospace font */
-    overflow-x: auto;
+    background-color: #000000 !important; /* Dark background similar to Sonic Pi IDE */
+    color: #f8f8f2 !important; /* Light text */
+    padding: 16px !important;
+    border-radius: 8px !important;
+    font-family: 'Courier New', Courier, monospace !important; /* Monospace font */
+    overflow-x: auto !important;
 }
 .sonic-pi-code code {
-    color: #f8f8f2; /* Ensuring code text is light */
+    color: #f8f8f2 !important; /* Ensuring code text is light */
 }
 
 .sonic-pi-code pre {
-    margin: 0;
+    margin: 0 !important;
 }
 .sonic-pi-code .keyword {
-    color: #fff;
+    color: #fff !important;
 }
 .sonic-pi-code .function {
-    color: #ea1b8f;
+    color: #ea1b8f !important;
 }
 .sonic-pi-code .number {
-    color: #4a6ff4;
+    color: #4a6ff4 !important;
 }
 .sonic-pi-code .comment {
-    color: #79887a;
-    font-style: italic;
+    color: #79887a !important;
+    font-style: italic !important;
 }
 .sonic-pi-code .doend {
-    color: #ffe007;
+    color: #ffe007 !important;
 }
 
 .code-container {
-    position: relative;
+    position: relative !important;
 }
 
 .copy-icon{
-    position: absolute;
-    top: 10px; /* Adjust as needed */
-    right: 10px; /* Adjust as needed */
-    display: none; /* Hidden by default */
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1.2em; /* Adjust size as needed */
-    color: #ffffff; /* Change color as needed */
-    z-index: 10; /* Ensure the icon is above other elements */
+    position: absolute !important;
+    top: 10px !important; /* Adjust as needed */
+    right: 10px !important; /* Adjust as needed */
+    display: none !important; /* Hidden by default */
+    background: none !important;
+    border: none !important;
+    cursor: pointer !important;
+    font-size: 1.2em !important; /* Adjust size as needed */
+    color: #ffffff !important; /* Change color as needed */
+    z-index: 10 !important; /* Ensure the icon is above other elements */
 }
 
 .send-icon {
-    position: absolute;
-    top: 10px; /* Adjust as needed */
-    right: 40px; /* Adjust as needed */
-    display: none; /* Hidden by default */
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1.2em; /* Adjust size as needed */
-    color: #ffffff; /* Change color as needed */
-    z-index: 10; /* Ensure the icon is above other elements */
+    position: absolute !important;
+    top: 10px !important; /* Adjust as needed */
+    right: 40px !important; /* Adjust as needed */
+    display: none !important; /* Hidden by default */
+    background: none !important;
+    border: none !important;
+    cursor: pointer !important;
+    font-size: 1.2em !important; /* Adjust size as needed */
+    color: #ffffff !important; /* Change color as needed */
+    z-index: 10 !important; /* Ensure the icon is above other elements */
 }
 
 .code-container:hover .copy-icon {
-    display: block; /* Show on hover */
+    display: block !important; /* Show on hover */
 }
 
 .code-container:hover .send-icon {
-    display: block; /* Show on hover */
+    display: block !important; /* Show on hover */
 }
 
 
 .tab-pane {
-    max-height: 400px; /* Limit the height to 400 pixels */
-    overflow-y: auto; /* Show vertical scrollbar if content exceeds the height */
+    max-height: 400px !important; /* Limit the height to 400 pixels */
+    overflow-y: auto !important; /* Show vertical scrollbar if content exceeds the height */
 }
 
 /* For WebKit browsers (Chrome, Safari) */
 .tab-pane::-webkit-scrollbar {
-    width: 8px; /* Width of the scrollbar */
-    background-color: #f1f1f1; /* Background color of the scrollbar track */
+    width: 8px !important; /* Width of the scrollbar */
+    background-color: #f1f1f1 !important; /* Background color of the scrollbar track */
 }
 
 .tab-pane::-webkit-scrollbar-thumb {
-    background-color: #555; /* Color of the scrollbar thumb */
-    border-radius: 10px; /* Rounded corners for the scrollbar thumb */
+    background-color: #555 !important; /* Color of the scrollbar thumb */
+    border-radius: 10px !important; /* Rounded corners for the scrollbar thumb */
 }
 
 .tab-pane::-webkit-scrollbar-thumb:hover {
-    background-color: #333; /* Darker color on hover */
+    background-color: #333 !important; /* Darker color on hover */
 }
 
 /* For Firefox */
 .tab-pane {
-    scrollbar-width: thin; /* Make scrollbar thin */
-    scrollbar-color: #555 #f1f1f1; /* Thumb color and track color */
+    scrollbar-width: thin !important; /* Make scrollbar thin */
+    scrollbar-color: #555 #f1f1f1 !important; /* Thumb color and track color */
 }
 
 .nav-link{
-    font-family: inherit;
+    font-family: inherit !important;
 }

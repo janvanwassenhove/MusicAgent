@@ -73,7 +73,7 @@ class Song:
         )
 
         # Write the content to README.md
-        with open(readme_file, 'w') as file:
+        with open(readme_file, 'w', encoding='utf-8') as file:
             file.write(readme_content)
 
 

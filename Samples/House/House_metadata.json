@@ -1,5 +1,87 @@
 [
     {
+        "Filename": "House/1 2 3 Spanish - 128 BPM.wav",
+        "Duration": 3.75,
+        "BPM": 139.67,
+        "Key": "E minor",
+        "Vibe": "The track has a Energetic tempo at 140 BPM, featuring a warm and low energy sound. It feels soft and smooth with a E minor tonality.",
+        "Tags": [
+            "Energetic",
+            "warm",
+            "low energy",
+            "soft and smooth",
+            "E minor",
+            "Crunch",
+            "display_name",
+            "Whale vocalization",
+            "Pulse",
+            "Conversation"
+        ],
+        "Description": "A warm, low energy track with a Energetic tempo and a E minor tonality."
+    },
+    {
+        "Filename": "House/Arp Loop 12 - 128 BPM Dmin.wav",
+        "Duration": 7.5,
+        "BPM": 129.2,
+        "Key": "A minor",
+        "Vibe": "The track has a Energetic tempo at 129 BPM, featuring a bright and high energy sound. It feels soft and smooth with a A minor tonality.",
+        "Tags": [
+            "Energetic",
+            "bright",
+            "high energy",
+            "soft and smooth",
+            "A minor",
+            "Whale vocalization",
+            "Chirp tone",
+            "Sidetone",
+            "Lullaby",
+            "Ukulele"
+        ],
+        "Description": "A bright, high energy track with a Energetic tempo and a A minor tonality."
+    },
+    {
+        "Filename": "House/Arp Loop 13 - 128 BPM Dmin.wav",
+        "Duration": 7.5,
+        "BPM": 129.2,
+        "Key": "D minor",
+        "Vibe": "The track has a Energetic tempo at 129 BPM, featuring a warm and high energy sound. It feels soft and smooth with a D minor tonality.",
+        "Tags": [
+            "Energetic",
+            "warm",
+            "high energy",
+            "soft and smooth",
+            "D minor",
+            "Whale vocalization",
+            "Opera",
+            "House music",
+            "Ambient music",
+            "Techno"
+        ],
+        "Description": "A warm, high energy track with a Energetic tempo and a D minor tonality.",
+        "Track Type": "Vocals Only"
+    },
+    {
+        "Filename": "House/Arp Loop 32 - 128 BPM Emin.wav",
+        "Duration": 15.0,
+        "BPM": 129.2,
+        "Key": "D minor",
+        "Vibe": "The track has a Energetic tempo at 129 BPM, featuring a warm and high energy sound. It feels soft and smooth with a D minor tonality.",
+        "Tags": [
+            "Energetic",
+            "warm",
+            "high energy",
+            "soft and smooth",
+            "D minor",
+            "Whale vocalization",
+            "Opera",
+            "Drum and bass",
+            "House music",
+            "Hammond organ"
+        ],
+        "Description": "A warm, high energy track with a Energetic tempo and a D minor tonality.",
+        "Track Type": "Vocals Only"
+    },
+    {
         "Filename": "House/Bass House Loop 11 - 128 BPM F.wav",
         "Duration": 15.0,
         "BPM": 129.2,
@@ -63,6 +145,87 @@
         "Track Type": "Instrumentals Only"
     },
     {
+        "Filename": "House/Crash 18.wav",
+        "Duration": 2.74,
+        "BPM": 234.91,
+        "Key": "G# minor",
+        "Vibe": "The track has a Energetic tempo at 235 BPM, featuring a bright and low energy sound. It feels soft and smooth with a G# minor tonality.",
+        "Tags": [
+            "Energetic",
+            "bright",
+            "low energy",
+            "soft and smooth",
+            "G# minor",
+            "Whale vocalization",
+            "Tabla",
+            "Opera",
+            "Music",
+            "Chirp tone"
+        ],
+        "Description": "A bright, low energy track with a Energetic tempo and a G# minor tonality.",
+        "Track Type": "Vocals Only"
+    },
+    {
+        "Filename": "House/Crash 23.wav",
+        "Duration": 3.0,
+        "BPM": 39.45,
+        "Key": "F# minor",
+        "Vibe": "The track has a Relaxed tempo at 39 BPM, featuring a bright and low energy sound. It feels soft and smooth with a F# minor tonality.",
+        "Tags": [
+            "Relaxed",
+            "bright",
+            "low energy",
+            "soft and smooth",
+            "F# minor",
+            "Whale vocalization",
+            "Drum kit",
+            "Harpsichord",
+            "Music",
+            "Percussion"
+        ],
+        "Description": "A bright, low energy track with a Relaxed tempo and a F# minor tonality."
+    },
+    {
+        "Filename": "House/Crash 8.wav",
+        "Duration": 0.94,
+        "BPM": 200.89,
+        "Key": "D# minor",
+        "Vibe": "The track has a Energetic tempo at 201 BPM, featuring a bright and high energy sound. It feels intense and punchy with a D# minor tonality.",
+        "Tags": [
+            "Energetic",
+            "bright",
+            "high energy",
+            "intense and punchy",
+            "D# minor",
+            "Whale vocalization",
+            "Harpsichord",
+            "Tabla",
+            "Cymbal",
+            "Music"
+        ],
+        "Description": "A bright, high energy track with a Energetic tempo and a D# minor tonality."
+    },
+    {
+        "Filename": "House/Drum Buildup 1 - 128 BPM.wav",
+        "Duration": 15.0,
+        "BPM": 129.2,
+        "Key": "D# minor",
+        "Vibe": "The track has a Energetic tempo at 129 BPM, featuring a bright and high energy sound. It feels soft and smooth with a D# minor tonality.",
+        "Tags": [
+            "Energetic",
+            "bright",
+            "high energy",
+            "soft and smooth",
+            "D# minor",
+            "Run",
+            "Arrow",
+            "Fire",
+            "Sonar",
+            "Gurgling"
+        ],
+        "Description": "A bright, high energy track with a Energetic tempo and a D# minor tonality."
+    },
+    {
         "Filename": "House/Drum Buildup 21 - 128 BPM.wav",
         "Duration": 15.0,
         "BPM": 129.2,
@@ -81,6 +244,27 @@
             "Boom"
         ],
         "Description": "A bright, high energy track with a Energetic tempo and a D minor tonality."
+    },
+    {
+        "Filename": "House/Drum Buildup 3 - 128 BPM.wav",
+        "Duration": 15.0,
+        "BPM": 129.2,
+        "Key": "D# minor",
+        "Vibe": "The track has a Energetic tempo at 129 BPM, featuring a bright and high energy sound. It feels soft and smooth with a D# minor tonality.",
+        "Tags": [
+            "Energetic",
+            "bright",
+            "high energy",
+            "soft and smooth",
+            "D# minor",
+            "Whale vocalization",
+            "Opera",
+            "Electronic music",
+            "Chirp tone",
+            "Electronica"
+        ],
+        "Description": "A bright, high energy track with a Energetic tempo and a D# minor tonality.",
+        "Track Type": "Vocals Only"
     },
     {
         "Filename": "House/Drum Buildup 57 - 128 BPM.wav",
@@ -121,6 +305,46 @@
             "Music"
         ],
         "Description": "A bright, high energy track with a Energetic tempo and a F minor tonality."
+    },
+    {
+        "Filename": "House/Future House Loop 14 - 124 BPM Fmin.wav",
+        "Duration": 15.48,
+        "BPM": 82.03,
+        "Key": "A# minor",
+        "Vibe": "The track has a Relaxed tempo at 82 BPM, featuring a bright and high energy sound. It feels intense and punchy with a A# minor tonality.",
+        "Tags": [
+            "Relaxed",
+            "bright",
+            "high energy",
+            "intense and punchy",
+            "A# minor",
+            "Whale vocalization",
+            "Hum",
+            "Ping",
+            "Lullaby",
+            "Sidetone"
+        ],
+        "Description": "A bright, high energy track with a Relaxed tempo and a A# minor tonality."
+    },
+    {
+        "Filename": "House/Future House Loop 3 - 128 BPM Dmin.wav",
+        "Duration": 15.0,
+        "BPM": 84.72,
+        "Key": "D minor",
+        "Vibe": "The track has a Relaxed tempo at 85 BPM, featuring a bright and high energy sound. It feels intense and punchy with a D minor tonality.",
+        "Tags": [
+            "Relaxed",
+            "bright",
+            "high energy",
+            "intense and punchy",
+            "D minor",
+            "Whale vocalization",
+            "Drum kit",
+            "Harpsichord",
+            "Percussion",
+            "Hammond organ"
+        ],
+        "Description": "A bright, high energy track with a Relaxed tempo and a D minor tonality."
     },
     {
         "Filename": "House/G House Drop Loop 1 - 124 BPM D# Min.wav",
@@ -490,6 +714,46 @@
         "Track Type": "Vocals Only"
     },
     {
+        "Filename": "House/House Crash 2.wav",
+        "Duration": 2.81,
+        "BPM": 84.72,
+        "Key": "D minor",
+        "Vibe": "The track has a Relaxed tempo at 85 BPM, featuring a bright and low energy sound. It feels soft and smooth with a D minor tonality.",
+        "Tags": [
+            "Relaxed",
+            "bright",
+            "low energy",
+            "soft and smooth",
+            "D minor",
+            "Meow",
+            "Fill (with liquid)",
+            "Pulse",
+            "surf",
+            "Shatter"
+        ],
+        "Description": "A bright, low energy track with a Relaxed tempo and a D minor tonality."
+    },
+    {
+        "Filename": "House/House Crash 3.wav",
+        "Duration": 2.51,
+        "BPM": 79.51,
+        "Key": "A minor",
+        "Vibe": "The track has a Relaxed tempo at 80 BPM, featuring a bright and low energy sound. It feels soft and smooth with a A minor tonality.",
+        "Tags": [
+            "Relaxed",
+            "bright",
+            "low energy",
+            "soft and smooth",
+            "A minor",
+            "Meow",
+            "surf",
+            "Croak",
+            "Harpsichord",
+            "Pulse"
+        ],
+        "Description": "A bright, low energy track with a Relaxed tempo and a A minor tonality."
+    },
+    {
         "Filename": "House/House Drop Loop 1 - Bass House - 128 BPM D Min.wav",
         "Duration": 7.5,
         "BPM": 129.2,
@@ -715,6 +979,271 @@
         "Description": "A warm, low energy track with a Energetic tempo and a F minor tonality."
     },
     {
+        "Filename": "House/House Piano Loop 2 - 128 BPM E Min.wav",
+        "Duration": 15.0,
+        "BPM": 129.2,
+        "Key": "E minor",
+        "Vibe": "The track has a Energetic tempo at 129 BPM, featuring a warm and high energy sound. It feels soft and smooth with a E minor tonality.",
+        "Tags": [
+            "Energetic",
+            "warm",
+            "high energy",
+            "soft and smooth",
+            "E minor",
+            "Whale vocalization",
+            "Keyboard (musical)",
+            "Ukulele",
+            "Piano",
+            "Music"
+        ],
+        "Description": "A warm, high energy track with a Energetic tempo and a E minor tonality.",
+        "Track Type": "Instrumentals Only"
+    },
+    {
+        "Filename": "House/House Piano Loop 3 - 128 BPM F Min.wav",
+        "Duration": 15.0,
+        "BPM": 103.36,
+        "Key": "F minor",
+        "Vibe": "The track has a Moderate tempo at 103 BPM, featuring a warm and high energy sound. It feels soft and smooth with a F minor tonality.",
+        "Tags": [
+            "Moderate",
+            "warm",
+            "high energy",
+            "soft and smooth",
+            "F minor",
+            "Whale vocalization",
+            "Jingle (music)",
+            "Music",
+            "Opera",
+            "Ukulele"
+        ],
+        "Description": "A warm, high energy track with a Moderate tempo and a F minor tonality.",
+        "Track Type": "Vocals Only"
+    },
+    {
+        "Filename": "House/House Ride 1.wav",
+        "Duration": 0.94,
+        "BPM": 120.19,
+        "Key": "A minor",
+        "Vibe": "The track has a Energetic tempo at 120 BPM, featuring a bright and low energy sound. It feels soft and smooth with a A minor tonality.",
+        "Tags": [
+            "Energetic",
+            "bright",
+            "low energy",
+            "soft and smooth",
+            "A minor",
+            "Car",
+            "Writing",
+            "smoke alarm",
+            "Whale vocalization",
+            "Pulse"
+        ],
+        "Description": "A bright, low energy track with a Energetic tempo and a A minor tonality."
+    },
+    {
+        "Filename": "House/House Ride 3.wav",
+        "Duration": 0.94,
+        "BPM": 172.27,
+        "Key": "A minor",
+        "Vibe": "The track has a Energetic tempo at 172 BPM, featuring a bright and high energy sound. It feels soft and smooth with a A minor tonality.",
+        "Tags": [
+            "Energetic",
+            "bright",
+            "high energy",
+            "soft and smooth",
+            "A minor",
+            "Whale vocalization",
+            "Ping",
+            "Music",
+            "Chirp tone",
+            "Harp"
+        ],
+        "Description": "A bright, high energy track with a Energetic tempo and a A minor tonality."
+    },
+    {
+        "Filename": "House/House Riser 2 - 128 BPM E.wav",
+        "Duration": 15.0,
+        "BPM": 120.19,
+        "Key": "B minor",
+        "Vibe": "The track has a Energetic tempo at 120 BPM, featuring a bright and high energy sound. It feels soft and smooth with a B minor tonality.",
+        "Tags": [
+            "Energetic",
+            "bright",
+            "high energy",
+            "soft and smooth",
+            "B minor",
+            "Whale vocalization",
+            "urban or manmade",
+            "Crackle",
+            "Car",
+            "public space"
+        ],
+        "Description": "A bright, high energy track with a Energetic tempo and a B minor tonality."
+    },
+    {
+        "Filename": "House/House Riser 3 - 128 BPM F.wav",
+        "Duration": 15.0,
+        "BPM": 129.2,
+        "Key": "A# minor",
+        "Vibe": "The track has a Energetic tempo at 129 BPM, featuring a bright and high energy sound. It feels soft and smooth with a A# minor tonality.",
+        "Tags": [
+            "Energetic",
+            "bright",
+            "high energy",
+            "soft and smooth",
+            "A# minor",
+            "Whale vocalization",
+            "Opera",
+            "Electronica",
+            "House music",
+            "Electronic music"
+        ],
+        "Description": "A bright, high energy track with a Energetic tempo and a A# minor tonality.",
+        "Track Type": "Vocals Only"
+    },
+    {
+        "Filename": "House/House String Loop 2 - 128 BPM F# Min.wav",
+        "Duration": 15.0,
+        "BPM": 84.72,
+        "Key": "F# minor",
+        "Vibe": "The track has a Relaxed tempo at 85 BPM, featuring a warm and high energy sound. It feels soft and smooth with a F# minor tonality.",
+        "Tags": [
+            "Relaxed",
+            "warm",
+            "high energy",
+            "soft and smooth",
+            "F# minor",
+            "Whale vocalization",
+            "Pizzicato",
+            "Trombone",
+            "Music",
+            "Cello"
+        ],
+        "Description": "A warm, high energy track with a Relaxed tempo and a F# minor tonality."
+    },
+    {
+        "Filename": "House/House String Loop 3 - 128 BPM A# Min.wav",
+        "Duration": 15.0,
+        "BPM": 86.13,
+        "Key": "A# minor",
+        "Vibe": "The track has a Relaxed tempo at 86 BPM, featuring a warm and high energy sound. It feels soft and smooth with a A# minor tonality.",
+        "Tags": [
+            "Relaxed",
+            "warm",
+            "high energy",
+            "soft and smooth",
+            "A# minor",
+            "Whale vocalization",
+            "Music",
+            "Trombone",
+            "String section",
+            "fiddle"
+        ],
+        "Description": "A warm, high energy track with a Relaxed tempo and a A# minor tonality."
+    },
+    {
+        "Filename": "House/House Vocal Loop 1 - 128 BPM E Min.wav",
+        "Duration": 7.5,
+        "BPM": 129.2,
+        "Key": "E minor",
+        "Vibe": "The track has a Energetic tempo at 129 BPM, featuring a bright and high energy sound. It feels soft and smooth with a E minor tonality.",
+        "Tags": [
+            "Energetic",
+            "bright",
+            "high energy",
+            "soft and smooth",
+            "E minor",
+            "Whale vocalization",
+            "Music",
+            "Musical instrument",
+            "Car",
+            "Plucked string instrument"
+        ],
+        "Description": "A bright, high energy track with a Energetic tempo and a E minor tonality."
+    },
+    {
+        "Filename": "House/House Vocal Loop 4 - 128 BPM A# Min.wav",
+        "Duration": 15.0,
+        "BPM": 103.36,
+        "Key": "A# minor",
+        "Vibe": "The track has a Moderate tempo at 103 BPM, featuring a bright and high energy sound. It feels soft and smooth with a A# minor tonality.",
+        "Tags": [
+            "Moderate",
+            "bright",
+            "high energy",
+            "soft and smooth",
+            "A# minor",
+            "Whale vocalization",
+            "Opera",
+            "Ska",
+            "Flute",
+            "Techno"
+        ],
+        "Description": "A bright, high energy track with a Moderate tempo and a A# minor tonality.",
+        "Track Type": "Both Vocals and Instrumentals"
+    },
+    {
+        "Filename": "House/House Vocoder Loop 2 - 128 BPM G Min.wav",
+        "Duration": 7.5,
+        "BPM": 129.2,
+        "Key": "G minor",
+        "Vibe": "The track has a Energetic tempo at 129 BPM, featuring a bright and high energy sound. It feels soft and smooth with a G minor tonality.",
+        "Tags": [
+            "Energetic",
+            "bright",
+            "high energy",
+            "soft and smooth",
+            "G minor",
+            "Whale vocalization",
+            "Electronic tuner",
+            "Mains hum",
+            "Effects unit",
+            "Plucked string instrument"
+        ],
+        "Description": "A bright, high energy track with a Energetic tempo and a G minor tonality."
+    },
+    {
+        "Filename": "House/House Vocoder Loop 3 - 128 BPM A Min.wav",
+        "Duration": 15.0,
+        "BPM": 258.4,
+        "Key": "A minor",
+        "Vibe": "The track has a Energetic tempo at 258 BPM, featuring a warm and high energy sound. It feels soft and smooth with a A minor tonality.",
+        "Tags": [
+            "Energetic",
+            "warm",
+            "high energy",
+            "soft and smooth",
+            "A minor",
+            "Whale vocalization",
+            "Sigh",
+            "Opera",
+            "Reverberation",
+            "Sad music"
+        ],
+        "Description": "A warm, high energy track with a Energetic tempo and a A minor tonality.",
+        "Track Type": "Vocals Only"
+    },
+    {
+        "Filename": "House/House White Noise Up - 128 BPM.wav",
+        "Duration": 7.5,
+        "BPM": 178.21,
+        "Key": "G# minor",
+        "Vibe": "The track has a Energetic tempo at 178 BPM, featuring a bright and high energy sound. It feels soft and smooth with a G# minor tonality.",
+        "Tags": [
+            "Energetic",
+            "bright",
+            "high energy",
+            "soft and smooth",
+            "G# minor",
+            "Crunch",
+            "Meow",
+            "Pulse",
+            "Whistling",
+            "Vibration"
+        ],
+        "Description": "A bright, high energy track with a Energetic tempo and a G# minor tonality."
+    },
+    {
         "Filename": "House/Impact 22.wav",
         "Duration": 15.47,
         "BPM": 136.0,
@@ -778,6 +1307,209 @@
         "Track Type": "Vocals Only"
     },
     {
+        "Filename": "House/Main Clap 1.wav",
+        "Duration": 0.92,
+        "BPM": 0.0,
+        "Key": "A# minor",
+        "Vibe": "The track has a Relaxed tempo at 0 BPM, featuring a bright and high energy sound. It feels intense and punchy with a A# minor tonality.",
+        "Tags": [
+            "Relaxed",
+            "bright",
+            "high energy",
+            "intense and punchy",
+            "A# minor",
+            "Ping",
+            "Firecracker",
+            "Ding",
+            "Drill",
+            "Explosion"
+        ],
+        "Description": "A bright, high energy track with a Relaxed tempo and a A# minor tonality."
+    },
+    {
+        "Filename": "House/Master Collection Crash 1.wav",
+        "Duration": 2.0,
+        "BPM": 198.77,
+        "Key": "C# minor",
+        "Vibe": "The track has a Energetic tempo at 199 BPM, featuring a bright and low energy sound. It feels soft and smooth with a C# minor tonality.",
+        "Tags": [
+            "Energetic",
+            "bright",
+            "low energy",
+            "soft and smooth",
+            "C# minor",
+            "Whale vocalization",
+            "Chirp tone",
+            "Tabla",
+            "Crack",
+            "Harpsichord"
+        ],
+        "Description": "A bright, low energy track with a Energetic tempo and a C# minor tonality."
+    },
+    {
+        "Filename": "House/Master Collection Crash 7.wav",
+        "Duration": 2.0,
+        "BPM": 172.27,
+        "Key": "F# minor",
+        "Vibe": "The track has a Energetic tempo at 172 BPM, featuring a bright and high energy sound. It feels soft and smooth with a F# minor tonality.",
+        "Tags": [
+            "Energetic",
+            "bright",
+            "high energy",
+            "soft and smooth",
+            "F# minor",
+            "Whale vocalization",
+            "Tabla",
+            "Harpsichord",
+            "Cymbal",
+            "Music"
+        ],
+        "Description": "A bright, high energy track with a Energetic tempo and a F# minor tonality."
+    },
+    {
+        "Filename": "House/Master Collection Crash 8.wav",
+        "Duration": 1.33,
+        "BPM": 120.19,
+        "Key": "C# minor",
+        "Vibe": "The track has a Energetic tempo at 120 BPM, featuring a bright and low energy sound. It feels soft and smooth with a C# minor tonality.",
+        "Tags": [
+            "Energetic",
+            "bright",
+            "low energy",
+            "soft and smooth",
+            "C# minor",
+            "Drill",
+            "Single-lens reflex camera",
+            "Artillery fire",
+            "Explosion",
+            "Pulse"
+        ],
+        "Description": "A bright, low energy track with a Energetic tempo and a C# minor tonality."
+    },
+    {
+        "Filename": "House/Master Collection Vol 2 Full Drum Loop 3 - 128 BPM.wav",
+        "Duration": 7.51,
+        "BPM": 129.2,
+        "Key": "A# minor",
+        "Vibe": "The track has a Energetic tempo at 129 BPM, featuring a bright and high energy sound. It feels intense and punchy with a A# minor tonality.",
+        "Tags": [
+            "Energetic",
+            "bright",
+            "high energy",
+            "intense and punchy",
+            "A# minor",
+            "Whale vocalization",
+            "Opera",
+            "Drum kit",
+            "Electronic music",
+            "Percussion"
+        ],
+        "Description": "A bright, high energy track with a Energetic tempo and a A# minor tonality.",
+        "Track Type": "Vocals Only"
+    },
+    {
+        "Filename": "House/Master Collection Vol 2 Full Drum Loop 5 - 128 BPM.wav",
+        "Duration": 7.5,
+        "BPM": 129.2,
+        "Key": "F minor",
+        "Vibe": "The track has a Energetic tempo at 129 BPM, featuring a bright and high energy sound. It feels intense and punchy with a F minor tonality.",
+        "Tags": [
+            "Energetic",
+            "bright",
+            "high energy",
+            "intense and punchy",
+            "F minor",
+            "Whale vocalization",
+            "Opera",
+            "Drum and bass",
+            "House music",
+            "Electronic music"
+        ],
+        "Description": "A bright, high energy track with a Energetic tempo and a F minor tonality.",
+        "Track Type": "Vocals Only"
+    },
+    {
+        "Filename": "House/Master Collection Vol 2 Top Drum Loop 11 - 128 BPM.wav",
+        "Duration": 7.5,
+        "BPM": 129.2,
+        "Key": "D# minor",
+        "Vibe": "The track has a Energetic tempo at 129 BPM, featuring a bright and low energy sound. It feels soft and smooth with a D# minor tonality.",
+        "Tags": [
+            "Energetic",
+            "bright",
+            "low energy",
+            "soft and smooth",
+            "D# minor",
+            "Moo",
+            "Harpsichord",
+            "Whale vocalization",
+            "Music",
+            "Drum machine"
+        ],
+        "Description": "A bright, low energy track with a Energetic tempo and a D# minor tonality."
+    },
+    {
+        "Filename": "House/Master Collection Vol 2 Top Drum Loop 7 - 128 BPM.wav",
+        "Duration": 7.51,
+        "BPM": 63.8,
+        "Key": "B minor",
+        "Vibe": "The track has a Relaxed tempo at 64 BPM, featuring a bright and low energy sound. It feels soft and smooth with a B minor tonality.",
+        "Tags": [
+            "Relaxed",
+            "bright",
+            "low energy",
+            "soft and smooth",
+            "B minor",
+            "Whale vocalization",
+            "Drum kit",
+            "Percussion",
+            "Harpsichord",
+            "Music"
+        ],
+        "Description": "A bright, low energy track with a Relaxed tempo and a B minor tonality."
+    },
+    {
+        "Filename": "House/Master Collection Vol 2 Vocal Arp 3 - 128 BPM F Min.wav",
+        "Duration": 15.0,
+        "BPM": 129.2,
+        "Key": "F minor",
+        "Vibe": "The track has a Energetic tempo at 129 BPM, featuring a warm and high energy sound. It feels soft and smooth with a F minor tonality.",
+        "Tags": [
+            "Energetic",
+            "warm",
+            "high energy",
+            "soft and smooth",
+            "F minor",
+            "Whale vocalization",
+            "Piano",
+            "Keyboard (musical)",
+            "Ukulele",
+            "Music"
+        ],
+        "Description": "A warm, high energy track with a Energetic tempo and a F minor tonality.",
+        "Track Type": "Instrumentals Only"
+    },
+    {
+        "Filename": "House/Master Collection Vol 2 Vocal Arp 4 - 128 BPM B Maj.wav",
+        "Duration": 15.0,
+        "BPM": 129.2,
+        "Key": "D# minor",
+        "Vibe": "The track has a Energetic tempo at 129 BPM, featuring a bright and high energy sound. It feels soft and smooth with a D# minor tonality.",
+        "Tags": [
+            "Energetic",
+            "bright",
+            "high energy",
+            "soft and smooth",
+            "D# minor",
+            "Whale vocalization",
+            "Strum",
+            "Musical instrument",
+            "Music",
+            "Plucked string instrument"
+        ],
+        "Description": "A bright, high energy track with a Energetic tempo and a D# minor tonality."
+    },
+    {
         "Filename": "House/Moonlight Guitar Loop 13 - 128 BPM F Maj.wav",
         "Duration": 7.5,
         "BPM": 129.2,
@@ -818,6 +1550,107 @@
         "Description": "A warm, high energy track with a Relaxed tempo and a E minor tonality."
     },
     {
+        "Filename": "House/Organic Percussion Loop 10 - 128 BPM.wav",
+        "Duration": 7.5,
+        "BPM": 129.2,
+        "Key": "F minor",
+        "Vibe": "The track has a Energetic tempo at 129 BPM, featuring a bright and low energy sound. It feels soft and smooth with a F minor tonality.",
+        "Tags": [
+            "Energetic",
+            "bright",
+            "low energy",
+            "soft and smooth",
+            "F minor",
+            "Whale vocalization",
+            "Chirp tone",
+            "Hi-hat",
+            "Music",
+            "Harpsichord"
+        ],
+        "Description": "A bright, low energy track with a Energetic tempo and a F minor tonality."
+    },
+    {
+        "Filename": "House/Organic Percussion Loop 12 - 128 BPM.wav",
+        "Duration": 7.5,
+        "BPM": 129.2,
+        "Key": "A# minor",
+        "Vibe": "The track has a Energetic tempo at 129 BPM, featuring a bright and low energy sound. It feels soft and smooth with a A# minor tonality.",
+        "Tags": [
+            "Energetic",
+            "bright",
+            "low energy",
+            "soft and smooth",
+            "A# minor",
+            "Typewriter",
+            "Drum kit",
+            "Shuffling cards",
+            "Harpsichord",
+            "Music"
+        ],
+        "Description": "A bright, low energy track with a Energetic tempo and a A# minor tonality."
+    },
+    {
+        "Filename": "House/Perc Loop 17 - 128 BPM.wav",
+        "Duration": 3.75,
+        "BPM": 129.2,
+        "Key": "B minor",
+        "Vibe": "The track has a Energetic tempo at 129 BPM, featuring a bright and high energy sound. It feels intense and punchy with a B minor tonality.",
+        "Tags": [
+            "Energetic",
+            "bright",
+            "high energy",
+            "intense and punchy",
+            "B minor",
+            "Whale vocalization",
+            "Harpsichord",
+            "Hi-hat",
+            "Music",
+            "Drum machine"
+        ],
+        "Description": "A bright, high energy track with a Energetic tempo and a B minor tonality."
+    },
+    {
+        "Filename": "House/Perc Loop 18 - 128 BPM.wav",
+        "Duration": 7.5,
+        "BPM": 172.27,
+        "Key": "C# minor",
+        "Vibe": "The track has a Energetic tempo at 172 BPM, featuring a bright and low energy sound. It feels soft and smooth with a C# minor tonality.",
+        "Tags": [
+            "Energetic",
+            "bright",
+            "low energy",
+            "soft and smooth",
+            "C# minor",
+            "Whale vocalization",
+            "Chirp tone",
+            "Opera",
+            "Drum kit",
+            "House music"
+        ],
+        "Description": "A bright, low energy track with a Energetic tempo and a C# minor tonality.",
+        "Track Type": "Vocals Only"
+    },
+    {
+        "Filename": "House/Perc Loop 34 - 128 BPM.wav",
+        "Duration": 7.5,
+        "BPM": 129.2,
+        "Key": "D# minor",
+        "Vibe": "The track has a Energetic tempo at 129 BPM, featuring a bright and low energy sound. It feels soft and smooth with a D# minor tonality.",
+        "Tags": [
+            "Energetic",
+            "bright",
+            "low energy",
+            "soft and smooth",
+            "D# minor",
+            "Rumble",
+            "Chirp tone",
+            "Ping",
+            "Crack",
+            "Glass"
+        ],
+        "Description": "A bright, low energy track with a Energetic tempo and a D# minor tonality."
+    },
+    {
         "Filename": "House/Piano Loop 1 - 128 BPM Cmin.wav",
         "Duration": 15.0,
         "BPM": 129.2,
@@ -856,6 +1689,26 @@
             "Music"
         ],
         "Description": "A warm, high energy track with a Energetic tempo and a D# minor tonality."
+    },
+    {
+        "Filename": "House/Predrop Vocal - Hands Up - 128 BPM .wav",
+        "Duration": 1.88,
+        "BPM": 184.57,
+        "Key": "A minor",
+        "Vibe": "The track has a Energetic tempo at 185 BPM, featuring a bright and high energy sound. It feels soft and smooth with a A minor tonality.",
+        "Tags": [
+            "Energetic",
+            "bright",
+            "high energy",
+            "soft and smooth",
+            "A minor",
+            "display_name",
+            "Television",
+            "Whale vocalization",
+            "Pulse",
+            "Synthetic singing"
+        ],
+        "Description": "A bright, high energy track with a Energetic tempo and a A minor tonality."
     },
     {
         "Filename": "House/Predrop Vocal - Its A House Party - 128 BPM.wav",
@@ -1100,6 +1953,106 @@
         ],
         "Description": "A warm, high energy track with a Energetic tempo and a F minor tonality.",
         "Track Type": "Instrumentals Only"
+    },
+    {
+        "Filename": "House/Shockwave Percussion 121.wav",
+        "Duration": 1.18,
+        "BPM": 0.0,
+        "Key": "A# minor",
+        "Vibe": "The track has a Relaxed tempo at 0 BPM, featuring a bright and low energy sound. It feels intense and punchy with a A# minor tonality.",
+        "Tags": [
+            "Relaxed",
+            "bright",
+            "low energy",
+            "intense and punchy",
+            "A# minor",
+            "Car",
+            "Air brake",
+            "Writing",
+            "Pulse",
+            "public space"
+        ],
+        "Description": "A bright, low energy track with a Relaxed tempo and a A# minor tonality."
+    },
+    {
+        "Filename": "House/Shockwave Percussion 14.wav",
+        "Duration": 0.95,
+        "BPM": 120.19,
+        "Key": "G# minor",
+        "Vibe": "The track has a Energetic tempo at 120 BPM, featuring a warm and low energy sound. It feels soft and smooth with a G# minor tonality.",
+        "Tags": [
+            "Energetic",
+            "warm",
+            "low energy",
+            "soft and smooth",
+            "G# minor",
+            "Moo",
+            "Writing",
+            "smoke alarm",
+            "Music",
+            "Harpsichord"
+        ],
+        "Description": "A warm, low energy track with a Energetic tempo and a G# minor tonality."
+    },
+    {
+        "Filename": "House/Shockwave Percussion 3.wav",
+        "Duration": 0.95,
+        "BPM": 120.19,
+        "Key": "A# minor",
+        "Vibe": "The track has a Energetic tempo at 120 BPM, featuring a warm and high energy sound. It feels soft and smooth with a A# minor tonality.",
+        "Tags": [
+            "Energetic",
+            "warm",
+            "high energy",
+            "soft and smooth",
+            "A# minor",
+            "Whale vocalization",
+            "Harpsichord",
+            "Drum machine",
+            "Percussion",
+            "Drum kit"
+        ],
+        "Description": "A warm, high energy track with a Energetic tempo and a A# minor tonality."
+    },
+    {
+        "Filename": "House/Shockwave Percussion 33.wav",
+        "Duration": 0.95,
+        "BPM": 120.19,
+        "Key": "A# minor",
+        "Vibe": "The track has a Energetic tempo at 120 BPM, featuring a bright and low energy sound. It feels soft and smooth with a A# minor tonality.",
+        "Tags": [
+            "Energetic",
+            "bright",
+            "low energy",
+            "soft and smooth",
+            "A# minor",
+            "Fart",
+            "Pulse",
+            "Bang",
+            "Harpsichord",
+            "smack"
+        ],
+        "Description": "A bright, low energy track with a Energetic tempo and a A# minor tonality."
+    },
+    {
+        "Filename": "House/Shockwave Percussion 81.wav",
+        "Duration": 0.98,
+        "BPM": 119.68,
+        "Key": "C minor",
+        "Vibe": "The track has a Moderate tempo at 120 BPM, featuring a bright and low energy sound. It feels soft and smooth with a C minor tonality.",
+        "Tags": [
+            "Moderate",
+            "bright",
+            "low energy",
+            "soft and smooth",
+            "C minor",
+            "Chirp tone",
+            "Whale vocalization",
+            "Writing",
+            "Foghorn",
+            "Ping"
+        ],
+        "Description": "A bright, low energy track with a Moderate tempo and a C minor tonality."
     },
     {
         "Filename": "House/Shuffle Full Drum Loop 2 - 128 BPM.wav",
@@ -1678,5 +2631,187 @@
             "Conversation"
         ],
         "Description": "A bright, low energy track with a Energetic tempo and a D# minor tonality."
+    },
+    {
+        "Filename": "House/Tension White Noise Up 7 - 128 BPM.wav",
+        "Duration": 7.5,
+        "BPM": 112.35,
+        "Key": "F minor",
+        "Vibe": "The track has a Moderate tempo at 112 BPM, featuring a bright and high energy sound. It feels soft and smooth with a F minor tonality.",
+        "Tags": [
+            "Moderate",
+            "bright",
+            "high energy",
+            "soft and smooth",
+            "F minor",
+            "Chirp tone",
+            "Cacophony",
+            "Creak",
+            "Croak",
+            "Snake"
+        ],
+        "Description": "A bright, high energy track with a Moderate tempo and a F minor tonality."
+    },
+    {
+        "Filename": "House/Titan Chord Loop 16 - 125 BPM G Min.wav",
+        "Duration": 30.72,
+        "BPM": 83.96,
+        "Key": "G minor",
+        "Vibe": "The track has a Relaxed tempo at 84 BPM, featuring a warm and high energy sound. It feels soft and smooth with a G minor tonality.",
+        "Tags": [
+            "Relaxed",
+            "warm",
+            "high energy",
+            "soft and smooth",
+            "G minor",
+            "Whale vocalization",
+            "Electronic dance music",
+            "Opera",
+            "Music for children",
+            "Ukulele"
+        ],
+        "Description": "A warm, high energy track with a Relaxed tempo and a G minor tonality.",
+        "Track Type": "Vocals Only"
+    },
+    {
+        "Filename": "House/Titan Chord Loop 19 - 128 BPM F Min.wav",
+        "Duration": 30.0,
+        "BPM": 170.45,
+        "Key": "A# minor",
+        "Vibe": "The track has a Energetic tempo at 170 BPM, featuring a warm and high energy sound. It feels intense and punchy with a A# minor tonality.",
+        "Tags": [
+            "Energetic",
+            "warm",
+            "high energy",
+            "intense and punchy",
+            "A# minor",
+            "Whale vocalization",
+            "Ukulele",
+            "Music",
+            "Hammond organ",
+            "Keyboard (musical)"
+        ],
+        "Description": "A warm, high energy track with a Energetic tempo and a A# minor tonality."
+    },
+    {
+        "Filename": "House/Titan Crash 2.wav",
+        "Duration": 1.0,
+        "BPM": 99.38,
+        "Key": "E minor",
+        "Vibe": "The track has a Moderate tempo at 99 BPM, featuring a bright and high energy sound. It feels soft and smooth with a E minor tonality.",
+        "Tags": [
+            "Moderate",
+            "bright",
+            "high energy",
+            "soft and smooth",
+            "E minor",
+            "Whale vocalization",
+            "Harpsichord",
+            "Tabla",
+            "Cymbal",
+            "Percussion"
+        ],
+        "Description": "A bright, high energy track with a Moderate tempo and a E minor tonality."
+    },
+    {
+        "Filename": "House/Titan Crash 7.wav",
+        "Duration": 2.0,
+        "BPM": 172.27,
+        "Key": "C minor",
+        "Vibe": "The track has a Energetic tempo at 172 BPM, featuring a bright and low energy sound. It feels soft and smooth with a C minor tonality.",
+        "Tags": [
+            "Energetic",
+            "bright",
+            "low energy",
+            "soft and smooth",
+            "C minor",
+            "Whale vocalization",
+            "Harpsichord",
+            "Percussion",
+            "Tabla",
+            "Cymbal"
+        ],
+        "Description": "A bright, low energy track with a Energetic tempo and a C minor tonality."
+    },
+    {
+        "Filename": "House/Titan Open Hihat 24.wav",
+        "Duration": 0.87,
+        "BPM": 120.19,
+        "Key": "A# minor",
+        "Vibe": "The track has a Energetic tempo at 120 BPM, featuring a bright and high energy sound. It feels soft and smooth with a A# minor tonality.",
+        "Tags": [
+            "Energetic",
+            "bright",
+            "high energy",
+            "soft and smooth",
+            "A# minor",
+            "Explosion",
+            "Artillery fire",
+            "Drill",
+            "Firecracker",
+            "Fart"
+        ],
+        "Description": "A bright, high energy track with a Energetic tempo and a A# minor tonality."
+    },
+    {
+        "Filename": "House/Titan Ride 3.wav",
+        "Duration": 1.6,
+        "BPM": 172.27,
+        "Key": "G minor",
+        "Vibe": "The track has a Energetic tempo at 172 BPM, featuring a bright and low energy sound. It feels soft and smooth with a G minor tonality.",
+        "Tags": [
+            "Energetic",
+            "bright",
+            "low energy",
+            "soft and smooth",
+            "G minor",
+            "Whale vocalization",
+            "Tabla",
+            "Music",
+            "Harpsichord",
+            "Chirp tone"
+        ],
+        "Description": "A bright, low energy track with a Energetic tempo and a G minor tonality."
+    },
+    {
+        "Filename": "House/Vocal Loop 12 - 128 F#m.wav",
+        "Duration": 7.5,
+        "BPM": 129.2,
+        "Key": "E minor",
+        "Vibe": "The track has a Energetic tempo at 129 BPM, featuring a bright and high energy sound. It feels intense and punchy with a E minor tonality.",
+        "Tags": [
+            "Energetic",
+            "bright",
+            "high energy",
+            "intense and punchy",
+            "E minor",
+            "Pulse",
+            "display_name",
+            "Whale vocalization",
+            "Speech",
+            "Sigh"
+        ],
+        "Description": "A bright, high energy track with a Energetic tempo and a E minor tonality.",
+        "Track Type": "Vocals Only"
+    },
+    {
+        "Filename": "House/White Noise Up 11.wav",
+        "Duration": 7.5,
+        "BPM": 129.2,
+        "Key": "D# minor",
+        "Vibe": "The track has a Energetic tempo at 129 BPM, featuring a bright and high energy sound. It feels soft and smooth with a D# minor tonality.",
+        "Tags": [
+            "Energetic",
+            "bright",
+            "high energy",
+            "soft and smooth",
+            "D# minor",
+            "Arrow",
+            "Sonar",
+            "Whale vocalization",
+            "Chirp tone",
+            "urban or manmade"
+        ],
+        "Description": "A bright, high energy track with a Energetic tempo and a D# minor tonality."
     }
 ]

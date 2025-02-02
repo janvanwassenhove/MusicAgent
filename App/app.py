@@ -10,6 +10,9 @@ import asyncio
 from flask_socketio import SocketIO, emit
 from pythonosc import udp_client
 
+from flask_cors import CORS
+
+
 # Add the parent directory to the Python path
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
@@ -21,6 +24,9 @@ import json
 from queue import Queue
 
 app = Flask(__name__)
+
+CORS(app)
+
 socketio = SocketIO(app, async_mode='threading',  cors_allowed_origins="*")
 app.logger.setLevel(logging.DEBUG)  # Set Flask logger to DEBUG level
 input_callback = None
@@ -101,6 +107,8 @@ def load_config(agent_type):
         return config
     except FileNotFoundError:
         raise ValueError(f"Configuration file for {agent_type} // {config_path}  not found.")
+    except Exception as e:
+        raise ValueError(f"Error loading configuration for {agent_type}: {str(e)}")
 
 def initialize_agent(song_name, agent_type, input_callback, selected_model,api_provider ):
     # Set up logging
@@ -123,7 +131,7 @@ def initialize_agent(song_name, agent_type, input_callback, selected_model,api_p
     logger.info(f"input_callback set {agent.input_callback} ")
     return agent
 
-@app.route('/agent_types')
+@app.route('/api/agent_types')
 def agent_types():
     try:
         types = get_agent_types()
@@ -131,7 +139,7 @@ def agent_types():
     except FileNotFoundError as e:
         return jsonify({"error": str(e)}), 404
 
-@app.route('/init', methods=['POST'])
+@app.route('/api/init', methods=['POST'])
 def init_agent():
     global current_config
     agent_type = request.json.get('agent_type')
@@ -143,7 +151,7 @@ def init_agent():
     except ValueError as e:
         return jsonify({"error": str(e)}), 404
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/api/create', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
         data = request.json
@@ -184,7 +192,7 @@ def index():
 
     return render_template('index.html')
 
-@app.route('/timeline')
+@app.route('/api/timeline')
 def get_timeline():
     agent_type = request.args.get('agent_type', 'mITyJohn')  # Default to mITyJohn if not specified
     config_path = f'AgentConfig/{agent_type}/MusicCreationChainConfig.json'
@@ -192,12 +200,13 @@ def get_timeline():
         config = json.load(f)
     return jsonify(config)
 
-@app.route('/agent_config/<agent_type>', methods=['GET'])
+@app.route('/api/agent_config/<agent_type>', methods=['GET'])
 def get_agent_config(agent_type):
+    print(f"Getting config for {agent_type}")
     config = load_config(agent_type)
     return jsonify(config)
 
-@app.route('/agent_config/<agent_type>', methods=['POST'])
+@app.route('/api/agent_config/<agent_type>', methods=['POST'])
 def save_agent_config(agent_type):
     new_config = request.json
     save_config(agent_type, new_config)
@@ -209,17 +218,17 @@ def save_config(agent_type, new_config):
     with open(config_path, 'w') as config_file:
         json.dump(new_config, config_file, indent=2)
 
-@socketio.on('connect')
+@socketio.on('/api/connect')
 def handle_connect():
     global input_callback
     input_callback = create_input_callback()
     logger.info(f"Client connected ({request.sid}) and input_callback created ")
 
-@socketio.on('disconnect')
+@socketio.on('/api/disconnect')
 def handle_disconnect():
         logger.info(f"Client disconnected: {request.sid}")
 
-@app.route('/stream')
+@app.route('/api/stream')
 def stream():
     def generate():
         while True:
@@ -234,11 +243,11 @@ def stream():
 
     return Response(generate(), mimetype='text/event-stream')
 
-@app.route('/genres')
+@app.route('/api/genres')
 def get_genres():
     return jsonify({"genres": song_config['genres']})
 
-@app.route('/get_sonicpi_code/<songname>', methods=['GET'])
+@app.route('/api/get_sonicpi_code/<songname>', methods=['GET'])
 def get_sonicpi_code(songname):
     filepath = os.path.join('songs', songname, f'{songname}.rb')
     if os.path.exists(filepath):
@@ -248,7 +257,7 @@ def get_sonicpi_code(songname):
     else:
         return jsonify({'error': 'File not found'}), 404
 
-@app.route('/send_to_sonicpi', methods=['POST'])
+@app.route('/api/send_to_sonicpi', methods=['POST'])
 def send_to_sonicpi():
     data = request.json
     if not data or 'code' not in data:
