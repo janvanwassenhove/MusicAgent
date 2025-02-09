@@ -133,7 +133,7 @@ export default {
       const songName = this.$store.state.formData.song_name || 'Untitled';
       const agentType = this.$store.state.formData.agent_type || 'mITyJohn';
 
-      axios.post('/send_to_sonicpi', {
+      axios.post(`${process.env.VUE_APP_API_URL}/api/send_to_sonicpi`, {
         code: code,
         song_name: songName,
         agent_type: agentType
@@ -145,6 +145,22 @@ export default {
             console.error('Error sending code to Sonic Pi:', error);
             alert('Failed to send the code to Sonic Pi, did you run SonicPi/Setup/recording.rb in Sonic Pi?');
           });
+    },
+    async fetchSonicPiCode(songname) {
+      try {
+        const response = await axios.get(`${process.env.VUE_APP_API_URL}/api/get_sonicpi_code/${songname}`);
+        console.info('Polling for sonic pi file');
+        if (response.data.sonicpi_code) {
+          const newCode = response.data.sonicpi_code;
+          if (!this.sonicPiCodeVersions.includes(newCode)) {
+            console.info('New Version Code Found:', newCode);
+            this.sonicPiCodeVersions.push(newCode);
+            this.updateSonicPiCodeTabs();
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching Sonic Pi code:', error);
+      }
     }
   },
   mounted() {

@@ -1,53 +1,64 @@
 <template>
-
-  <div class="text-center py-2 mb-2" style="background-color: #1A4731;">
-    <img src="@/assets/images/musicagent.png" alt="MusicAgent" style="max-width: 100%; height: 200px;">
-  </div>
-  <div class="container main_container p-4">
+  <MainLayout>
     <SongConfiguration @formSubmitted="startEventSource" />
     <hr>
     <div class="d-flex justify-content-between mb-3">
-      <button class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#songParameters" aria-expanded="true" aria-controls="songParameters">
+      <button
+          class="btn btn-primary"
+          :class="{ 'btn-dark-green': visibleDivs.songParameters }"
+          @click="toggleVisibility('songParameters')">
         <i class="fas fa-music"></i> Song Parameters
       </button>
-      <button class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#agentTimeline" aria-expanded="true" aria-controls="agentTimeline">
+      <button
+          class="btn btn-primary"
+          :class="{ 'btn-dark-green': visibleDivs.agentTimeline }"
+          @click="toggleVisibility('agentTimeline')">
         <i class="fas fa-stream"></i> Music Creation Timeline
       </button>
-      <button class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#agentConversations" aria-expanded="true" aria-controls="agentConversations">
+      <button
+          class="btn btn-primary"
+          :class="{ 'btn-dark-green': visibleDivs.agentConversations }"
+          @click="toggleVisibility('agentConversations')">
         <i class="fas fa-comments"></i> Agent Conversations
       </button>
-      <button class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#musicAgentLogs" aria-expanded="true" aria-controls="musicAgentLogs">
+      <button
+          class="btn btn-primary"
+          :class="{ 'btn-dark-green': visibleDivs.musicAgentLogs }"
+          @click="toggleVisibility('musicAgentLogs')" >
         <i class="fas fa-file-alt"></i> Music Agent Logs
       </button>
-      <button class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#sonicPiCode" aria-expanded="true" aria-controls="sonicPiCode">
+      <button
+          class="btn btn-primary"
+          :class="{ 'btn-dark-green': visibleDivs.sonicPiCode }"
+          @click="toggleVisibility('sonicPiCode')">
         <i class="fas fa-code"></i> Sonic Pi Code
       </button>
     </div>
 
     <div class="row">
-      <div id="songParameters" class="collapse show"><SongParameters   ref="songParametersRef" /></div>
-      <div id="agentTimeline" class="collapse show"><AgentTimeline /></div>
-      <AgentConversations  ref="agentConversationsRef" />
-      <MusicAgentLogs  ref="sonicPiCodeRef" />
-      <SonicPiCode />
+      <div v-show="visibleDivs.songParameters" class="col-md-6 py-4">
+        <SongParameters ref="songParametersRef" />
+      </div>
+      <div v-show="visibleDivs.agentTimeline" class="col-md-6 py-4">
+        <AgentTimeline ref="agentTimelineRef"/>
+      </div>
+      <div v-show="visibleDivs.agentConversations">
+        <AgentConversations ref="agentConversationsRef" />
+      </div>
+      <div v-show="visibleDivs.musicAgentLogs">
+        <MusicAgentLogs />
+      </div>
+      <div v-show="visibleDivs.sonicPiCode">
+        <SonicPiCode ref="sonicPiCodeRef" />
+      </div>
     </div>
-  </div>
-  <footer class="container footer_container bg-dark text-white text-center py-3  mb-4">
-    <div>
-      <p class="mb-0">&copy; 2024 MusicAgent from mITyJohn. All rights reserved.</p>
-      <p class="mb-0">Follow mITy.John on
-        <a href="https://www.instagram.com/mity.john/" class="text-white"><i class="fab fa-instagram"></i></a>&nbsp;
-        <a href="https://www.linkedin.com/in/jan-van-wassenhove-9b49893/" class="text-white"><i class="fab fa-linkedin"></i></a>&nbsp;
-        <a href="https://mityjohn.com/" class="text-white"><i class="fab fa-wordpress"></i></a>&nbsp;
-        <a href="https://x.com/mity_john" class="text-white"><i class="fab fa-twitter"></i></a>&nbsp;
-      </p>
-    </div>
-  </footer>
-
+  </MainLayout>
 </template>
+
 <script>
 import { ref, onMounted } from 'vue'
-import { useStore } from 'vuex'
+import { useStore, mapState, mapMutations } from 'vuex'
+import MainLayout from '@/layouts/MainLayout.vue'
 import SongConfiguration from '@/components/SongConfiguration.vue'
 import AgentTimeline from '@/components/AgentTimeline.vue'
 import MusicAgentLogs from '@/components/MusicAgentLogs.vue'
@@ -58,6 +69,7 @@ import AgentConversations from '@/components/AgentConversations.vue'
 export default {
   name: 'HomePage',
   components: {
+    MainLayout,
     SongConfiguration,
     AgentTimeline,
     MusicAgentLogs,
@@ -65,19 +77,40 @@ export default {
     SongParameters,
     AgentConversations
   },
+  data() {
+    return {
+      visibleDivs: {
+        songParameters: false,
+        agentTimeline: false,
+        agentConversations: false,
+        musicAgentLogs: false,
+        sonicPiCode: false
+      }
+    };
+  },
+  computed: {
+    ...mapState(['formSubmitted', 'formData', 'logMessages', 'songParameters', 'currentPhase', 'completedPhases']),
+  },
+  methods: {
+    ...mapMutations(['setFormSubmitted']),
+    toggleVisibility(div) {
+      this.visibleDivs[div] = !this.visibleDivs[div];
+    }
+  },
   setup() {
     const store = useStore()
+    console.log("Store in setup:", store)
     const formData = ref(store.state.formData)
-    const logMessages = ref(store.state.logMessages)
-    const songParameters = ref(store.state.songParameters)
+    const logMessages = ref(store.state.logMessages || [])
     const currentPhase = ref(store.state.currentPhase)
     const completedPhases = ref(store.state.completedPhases)
-    const formSubmitted = ref(false)
+    const songParameters = ref(store.state.songParameters)
     const inputPrompt = ref('')
     const inputModal = ref(null)
     const eventSource = ref(null)
     const sonicPiCodeRef = ref(null)
     const agentConversationsRef = ref(null)
+    const agentTimelineRef = ref(null)
 
     const resetCurrentPhase = () => {
       currentPhase.value = ''
@@ -85,6 +118,7 @@ export default {
     }
 
     const startEventSource = () => {
+      store.commit('setFormSubmitted', true);
       if (eventSource.value) {
         eventSource.value.close()
       }
@@ -99,17 +133,19 @@ export default {
 
       eventSource.value.onmessage = (e) => {
         console.log("Received message:", e.data)
-        if (formSubmitted.value && e.data.includes('"sonicpi_code"')) {
+        if (store.state.formSubmitted && e.data.includes('"sonicpi_code"')) {
+          console.log("Found Sonic pi code in response")
           if (formData.value.song_name && formData.value.song_name.trim() !== '') {
-            sonicPiCodeRef.value.fetchSonicPiCode(formData.value.song_name);
+            console.log("Found Sonic pi code in response " + formData.value.song_name)
+            sonicPiCodeRef.value?.fetchSonicPiCode(formData.value.song_name);
           }
         }
         if (e.data === "DONE") {
           const completionAlert = document.getElementById('completionAlert')
           completionAlert.style.display = 'block'
-          formSubmitted.value = false
+          store.commit('setFormSubmitted', false);
           if (formData.value.song_name && formData.value.song_name.trim() !== '') {
-            sonicPiCodeRef.value.fetchSonicPiCode(formData.value.song_name);
+            sonicPiCodeRef.value?.fetchSonicPiCode(formData.value.song_name);
           }
         } else if (e.data.startsWith("input_required|")) {
           const [, prompt] = e.data.split("|")
@@ -132,11 +168,17 @@ export default {
               songParameters.value[key] = value.trim();
             });
           } else {
-            console.log("Received message pushing to logMessages: " +e.data);
+            console.log("Received message pushing to logMessages: " + e.data);
             logMessages.value.push(e.data);
+            if (agentTimelineRef.value) {
+              agentTimelineRef.value.processPhaseStart(e.data);
+            } else {
+              console.debug("agentTimelineRef is null");
+            }
           }
         }
       }
+
       eventSource.value.onerror = (e) => {
         console.error('EventSource error:', e)
         logMessages.value.push('Error in event stream. Please check server logs.')
@@ -145,6 +187,7 @@ export default {
     }
 
     onMounted(() => {
+      console.log("formSubmitted in Home.vue:", store.state.formSubmitted)
       startEventSource()
     })
 
@@ -153,15 +196,21 @@ export default {
       logMessages,
       currentPhase,
       completedPhases,
-      formSubmitted,
       inputPrompt,
       inputModal,
       startEventSource,
       sonicPiCodeRef,
-      agentConversationsRef
-
+      agentConversationsRef,
+      agentTimelineRef
     }
   }
 }
-
 </script>
+
+<style scoped>
+.btn-dark-green {
+  background-color: #1A4731 !important;
+  border-color: #1A4731 !important;
+  color: white !important;
+}
+</style>

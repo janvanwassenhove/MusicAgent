@@ -48,10 +48,12 @@ class GPTAgent:
         self.max_context_length = self.MAX_TOKENS[selected_model]["content_length"]
 
     def log_request_response(self, provider, request_data, response_data, cost, token_count, char_count):
-        songs_dir = 'songs'
+        songs_dir = 'Songs'
+        project_root = os.path.dirname(os.path.abspath(__file__))
+        songs_dir = os.path.join(project_root, 'Songs')
         if not os.path.exists(songs_dir):
             os.makedirs(songs_dir)
-        song_log_directory = os.path.join('songs', self.song.name)
+        song_log_directory = os.path.join(songs_dir, self.song.name)
         if not os.path.exists(song_log_directory):
             os.makedirs(song_log_directory)
 
@@ -457,9 +459,8 @@ class GPTAgent:
         self.logger.info("image " + image_url)
 
         if songdir == "":
-            songdir = os.path.join('songs', filename)
-
-        # Ensure the directory exists
+            project_root = os.path.dirname(os.path.abspath(__file__))
+            songdir = os.path.join(project_root, 'Songs', filename)
         if not os.path.exists(songdir):
             os.makedirs(songdir)
 

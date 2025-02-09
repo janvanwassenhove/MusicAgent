@@ -22,10 +22,12 @@ class Song:
         print("\nCreating the song file.")
 
         # Create the songs directory if it doesn't exist
-        if not os.path.exists('songs'):
-            os.makedirs('songs')
+        project_root = os.path.dirname(os.path.abspath(__file__))
+        songs_directory = os.path.join(project_root, 'Songs')
+        if not os.path.exists(songs_directory):
+            os.makedirs(songs_directory)
         # Create the subdirectory for the song
-        song_directory = os.path.join('songs', self.name)
+        song_directory = os.path.join(songs_directory, self.name)
         if not os.path.exists(song_directory):
            os.makedirs(song_directory)
 

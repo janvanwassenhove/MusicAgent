@@ -11,7 +11,7 @@ export default createStore({
             api_provider: 'openai',
             selected_model: 'gpt-4o-mini'
         },
-
+        formSubmitted: false,
         agentInitialized: false,
         errors: {},
         genres: [],
@@ -20,6 +20,7 @@ export default createStore({
         timeline: [],
         currentPhase: '',
         completedPhases: [],
+        currentCycle: {},
         songParameters: {},
         logMessages: [],
         sonicPiCodeVersions: []
@@ -27,6 +28,12 @@ export default createStore({
     mutations: {
         addSonicPiCodeVersion(state, newCode) {
             state.sonicPiCodeVersions.push(newCode);
+        },
+        setFormSubmitted(state, value) {
+            state.formSubmitted = value;
+        },
+        setTimeline(state, timeline) {
+            state.timeline = timeline;
         },
         setErrors(state, errors) {
             state.errors = errors
@@ -46,7 +53,15 @@ export default createStore({
         },
         setAvailableModels(state, availableModels) {
             state.availableModels = availableModels
-        }
+        },
+        setCurrentPhase(state, phase) {
+            state.currentPhase = phase;
+        },
+        addCompletedPhase(state, phase) {
+            if (!state.completedPhases.includes(phase)) {
+                state.completedPhases.push(phase);
+            }
+        },
     },
     actions: {
         updateModelOptions({ commit, state }) {
