@@ -15,6 +15,8 @@
     "bootstrap-icons": "^1.11.3",
     "core-js": "^3.8.3",
     "vue": "^3.2.13",
+    "vue-audio-visual": "^3.0.9",
+    "vue-file-drop": "^0.2.2",
     "vue-router": "^4.5.0",
     "vuex": "^4.1.0"
   },

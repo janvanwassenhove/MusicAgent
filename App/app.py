@@ -380,5 +380,21 @@ def get_sample(filename):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+UPLOAD_DIRECTORY = os.path.join(os.path.dirname(__file__), '..', 'Samples', 'Uploaded')
+
+if not os.path.exists(UPLOAD_DIRECTORY):
+    os.makedirs(UPLOAD_DIRECTORY)
+
+@app.route('/api/upload_samples', methods=['POST'])
+def upload_samples():
+    if 'files' not in request.files:
+        return jsonify({"error": "No files part in the request"}), 400
+
+    files = request.files.getlist('files')
+    for file in files:
+        file.save(os.path.join(UPLOAD_DIRECTORY, file.filename))
+
+    return jsonify({"status": "success"}), 200
+
 if __name__ == '__main__':
     socketio.run(app, debug=True)

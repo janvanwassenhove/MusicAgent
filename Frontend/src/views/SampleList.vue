@@ -2,19 +2,34 @@
   <MainLayout>
     <div class="container">
       <h1 class="my-4">Samples</h1>
-      <button class="btn btn-primary" @click="runSampleMetadataListing">Run Sample Metadata Listing</button>
+      <span>Run sample metadata listing after uploading new samples so they'll be enlisted during song creation.</span><br/>
+      <button class="btn btn-primary mt-2" @click="runSampleMetadataListing">Run Sample Metadata Listing</button>
       <div v-if="isRunning" class="progress mt-3">
         <div class="progress-bar" role="progressbar" :style="{ width: progress + '%' }" :aria-valuenow="progress" aria-valuemin="0" aria-valuemax="100">{{ progress }}%</div>
       </div>
       <hr>
+      <span>Select your sample(s) you'd like to use in your songs:</span><br/>
+      <div class="input-group mb-3 mt-3">
+        <input type="file" class="form-control" @change="handleFileUpload" multiple>
+        <button class="btn btn-primary" @click="uploadSamples">Upload Samples</button>
+      </div>
+      <hr><av-line :line-width="2" line-color="lime" src="/static/music.mp3"></av-line>
       <div class="input-group mb-3">
         <input type="text" class="form-control" placeholder="Search samples..." v-model="searchQuery" @input="filterSamples">
       </div>
       <ul class="list-group mt-4">
         <li v-for="sample in paginatedSamples" :key="sample.Filename" class="list-group-item">
           <div class="d-flex justify-content-between align-items-center">
+            <av-line :line-width="2" line-color="lime" :src="sample.url" v-if="currentSample === sample.Filename && isPlaying"></av-line>
             <span @click="toggleDetails(sample.Filename)" style="cursor: pointer;">{{ sample.Filename }}</span>
-            <button class="btn btn-secondary btn-sm" @click="playSample(sample.Filename)">Play</button>
+            <div>
+              <button class="btn btn-secondary btn-sm" @click="togglePlayPause(sample.Filename)">
+                <i :class="isPlaying && currentSample === sample.Filename ? 'fas fa-pause' : 'fas fa-play'"></i>
+              </button>
+              <button class="btn btn-secondary btn-sm" @click="stopSample(sample.Filename)">
+                <i class="fas fa-stop"></i>
+              </button>
+            </div>
           </div>
           <div v-if="visibleSample === sample.Filename" class="mt-2">
             <p><strong>Duration:</strong> {{ sample.Duration }}
@@ -39,11 +54,13 @@
 <script>
 import axios from 'axios';
 import MainLayout from '@/layouts/MainLayout.vue';
+import { AvLine } from 'vue-audio-visual';
 
 export default {
   name: 'SampleList',
   components: {
-    MainLayout
+    MainLayout,
+    AvLine
   },
   data() {
     return {
@@ -54,7 +71,11 @@ export default {
       currentPage: 1,
       samplesPerPage: 10,
       visibleSample: null,
-      searchQuery: ''
+      searchQuery: '',
+      files: [],
+      audio: null,
+      currentSample: null,
+      isPlaying: false
     };
   },
   computed: {
@@ -96,7 +117,10 @@ export default {
     async fetchSamples() {
       try {
         const response = await axios.get(`${process.env.VUE_APP_API_URL}/api/sample_metadata`);
-        this.samples = response.data;
+        this.samples = response.data.map(sample => ({
+          ...sample,
+          url: URL.createObjectURL(new Blob([sample.data], { type: 'audio/mpeg' }))
+        }));
         this.filteredSamples = this.samples;
       } catch (error) {
         console.error('Error fetching samples:', error);
@@ -108,13 +132,45 @@ export default {
       this.currentPage = 1; // Reset to the first page after filtering
     },
     async playSample(filename) {
+      if (this.audio && this.currentSample === filename) {
+        this.audio.play();
+        this.isPlaying = true;
+        return;
+      }
+      if (this.audio) {
+        this.audio.pause();
+      }
       try {
         const response = await axios.get(`${process.env.VUE_APP_API_URL}/api/sample/${filename}`, { responseType: 'blob' });
         const url = URL.createObjectURL(response.data);
-        const audio = new Audio(url);
-        audio.play();
+        this.audio = new Audio(url);
+        this.audio.play();
+        this.currentSample = filename;
+        this.isPlaying = true;
       } catch (error) {
         console.error('Error playing sample:', error);
+      }
+    },
+    pauseSample() {
+      if (this.audio) {
+        this.audio.pause();
+        this.isPlaying = false;
+      }
+    },
+    stopSample() {
+      if (this.audio) {
+        this.audio.pause();
+        this.audio.currentTime = 0;
+        this.audio = null;
+        this.currentSample = null;
+        this.isPlaying = false;
+      }
+    },
+    togglePlayPause(filename) {
+      if (this.isPlaying && this.currentSample === filename) {
+        this.pauseSample();
+      } else {
+        this.playSample(filename);
       }
     },
     toggleDetails(filename) {
@@ -128,6 +184,26 @@ export default {
     nextPage() {
       if (this.currentPage < this.totalPages) {
         this.currentPage++;
+      }
+    },
+    handleFileUpload(event) {
+      const files = event.target.files || event;
+      this.files = [...this.files, ...files];
+    },
+    async uploadSamples() {
+      const formData = new FormData();
+      for (let i = 0; i < this.files.length; i++) {
+        formData.append('files', this.files[i]);
+      }
+      try {
+        await axios.post(`${process.env.VUE_APP_API_URL}/api/upload_samples`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        this.fetchSamples(); // Refresh the sample list after upload
+      } catch (error) {
+        console.error('Error uploading samples:', error);
       }
     }
   },
@@ -143,6 +219,20 @@ export default {
 }
 
 .progress-bar {
+  background-color: #1A4731;
+  color: white;
   line-height: 30px;
+}
+
+.drop-zone {
+  border: 2px dashed #ccc;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.drop-zone.dragging {
+  border-color: #1A4731;
+  background-color: #f0f0f0;
 }
 </style>
