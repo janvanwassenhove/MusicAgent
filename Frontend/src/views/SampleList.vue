@@ -20,7 +20,6 @@
       <ul class="list-group mt-4">
         <li v-for="sample in paginatedSamples" :key="sample.Filename" class="list-group-item">
           <div class="d-flex justify-content-between align-items-center">
-            <av-line :line-width="2" line-color="lime" :src="sample.url" v-if="currentSample === sample.Filename && isPlaying"></av-line>
             <span @click="toggleDetails(sample.Filename)" style="cursor: pointer;">{{ sample.Filename }}</span>
             <div>
               <button class="btn btn-secondary btn-sm" @click="togglePlayPause(sample.Filename)">
@@ -54,13 +53,11 @@
 <script>
 import axios from 'axios';
 import MainLayout from '@/layouts/MainLayout.vue';
-import { AvLine } from 'vue-audio-visual';
 
 export default {
   name: 'SampleList',
   components: {
-    MainLayout,
-    AvLine
+    MainLayout
   },
   data() {
     return {
