@@ -24,7 +24,7 @@
             <div>
               <button class="btn btn-secondary btn-sm" @click="togglePlayPause(sample.Filename)">
                 <i :class="isPlaying && currentSample === sample.Filename ? 'fas fa-pause' : 'fas fa-play'"></i>
-              </button>
+              </button>&nbsp;
               <button class="btn btn-secondary btn-sm" @click="stopSample(sample.Filename)">
                 <i class="fas fa-stop"></i>
               </button>
