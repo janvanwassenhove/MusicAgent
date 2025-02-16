@@ -50,8 +50,10 @@
       </ul>
       <div v-if="filteredSamples.length > samplesPerPage" class="d-flex justify-content-center mt-3">
         <button class="btn btn-primary" @click="prevPage" :disabled="currentPage === 1">Previous</button>
-        <span class="mx-2 mt-2">Page {{ currentPage }} of {{ totalPages }}</span>
-        <span class="mx-2 mt-2">Total Samples: {{ filteredSamples.length }}</span>
+        <span class="mx-2 mt-2" v-for="page in paginationPages" :key="page">
+          <button v-if="page !== '...'" class="btn btn-link" @click="goToPage(page)" :class="{ 'current-page': currentPage === page }">{{ page }}</button>
+          <span v-else>{{ page }}</span>
+        </span>
         <button class="btn btn-primary" @click="nextPage" :disabled="currentPage === totalPages">Next</button>
       </div>
     </div>
@@ -96,6 +98,34 @@ export default {
       const start = (this.currentPage - 1) * this.samplesPerPage;
       const end = start + this.samplesPerPage;
       return this.filteredSamples.slice(start, end);
+    },
+    paginationPages() {
+      const pages = [];
+      const totalPages = this.totalPages;
+      const currentPage = this.currentPage;
+      const delta = 2;
+      const range = {
+        start: Math.max(2, currentPage - delta),
+        end: Math.min(totalPages - 1, currentPage + delta)
+      };
+
+      for (let i = range.start; i <= range.end; i++) {
+        pages.push(i);
+      }
+
+      if (range.start > 2) {
+        pages.unshift('...');
+      }
+      if (range.end < totalPages - 1) {
+        pages.push('...');
+      }
+
+      pages.unshift(1);
+      if (totalPages > 1) {
+        pages.push(totalPages);
+      }
+
+      return pages;
     }
   },
   methods: {
@@ -246,8 +276,6 @@ export default {
         this.duration = 0;
       } else {
         this.visibleSample = filename;
-        this.currentTime = 0; // Reset currentTime
-        this.duration = 0; // Reset duration
       }
     },
     prevPage() {
@@ -259,6 +287,9 @@ export default {
       if (this.currentPage < this.totalPages) {
         this.currentPage++;
       }
+    },
+    goToPage(page) {
+      this.currentPage = page;
     },
     handleFileUpload(event) {
       const files = event.target.files || event;
@@ -339,5 +370,14 @@ export default {
 .drop-zone.dragging {
   border-color: #1A4731;
   background-color: #f0f0f0;
+}
+
+.btn-link {
+  color: #212429;
+}
+
+.current-page {
+  color: lightgrey;
+  pointer-events: none;
 }
 </style>
