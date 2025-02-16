@@ -36,7 +36,7 @@ class Song:
             song_creation_data.sonicpi_code = header + song_creation_data.sonicpi_code
 
         # Full path samples in the sonic pi code for song (excluded from parameter to avoid sending to openai, anthropic, ...)
-        project_directory = os.path.join(os.getcwd(), "Samples")
+        project_directory = os.path.join(project_root, "Samples")
         finalcode = re.sub(
             r'sample\s+"([^"]+)"',
             lambda match: f'sample "{os.path.normpath(f"{project_directory}/{match.group(1)}").replace("\\", "\\\\")}"',
