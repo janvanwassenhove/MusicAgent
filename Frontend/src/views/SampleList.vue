@@ -13,7 +13,7 @@
         <input type="file" class="form-control" @change="handleFileUpload" multiple>
         <button class="btn btn-primary" @click="uploadSamples">Upload Samples</button>
       </div>
-      <hr><av-line :line-width="2" line-color="lime" src="/static/music.mp3"></av-line>
+      <hr>
       <div class="input-group mb-3">
         <input type="text" class="form-control" placeholder="Search samples..." v-model="searchQuery" @input="filterSamples">
       </div>
@@ -21,22 +21,30 @@
         <li v-for="sample in paginatedSamples" :key="sample.Filename" class="list-group-item">
           <div class="d-flex justify-content-between align-items-center">
             <span @click="toggleDetails(sample.Filename)" style="cursor: pointer;">{{ sample.Filename }}</span>
-            <div>
-              <button class="btn btn-secondary btn-sm" @click="togglePlayPause(sample.Filename)">
-                <i :class="isPlaying && currentSample === sample.Filename ? 'fas fa-pause' : 'fas fa-play'"></i>
-              </button>&nbsp;
-              <button class="btn btn-secondary btn-sm" @click="stopSample(sample.Filename)">
-                <i class="fas fa-stop"></i>
-              </button>
-            </div>
           </div>
           <div v-if="visibleSample === sample.Filename" class="mt-2">
-            <p><strong>Duration:</strong> {{ sample.Duration }}
-            <br><strong>BPM:</strong> {{ sample.BPM }}
-            <br><strong>Key:</strong> {{ sample.Key }}
-            <br><strong>Vibe:</strong> {{ sample.Vibe }}
-            <br><strong>Tags:</strong> {{ sample.Tags.join(', ') }}
-            <br><strong>Description:</strong> {{ sample.Description }}</p>
+            <div class="row">
+              <div class="col-md-9">
+                <p><strong>Duration:</strong> {{ sample.Duration }}
+                  <br><strong>BPM:</strong> {{ sample.BPM }}
+                  <br><strong>Key:</strong> {{ sample.Key }}
+                  <br><strong>Vibe:</strong> {{ sample.Vibe }}
+                  <br><strong>Tags:</strong> {{ sample.Tags.join(', ') }}
+                  <br><strong>Description:</strong> {{ sample.Description }}</p>
+              </div>
+              <div class="col-md-3 player">
+                <canvas :id="`canvas-${sample.Filename}`" class="spectrum-canvas"></canvas>
+                <div class="player-controls">
+                  <button class="btn btn-secondary btn-sm" @click="togglePlayPause(sample.Filename)">
+                    <i :class="isPlaying && currentSample === sample.Filename ? 'fas fa-pause' : 'fas fa-play'"></i>
+                  </button>&nbsp;
+                  <button class="btn btn-secondary btn-sm" @click="stopSample(sample.Filename)">
+                    <i class="fas fa-stop"></i>
+                  </button>&nbsp;
+                  <span class="player-time"><b>{{ formatTime(currentTime) }} / {{ formatTime(duration) }}</b></span>
+                </div>
+              </div>
+            </div>
           </div>
         </li>
       </ul>
@@ -72,7 +80,12 @@ export default {
       files: [],
       audio: null,
       currentSample: null,
-      isPlaying: false
+      isPlaying: false,
+      audioContext: null,
+      analyser: null,
+      dataArray: null,
+      currentTime: 0,
+      duration: 0
     };
   },
   computed: {
@@ -116,7 +129,7 @@ export default {
         const response = await axios.get(`${process.env.VUE_APP_API_URL}/api/sample_metadata`);
         this.samples = response.data.map(sample => ({
           ...sample,
-          url: URL.createObjectURL(new Blob([sample.data], { type: 'audio/mpeg' }))
+          url: URL.createObjectURL(new Blob([sample.data], {type: 'audio/mpeg'}))
         }));
         this.filteredSamples = this.samples;
       } catch (error) {
@@ -138,15 +151,70 @@ export default {
         this.audio.pause();
       }
       try {
-        const response = await axios.get(`${process.env.VUE_APP_API_URL}/api/sample/${filename}`, { responseType: 'blob' });
+        const response = await axios.get(`${process.env.VUE_APP_API_URL}/api/sample/${filename}`, {responseType: 'blob'});
         const url = URL.createObjectURL(response.data);
         this.audio = new Audio(url);
+        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        this.analyser = this.audioContext.createAnalyser();
+        const source = this.audioContext.createMediaElementSource(this.audio);
+        source.connect(this.analyser);
+        this.analyser.connect(this.audioContext.destination);
+        this.dataArray = new Uint8Array(this.analyser.frequencyBinCount);
+
+        this.audio.onloadedmetadata = () => {
+          this.duration = this.audio.duration;
+        };
+
         this.audio.play();
         this.currentSample = filename;
         this.isPlaying = true;
+
+        this.audio.ontimeupdate = () => {
+          this.currentTime = this.audio.currentTime;
+        };
+
+        this.visualize(filename);
       } catch (error) {
         console.error('Error playing sample:', error);
       }
+    },
+    visualize(filename) {
+      const canvas = document.getElementById(`canvas-${filename}`);
+      const canvasContext = canvas.getContext('2d');
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+
+      const draw = () => {
+        requestAnimationFrame(draw);
+        if (!this.audio) return; // Add this check to ensure this.audio is not null
+        this.analyser.getByteFrequencyData(this.dataArray);
+        canvasContext.fillStyle = '#1A4731';
+        canvasContext.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Draw the frequency bars
+        const barWidth = (canvas.width / this.dataArray.length) * 2.5;
+        let barHeight;
+        let x = 0;
+
+        for (let i = 0; i < this.dataArray.length; i++) {
+          barHeight = this.dataArray[i] / 2; // Adjust the bar height calculation
+          canvasContext.fillStyle = '#FFA500';
+          canvasContext.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+          x += barWidth + 1;
+        }
+
+        // Draw the current playback position line
+        const currentTime = this.audio.currentTime;
+        const duration = this.audio.duration;
+        const lineX = (currentTime / duration) * canvas.width;
+
+        canvasContext.strokeStyle = 'white';
+        canvasContext.beginPath();
+        canvasContext.moveTo(lineX, 0);
+        canvasContext.lineTo(lineX, canvas.height);
+        canvasContext.stroke();
+      };
+      draw();
     },
     pauseSample() {
       if (this.audio) {
@@ -158,6 +226,7 @@ export default {
       if (this.audio) {
         this.audio.pause();
         this.audio.currentTime = 0;
+        this.audio.ontimeupdate = null; // Remove the event listener
         this.audio = null;
         this.currentSample = null;
         this.isPlaying = false;
@@ -171,7 +240,15 @@ export default {
       }
     },
     toggleDetails(filename) {
-      this.visibleSample = this.visibleSample === filename ? null : filename;
+      if (this.visibleSample === filename) {
+        this.visibleSample = null;
+        this.currentTime = 0;
+        this.duration = 0;
+      } else {
+        this.visibleSample = filename;
+        this.currentTime = 0; // Reset currentTime
+        this.duration = 0; // Reset duration
+      }
     },
     prevPage() {
       if (this.currentPage > 1) {
@@ -202,6 +279,11 @@ export default {
       } catch (error) {
         console.error('Error uploading samples:', error);
       }
+    },
+    formatTime(seconds) {
+      const minutes = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
     }
   },
   mounted() {
@@ -219,6 +301,32 @@ export default {
   background-color: #1A4731;
   color: white;
   line-height: 30px;
+}
+
+.spectrum-canvas {
+  width: 100%;
+  height: 75%;
+  background-color: #1A4731;
+  border-radius: 8px;
+  margin-bottom: 5px
+}
+
+.player {
+  border: 1px solid;
+  padding: 3px;
+  border-radius: 12px;
+  background-color: #212429;
+}
+
+.player-controls {
+  display: inline;
+  padding-left: 5px;
+}
+
+.player-time {
+  color: #FFA500; 
+  text-align: right; 
+  margin-left: 15px;
 }
 
 .drop-zone {

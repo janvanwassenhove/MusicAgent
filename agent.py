@@ -339,8 +339,10 @@ class GPTAgent:
                         code_to_retrieve = '\n'.join(response_data['sonicpi_code'])
                     elif isinstance(response_data['sonicpi_code'], str):
                         code_to_retrieve = response_data['sonicpi_code']
-                    self.logger.info(f"Code successfully retrieved: {code_to_retrieve}")
-                    song_creation_data.set_parameter("sonicpi_code", code_to_retrieve)
+
+                    fixed_code = self.fix_sonic_pi_notes(code_to_retrieve)
+                    self.logger.info(f"Code successfully retrieved: {fixed_code}")
+                    song_creation_data.set_parameter("sonicpi_code", fixed_code)
                     self.song.create_song_file(song_creation_data)
                 else:
                     song_creation_data.update_parameters_from_response(response_data)
@@ -361,6 +363,9 @@ class GPTAgent:
 
         if retry_count >= max_retries:
             self.logger.info("Maximum number of retries reached, unable to parse JSON")
+
+    def fix_sonic_pi_notes(code):
+        return re.sub(r":([A-G])#(\d)", lambda m: f":{m.group(1).lower()}s{m.group(2)}", code)
 
     def validate_and_execute_code(self, song_creation_data, artist_config, response_text):
         self.song.create_song_file(song_creation_data)
