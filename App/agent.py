@@ -4,9 +4,9 @@ This file contains the GPTAgent class that interacts with the OpenAI or Anthropi
 
 from openai import OpenAI
 from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
-from audiorecorder import AudioRecorder
-from songCreationData import SongCreationData
-from sonicPi import SonicPi
+from .audiorecorder import AudioRecorder
+from .songCreationData import SongCreationData
+from .sonicPi import SonicPi
 from pythonosc import udp_client, dispatcher as osc_dispatcher, osc_server
 import tiktoken
 import json
@@ -238,7 +238,7 @@ class GPTAgent:
         )
 
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        project_root = current_dir  # Set project_root to the current directory
+        project_root = os.path.dirname(current_dir)  # Set project_root to the parent directory
 
         # Correct the path to the FAISS index file
         faiss_index_path = os.path.join(project_root, 'Samples', 'sample_index.faiss')
@@ -408,7 +408,7 @@ class GPTAgent:
 
     def execute_composition_chain(self, genre, duration, additional_information):
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        project_root = current_dir
+        project_root = os.path.dirname(current_dir) 
 
         with open(os.path.join(project_root, 'AgentConfig', self.agentType, 'MusicCreationPhaseConfig.json')) as file:
             phase_config = json.load(file)

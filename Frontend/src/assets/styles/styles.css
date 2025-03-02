@@ -182,7 +182,7 @@ a:hover {
     border-radius: 8px !important;
     font-family: 'Courier New', Courier, monospace !important; /* Monospace font */
     overflow-x: auto !important;
-    max-height: 400px !important; /* Limit the height to 400 pixels */
+    max-height: 500px !important; /* Limit the height to 400 pixels */
     overflow-y: auto !important; /* Show vertical scrollbar if content exceeds the height */
 }
 

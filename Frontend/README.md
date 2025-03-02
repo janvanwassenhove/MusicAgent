@@ -91,8 +91,13 @@ The agent can be configured in the [AgentConfig](AgentConfig) folder but also vi
 Paginated view of the songs created by the MusicAgent.
 While selecting the song, you have the ability to see the album cover, and the sonic pi code.
 
+![config](../Assets/WebApp/songlibrary.png)
+
 ## Settings
+Changing you agent style (impacts e.g. cover generation).
 
 ![config](../Assets/WebApp/settings_general.png)
 
-![config](../Assets/WebApp/settings_agents.png)
+Modifying the Sonic Pi settings. In case you're not hearing any sound, you might want to check the Sonic Pi settings.
+
+![config](../Assets/WebApp/settings_sonic_pi.png)
