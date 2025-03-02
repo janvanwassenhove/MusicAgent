@@ -413,7 +413,7 @@
             };
 
             const fetchAgentTypes = () => {
-                axios.get('/agent_types')
+                axios.get('/api/agent_types')
                     .then(response => {
                         if (response.data && response.data.agent_types) {
                             agentTypes.value = response.data.agent_types;
@@ -429,7 +429,7 @@
             const initializeAgent = () => {
                 resetCurrentPhase();
 
-                axios.post('/init', { agent_type: agent_type.value })
+                axios.post('/api/init', { agent_type: agent_type.value })
                     .then(response => {
                         genres.value = response.data.genres;
                         agentInitialized.value = true;
@@ -508,7 +508,7 @@
 
             const fetchSonicPiCode = async (songname) => {
                 try {
-                    const response = await axios.get(`/get_sonicpi_code/${songname}`);
+                    const response = await axios.get(`/api/get_sonicpi_code/${songname}`);
                     console.info('Polling for sonic pi file');
                     if (response.data.sonicpi_code) {
                         const newCode = response.data.sonicpi_code;
@@ -738,7 +738,7 @@
                         const parameterRegex = /\[([A-Z_]+)\]:\[(.*?)\]/g;
                         const paramMatches = [...e.data.matchAll(parameterRegex)];
 
-                        // console.log("Parameter matches:", paramMatches);
+                        console.log("Parameter matches:", paramMatches);
 
                         if (paramMatches.length > 0) {
                             paramMatches.forEach(match => {
@@ -819,7 +819,7 @@
                 if (!formData.value.agentType) return;
 
                 try {
-                    const response = await axios.get(`/agent_config/${formData.value.agentType}`);
+                    const response = await axios.get(`/api/agent_config/${formData.value.agentType}`);
                     configJson.value = JSON.stringify(response.data, null, 2);
                     nextTick(() => {
                         configModal.value.show();
@@ -832,7 +832,7 @@
             const saveConfig = async () => {
                 try {
                     const parsedConfig = JSON.parse(configJson.value);
-                    await axios.post(`/agent_config/${formData.value.agentType}`, parsedConfig);
+                    await axios.post(`/api/agent_config/${formData.value.agentType}`, parsedConfig);
                     configModal.value.hide();
                     initializeAgent();
                 } catch (error) {

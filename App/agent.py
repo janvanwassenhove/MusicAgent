@@ -4,9 +4,9 @@ This file contains the GPTAgent class that interacts with the OpenAI or Anthropi
 
 from openai import OpenAI
 from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
-from audiorecorder import AudioRecorder
-from songCreationData import SongCreationData
-from sonicPi import SonicPi
+from .audiorecorder import AudioRecorder
+from .songCreationData import SongCreationData
+from .sonicPi import SonicPi
 from pythonosc import udp_client, dispatcher as osc_dispatcher, osc_server
 import tiktoken
 import json
@@ -48,10 +48,12 @@ class GPTAgent:
         self.max_context_length = self.MAX_TOKENS[selected_model]["content_length"]
 
     def log_request_response(self, provider, request_data, response_data, cost, token_count, char_count):
-        songs_dir = 'songs'
+        songs_dir = '../Songs'
+        project_root = os.path.dirname(os.path.abspath(__file__))
+        songs_dir = os.path.join(project_root, 'Songs')
         if not os.path.exists(songs_dir):
             os.makedirs(songs_dir)
-        song_log_directory = os.path.join('songs', self.song.name)
+        song_log_directory = os.path.join(songs_dir, self.song.name)
         if not os.path.exists(song_log_directory):
             os.makedirs(song_log_directory)
 
@@ -235,9 +237,16 @@ class GPTAgent:
             f"Assistant is {assistant_role_name}, questioned by {user_role_name}. \nPrompting:\n {phase_prompt}\n"
         )
 
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        project_root = os.path.dirname(current_dir)  # Set project_root to the parent directory
+
+        # Correct the path to the FAISS index file
+        faiss_index_path = os.path.join(project_root, 'Samples', 'sample_index.faiss')
+        metadata_path = os.path.join(project_root, 'Samples', 'sample_metadata.json')
+
         # Load the FAISS index and metadata
-        index = faiss.read_index("Samples/sample_index.faiss")
-        with open("Samples/sample_metadata.json", "r") as f:
+        index = faiss.read_index(faiss_index_path)
+        with open(metadata_path, "r") as f:
             metadata = json.load(f)
 
         # Initialize the model for generating embeddings
@@ -330,8 +339,15 @@ class GPTAgent:
                         code_to_retrieve = '\n'.join(response_data['sonicpi_code'])
                     elif isinstance(response_data['sonicpi_code'], str):
                         code_to_retrieve = response_data['sonicpi_code']
-                    self.logger.info(f"Code successfully retrieved: {code_to_retrieve}")
-                    song_creation_data.set_parameter("sonicpi_code", code_to_retrieve)
+
+                    if code_to_retrieve and isinstance(code_to_retrieve, str):
+                        fixed_code = self.fix_sonic_pi_notes(code_to_retrieve)
+                    else:
+                        print(f"Warning: code_to_retrieve is not a valid string. Value: {code_to_retrieve}")
+                        fixed_code = code_to_retrieve 
+
+                    self.logger.info(f"Code successfully retrieved: {fixed_code}")
+                    song_creation_data.set_parameter("sonicpi_code", fixed_code)
                     self.song.create_song_file(song_creation_data)
                 else:
                     song_creation_data.update_parameters_from_response(response_data)
@@ -352,6 +368,11 @@ class GPTAgent:
 
         if retry_count >= max_retries:
             self.logger.info("Maximum number of retries reached, unable to parse JSON")
+
+    def fix_sonic_pi_notes(self, code):
+        if not isinstance(code, str):  # Extra safeguard
+            return code
+        return re.sub(r":([A-G])#(\d)", lambda m: f":{m.group(1).lower()}s{m.group(2)}", code)
 
     def validate_and_execute_code(self, song_creation_data, artist_config, response_text):
         self.song.create_song_file(song_creation_data)
@@ -386,11 +407,14 @@ class GPTAgent:
         return False
 
     def execute_composition_chain(self, genre, duration, additional_information):
-        with open('AgentConfig/'+self.agentType+'/MusicCreationPhaseConfig.json') as file:
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        project_root = os.path.dirname(current_dir) 
+
+        with open(os.path.join(project_root, 'AgentConfig', self.agentType, 'MusicCreationPhaseConfig.json')) as file:
             phase_config = json.load(file)
-        with open('AgentConfig/'+self.agentType+'/MusicCreationChainConfig.json') as file:
+        with open(os.path.join(project_root, 'AgentConfig', self.agentType, 'MusicCreationChainConfig.json')) as file:
             compose_chain_config = json.load(file)
-        with open('AgentConfig/'+self.agentType+'/ArtistConfig.json') as file:
+        with open(os.path.join(project_root, 'AgentConfig', self.agentType, 'ArtistConfig.json')) as file:
             artist_config = json.load(file)
 
         if self.api_provider == 'openai':
@@ -447,9 +471,8 @@ class GPTAgent:
         self.logger.info("image " + image_url)
 
         if songdir == "":
-            songdir = os.path.join('songs', filename)
-
-        # Ensure the directory exists
+            project_root = os.path.dirname(os.path.abspath(__file__))
+            songdir = os.path.join(project_root, 'Songs', filename)
         if not os.path.exists(songdir):
             os.makedirs(songdir)
 

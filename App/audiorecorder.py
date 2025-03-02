@@ -4,7 +4,7 @@ import numpy as np
 from scipy.io.wavfile import write
 import time
 import threading
-from sonicPi import SonicPi
+from .sonicPi import SonicPi
 import sys
 
 sys.set_int_max_str_digits(1000000)  # Increase as necessary

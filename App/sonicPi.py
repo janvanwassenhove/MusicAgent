@@ -35,16 +35,16 @@ class SonicPi:
             print(f"Failed to read script from file {file_path}: {str(e)}")
             return None
 
-    def call_sonicpi(self, song, ip_address, port):
-        # Path to the Sonic Pi script file
-        script_file_path = f"{song.song_dir}\\{song.name}.rb"
-        self.logger.info("Script in path " + script_file_path)
-
-        # Read the Sonic Pi script from the file
-        full_script = self.read_script_from_file(script_file_path)
+    def call_sonicpi(self, song, ip_address, port, full_script=None):
+        # If full_script is not provided, read it from the file
+        if full_script is None:
+            script_file_path = f"{song.song_dir}\\{song.name}.rb"
+            self.logger.info("Script in path " + script_file_path)
+            full_script = self.read_script_from_file(script_file_path)
 
         self.logger.info(f"Running code in Sonic PI on {ip_address}:{port}")
-
+        print(f"Running code in Sonic PI on {ip_address}:{port}")
+        
         # Set up the OSC client to communicate with Sonic Pi
         client = udp_client.SimpleUDPClient(ip_address, port)
 

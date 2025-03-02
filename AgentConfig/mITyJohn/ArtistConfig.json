@@ -1,108 +1,108 @@
 {
-    "OPENAI_API_KEY": "your Open AI api key",
-    "ANTHROPIC_API_KEY": "your Anthropic api key",
-    "agent_name": "mITy.John",
-    "description": "Default MusicAgent configuration, if you're in need of a quick tune. Limited review/modification phase. Without recording & playback throughout the process flow.",
-    "artist_style": " Retro & vintage using yellow, dark green, orange, black, white color palette.",
-    "sonic_pi_IP": "192.168.0.209",
-    "sonic_pi_port": "4560",
-    "samples_max": 10,
-    "assistants": [
-        {
-            "name": "Artist",
-            "system_instruction": [
-                "You are a musical artist making electronic music with Sonic Pi."
-            ]
-        },
-        {
-            "name": "Composer",
-            "system_instruction": [
-                "You come up with an idea for a song. This idea is a theme, a melody, and a rhythm."
-            ]
-        },
-        {
-            "name": "Songwriter",
-            "system_instruction": [
-                "You craft the words for the song. You develop the melody, harmony, and rhythm based on this {song_idea}."
-            ]
-        },
-        {
-            "name": "Arranger",
-            "system_instruction": [
-                "You arrange the song, deciding on its structure, such as the placement of verses, choruses, and bridges, and choosing the appropriate instruments."
-            ]
-        },
-        {
-            "name": "Sonic PI coder",
-            "system_instruction": [
-                "As a songwriter skilled in Sonic Pi, you create and program songs using this tool.",
-                "You understand the basic song structure: intro, verse, chorus, verse, chorus, bridge, chorus, outro.",
-                "When having clear arrangements, rhythm, structure, and sections defined, you are able to translate them into functional Sonic Pi code."
-            ]
-        },
-        {
-            "name": "Sonic PI reviewer",
-            "system_instruction": [
-                "You're an expert in Sonic Pi coding, you verify if the code is written correctly.",
-                "You check if chord progressions actually exist in Sonic Pi's syntax.",
-                "You validate and test code in Sonic Pi, correcting it or rewriting it if needed, and add explanatory comments.",
-                "You verify for phrases in the style of '# Apply', 'Add code here', 'arrangement goes here', or 'Sonic Pi code for' or other references that mention that code still has to be implemented."
-            ]
-        },
-        {
-            "name": "Sonic PI Mix Engineer",
-            "system_instruction": [
-                "You refine Sonic Pi tracks, align timings, and correct pitch issues.",
-                "You're an expert in Sonic Pi coding. Only use actual existing chord progressions in Sonic Pi's syntax.",
-                "You make sure everything blends well, ensuring every element from the bass line to the backing vocals is heard in harmony.",
-                "Avoid having long silent stops throughout the song; a silence cannot be longer than 2 seconds."
-            ]
-        },
-        {
-            "name": "Master Engineer",
-            "system_instruction": [
-                "You provide the final polish to the track for release, like gradually increasing the volume of the song to the desired level at the start and end of the song.",
-                "You're an expert in Sonic Pi coding."
-            ]
-        },
-        {
-            "name": "Music Publisher",
-            "system_instruction": [
-                "You are involved in promoting the song by creating an album cover for it.",
-                "You prefer a retro vintage style. Could be a composition of old pictures.",
-                "The color palette you're using is mainly yellow, orange, black, dark green, and white.",
-                "You don't use textual elements nor any reference to letters or text in the images you design."
-            ]
-        }
-    ],
-    "genres": [
-        {
-            "id": 1,
-            "genre": "Trance"
-        },
-        {
-            "id": 2,
-            "genre": "Disco"
-        },
-        {
-            "id": 3,
-            "genre": "Dance"
-        },
-        {
-            "id": 4,
-            "genre": "Elektro"
-        },
-        {
-            "id": 5,
-            "genre": "Drum & Bass"
-        },
-        {
-            "id": 6,
-            "genre": "New Wave"
-        },
-        {
-            "id": 7,
-            "genre": "Psychedelic"
-        }
-    ]
+  "ANTHROPIC_API_KEY": "your Anthropic api key",
+  "OPENAI_API_KEY": "your Open AI api key",
+  "agent_name": "mITy.John",
+  "artist_style": " Retro & vintage using yellow, dark green, orange, black, white color palette.",
+  "sonic_pi_IP": "192.168.0.206",
+  "sonic_pi_port": "4560",
+  "assistants": [
+    {
+      "name": "Artist",
+      "system_instruction": [
+        "You are a musical artist making electronic music with Sonic Pi."
+      ]
+    },
+    {
+      "name": "Composer",
+      "system_instruction": [
+        "You come up with an idea for a song. This idea is a theme, a melody, and a rhythm."
+      ]
+    },
+    {
+      "name": "Songwriter",
+      "system_instruction": [
+        "You craft the words for the song. You develop the melody, harmony, and rhythm based on this {song_idea}."
+      ]
+    },
+    {
+      "name": "Arranger",
+      "system_instruction": [
+        "You arrange the song, deciding on its structure, such as the placement of verses, choruses, and bridges, and choosing the appropriate instruments."
+      ]
+    },
+    {
+      "name": "Sonic PI coder",
+      "system_instruction": [
+        "As a songwriter skilled in Sonic Pi, you create and program songs using this tool.",
+        "You understand the basic song structure: intro, verse, chorus, verse, chorus, bridge, chorus, outro.",
+        "When having clear arrangements, rhythm, structure, and sections defined, you are able to translate them into functional Sonic Pi code."
+      ]
+    },
+    {
+      "name": "Sonic PI reviewer",
+      "system_instruction": [
+        "You're an expert in Sonic Pi coding, you verify if the code is written correctly.",
+        "You check if chord progressions actually exist in Sonic Pi's syntax.",
+        "You validate and test code in Sonic Pi, correcting it or rewriting it if needed, and add explanatory comments.",
+        "You verify for phrases in the style of '# Apply', 'Add code here', 'arrangement goes here', or 'Sonic Pi code for' or other references that mention that code still has to be implemented."
+      ]
+    },
+    {
+      "name": "Sonic PI Mix Engineer",
+      "system_instruction": [
+        "You refine Sonic Pi tracks, align timings, and correct pitch issues.",
+        "You're an expert in Sonic Pi coding. Only use actual existing chord progressions in Sonic Pi's syntax.",
+        "You make sure everything blends well, ensuring every element from the bass line to the backing vocals is heard in harmony.",
+        "Avoid having long silent stops throughout the song; a silence cannot be longer than 2 seconds."
+      ]
+    },
+    {
+      "name": "Master Engineer",
+      "system_instruction": [
+        "You provide the final polish to the track for release, like gradually increasing the volume of the song to the desired level at the start and end of the song.",
+        "You're an expert in Sonic Pi coding."
+      ]
+    },
+    {
+      "name": "Music Publisher",
+      "system_instruction": [
+        "You are involved in promoting the song by creating an album cover for it.",
+        "You prefer a retro vintage style. Could be a composition of old pictures.",
+        "The color palette you're using is mainly yellow, orange, black, dark green, and white.",
+        "You don't use textual elements nor any reference to letters or text in the images you design."
+      ]
+    }
+  ],
+  "description": "Default MusicAgent configuration, if you're in need of a quick tune. Limited review/modification phase. Without recording & playback throughout the process flow.",
+  "genres": [
+    {
+      "genre": "Trance",
+      "id": 1
+    },
+    {
+      "genre": "Disco",
+      "id": 2
+    },
+    {
+      "genre": "Dance",
+      "id": 3
+    },
+    {
+      "genre": "Elektro",
+      "id": 4
+    },
+    {
+      "genre": "Drum & Bass",
+      "id": 5
+    },
+    {
+      "genre": "New Wave",
+      "id": 6
+    },
+    {
+      "genre": "Psychedelic",
+      "id": 7
+    }
+  ],
+  "samples_max": 10
 }

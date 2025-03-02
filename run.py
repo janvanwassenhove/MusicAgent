@@ -2,11 +2,10 @@
 The main file that will be executed to run the GPT agent for songwriting.
 '''
 import os
-import openai
 import logging
 import json
-from agent import GPTAgent
-from song import Song
+from App.agent import GPTAgent
+from App.song import Song
 
 def get_available_models():
     return {
@@ -90,10 +89,10 @@ def main():
 
 def setup_logger(song_name):
     # Create 'songs' directory if it doesn't exist
-    if not os.path.exists('songs'):
-        os.makedirs('songs')
+    if not os.path.exists('Songs'):
+        os.makedirs('Songs')
     # Create the subdirectory for the song
-    song_directory = os.path.join('songs', song_name)
+    song_directory = os.path.join('Songs', song_name)
     if not os.path.exists(song_directory):
         os.makedirs(song_directory)
 

@@ -6,7 +6,7 @@ import re
 
 from typing_extensions import final
 
-from songCreationData import SongCreationData
+from .songCreationData import SongCreationData
 class Song:
     def __init__(self, name, logger):
         self.name = name
@@ -22,10 +22,13 @@ class Song:
         print("\nCreating the song file.")
 
         # Create the songs directory if it doesn't exist
-        if not os.path.exists('songs'):
-            os.makedirs('songs')
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        project_root = os.path.dirname(current_dir)  # Set project_root to the parent directory
+        songs_directory = os.path.join(project_root, 'Songs')
+        if not os.path.exists(songs_directory):
+            os.makedirs(songs_directory)
         # Create the subdirectory for the song
-        song_directory = os.path.join('songs', self.name)
+        song_directory = os.path.join(songs_directory, self.name)
         if not os.path.exists(song_directory):
            os.makedirs(song_directory)
 
@@ -34,7 +37,7 @@ class Song:
             song_creation_data.sonicpi_code = header + song_creation_data.sonicpi_code
 
         # Full path samples in the sonic pi code for song (excluded from parameter to avoid sending to openai, anthropic, ...)
-        project_directory = os.path.join(os.getcwd(), "Samples")
+        project_directory = os.path.join(project_root, "Samples")
         finalcode = re.sub(
             r'sample\s+"([^"]+)"',
             lambda match: f'sample "{os.path.normpath(f"{project_directory}/{match.group(1)}").replace("\\", "\\\\")}"',
@@ -73,7 +76,7 @@ class Song:
         )
 
         # Write the content to README.md
-        with open(readme_file, 'w') as file:
+        with open(readme_file, 'w', encoding='utf-8') as file:
             file.write(readme_content)
 
 

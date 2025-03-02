@@ -1,30 +1,35 @@
-from flask import Flask, render_template, request, jsonify, Response
+from flask import Flask, render_template, request, jsonify, Response, send_file
 import sys
 import os
 import logging
 import queue
-import threading
-import traceback
-import time
-import asyncio
-from flask_socketio import SocketIO, emit
-from pythonosc import udp_client
+from flask_socketio import SocketIO
+from SampleMedataListing import process_directory
+from concurrent.futures import ThreadPoolExecutor
+from flask_cors import CORS
 
 # Add the parent directory to the Python path
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 
-from agent import GPTAgent
-from song import Song
+from App.agent import GPTAgent
+from App.song import Song
 import json
 from queue import Queue
 
-app = Flask(__name__)
-socketio = SocketIO(app, async_mode='threading',  cors_allowed_origins="*")
+app = Flask(__name__, static_url_path='/static', static_folder=os.path.join(parent_dir, 'Songs'))
+
+CORS(app)
+
+socketio = SocketIO(app, async_mode='threading', cors_allowed_origins="*")
 app.logger.setLevel(logging.DEBUG)  # Set Flask logger to DEBUG level
 input_callback = None
 input_queue = Queue()
+
+# Global variable to track progress
+progress = 0
+progress_file = os.path.join(os.path.dirname(__file__), 'progress.json')
 
 def create_input_callback():
     def callback(prompt):
@@ -101,8 +106,10 @@ def load_config(agent_type):
         return config
     except FileNotFoundError:
         raise ValueError(f"Configuration file for {agent_type} // {config_path}  not found.")
+    except Exception as e:
+        raise ValueError(f"Error loading configuration for {agent_type}: {str(e)}")
 
-def initialize_agent(song_name, agent_type, input_callback, selected_model,api_provider ):
+def initialize_agent(song_name, agent_type, input_callback, selected_model, api_provider):
     # Set up logging
     logger.info(f"Initializing agent {agent_type} for song: {song_name}")
 
@@ -123,7 +130,7 @@ def initialize_agent(song_name, agent_type, input_callback, selected_model,api_p
     logger.info(f"input_callback set {agent.input_callback} ")
     return agent
 
-@app.route('/agent_types')
+@app.route('/api/agent_types')
 def agent_types():
     try:
         types = get_agent_types()
@@ -131,7 +138,7 @@ def agent_types():
     except FileNotFoundError as e:
         return jsonify({"error": str(e)}), 404
 
-@app.route('/init', methods=['POST'])
+@app.route('/api/init', methods=['POST'])
 def init_agent():
     global current_config
     agent_type = request.json.get('agent_type')
@@ -143,7 +150,7 @@ def init_agent():
     except ValueError as e:
         return jsonify({"error": str(e)}), 404
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/api/create', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
         data = request.json
@@ -184,20 +191,29 @@ def index():
 
     return render_template('index.html')
 
-@app.route('/timeline')
+@app.route('/api/timeline')
 def get_timeline():
     agent_type = request.args.get('agent_type', 'mITyJohn')  # Default to mITyJohn if not specified
-    config_path = f'AgentConfig/{agent_type}/MusicCreationChainConfig.json'
-    with open(config_path, 'r') as f:
-        config = json.load(f)
-    return jsonify(config)
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    config_path = os.path.join(project_root, 'AgentConfig', agent_type, 'MusicCreationChainConfig.json')
+    logger.info("config_path " + config_path)
+    if not os.path.exists(config_path):
+        return jsonify({"error": f"Configuration file not found: {config_path}"}), 404
 
-@app.route('/agent_config/<agent_type>', methods=['GET'])
+    try:
+        with open(config_path, 'r') as f:
+            config = json.load(f)
+        return jsonify(config)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/agent_config/<agent_type>', methods=['GET'])
 def get_agent_config(agent_type):
+    print(f"Getting config for {agent_type}")
     config = load_config(agent_type)
     return jsonify(config)
 
-@app.route('/agent_config/<agent_type>', methods=['POST'])
+@app.route('/api/agent_config/<agent_type>', methods=['POST'])
 def save_agent_config(agent_type):
     new_config = request.json
     save_config(agent_type, new_config)
@@ -209,17 +225,17 @@ def save_config(agent_type, new_config):
     with open(config_path, 'w') as config_file:
         json.dump(new_config, config_file, indent=2)
 
-@socketio.on('connect')
+@socketio.on('/api/connect')
 def handle_connect():
     global input_callback
     input_callback = create_input_callback()
     logger.info(f"Client connected ({request.sid}) and input_callback created ")
 
-@socketio.on('disconnect')
+@socketio.on('/api/disconnect')
 def handle_disconnect():
-        logger.info(f"Client disconnected: {request.sid}")
+    logger.info(f"Client disconnected: {request.sid}")
 
-@app.route('/stream')
+@app.route('/api/stream')
 def stream():
     def generate():
         while True:
@@ -234,13 +250,14 @@ def stream():
 
     return Response(generate(), mimetype='text/event-stream')
 
-@app.route('/genres')
+@app.route('/api/genres')
 def get_genres():
     return jsonify({"genres": song_config['genres']})
 
-@app.route('/get_sonicpi_code/<songname>', methods=['GET'])
+@app.route('/api/get_sonicpi_code/<songname>', methods=['GET'])
 def get_sonicpi_code(songname):
-    filepath = os.path.join('songs', songname, f'{songname}.rb')
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    filepath = os.path.join(project_root, 'Songs', songname, f'{songname}.rb')
     if os.path.exists(filepath):
         with open(filepath, 'r') as file:
             code = file.read()
@@ -248,7 +265,9 @@ def get_sonicpi_code(songname):
     else:
         return jsonify({'error': 'File not found'}), 404
 
-@app.route('/send_to_sonicpi', methods=['POST'])
+from App.sonicPi import SonicPi
+
+@app.route('/api/send_to_sonicpi', methods=['POST'])
 def send_to_sonicpi():
     data = request.json
     if not data or 'code' not in data:
@@ -259,17 +278,188 @@ def send_to_sonicpi():
     agent_type = data.get('agent_type', 'mITyJohn')
     try:
         artist_config = load_config(agent_type)
-        client = udp_client.SimpleUDPClient(artist_config["sonic_pi_IP"], int(artist_config["sonic_pi_port"]))
+        ip_address = artist_config["sonic_pi_IP"]
+        port = int(artist_config["sonic_pi_port"])
 
-        script_file_path = f"{os.path.dirname(current_dir)}\\songs\\{song_name}\\{song_name}.rb"
+        # Create a Song instance
+        song = Song(name=song_name, logger=logger)
+
+        # Read the script file
+        script_file_path = f"{os.path.dirname(current_dir)}\\Songs\\{song_name}\\{song_name}.rb"
         with open(script_file_path, 'r') as file:
             full_script = file.read()
 
-        client.send_message('/run-code', full_script)
+        # Initialize SonicPi instance
+        sonic_pi = SonicPi(logger)
+
+        # Call Sonic Pi with the song, IP address, port, and script content
+        sonic_pi.call_sonicpi(song, ip_address, port, full_script)
+
         return jsonify({"message": "Code sent to Sonic Pi"}), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route('/api/songs', methods=['GET'])
+def list_songs():
+    songs_dir = os.path.join(parent_dir, 'Songs')
+    try:
+        songs = [f for f in os.listdir(songs_dir) if os.path.isdir(os.path.join(songs_dir, f))]
+        return jsonify({"songs": songs})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+import shutil
+
+@app.route('/api/songs/<song>', methods=['DELETE'])
+def delete_song(song):
+    song_path = os.path.join(parent_dir, 'Songs', song)
+    try:
+        if os.path.exists(song_path) and os.path.isdir(song_path):
+            shutil.rmtree(song_path)
+            return jsonify({"message": "Song deleted successfully"})
+        else:
+            return jsonify({"error": "Song not found"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/songs/<song>/image', methods=['GET'])
+def get_song_image(song):
+    song_path = os.path.join(parent_dir, 'Songs', song, f'{song}.png')
+    if os.path.exists(song_path):
+        return send_file(song_path, mimetype='image/png')
+    else:
+        return jsonify({'error': 'Image not found'}), 404
+
+def read_progress():
+    global progress
+    try:
+        with open(progress_file, 'r') as f:
+            data = json.load(f)
+            progress = data.get("progress", 0)
+    except Exception as e:
+        progress = 0
+
+executor = ThreadPoolExecutor(max_workers=1)
+
+@app.route('/api/run_sample_metadata_listing', methods=['POST'])
+def run_sample_metadata_listing_endpoint():
+    #print("Starting sample metadata listing")
+    #threading.Thread(target=run_sample_metadata_listing).start()
+    logging.info("run_sample_metadata_listing API called")
+    try:
+        input_directory = os.path.join(os.path.dirname(__file__), "..", "Samples")
+        executor.submit(process_directory, input_directory)
+        return jsonify({"status": "accepted"}), 202
+    except Exception as e:
+        logging.error(f"Error running sample metadata listing: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/api/sample_metadata_progress', methods=['GET'])
+def sample_metadata_progress():
+    try:
+        with open(progress_file, 'r') as f:
+            data = json.load(f)
+            progress = data.get("progress", 0)
+        return jsonify({"progress": progress})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/sample_metadata', methods=['GET'])
+def get_sample_metadata():
+    try:
+        sample_metadata_path = os.path.join(parent_dir, 'Samples', 'sample_metadata.json')
+        with open(sample_metadata_path, 'r', encoding='utf-8') as f:
+            sample_metadata = json.load(f)
+        return jsonify(sample_metadata)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/sample/<path:filename>', methods=['GET'])
+def get_sample(filename):
+    try:
+        sample_path = os.path.join(parent_dir, 'Samples', filename)
+        if os.path.exists(sample_path):
+            return send_file(sample_path, as_attachment=True)
+        else:
+            return jsonify({"error": "File not found"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+UPLOAD_DIRECTORY = os.path.join(os.path.dirname(__file__), '..', 'Samples', 'Uploaded')
+
+if not os.path.exists(UPLOAD_DIRECTORY):
+    os.makedirs(UPLOAD_DIRECTORY)
+
+@app.route('/api/upload_samples', methods=['POST'])
+def upload_samples():
+    if 'files' not in request.files:
+        return jsonify({"error": "No files part in the request"}), 400
+
+    files = request.files.getlist('files')
+    for file in files:
+        file.save(os.path.join(UPLOAD_DIRECTORY, file.filename))
+
+    return jsonify({"status": "success"}), 200
+
+@app.route('/api/sonicpi/config', methods=['GET'])
+def get_sonicpi_config():
+    agent_config_path = find_agent_config_dir()
+    sonic_pi_configs = []
+
+    for agent_type in os.listdir(agent_config_path):
+        config_path = os.path.join(agent_config_path, agent_type, 'ArtistConfig.json')
+        if os.path.exists(config_path):
+            with open(config_path, 'r') as f:
+                config = json.load(f)
+                sonic_pi_configs.append({
+                    "agent_type": agent_type,
+                    "sonic_pi_IP": config.get("sonic_pi_IP"),
+                    "sonic_pi_port": config.get("sonic_pi_port")
+                })
+
+    return jsonify(sonic_pi_configs)
+
+@app.route('/api/artists/config', methods=['GET'])
+def get_artists_config():
+    agent_config_path = find_agent_config_dir()
+    sonic_pi_configs = []
+
+    for agent_type in os.listdir(agent_config_path):
+        config_path = os.path.join(agent_config_path, agent_type, 'ArtistConfig.json')
+        if os.path.exists(config_path):
+            with open(config_path, 'r') as f:
+                config = json.load(f)
+                sonic_pi_configs.append({
+                    "agent_type": agent_type,
+                    "agent_name": config.get("agent_name"),
+                    "artist_style": config.get("artist_style")
+                })
+
+    return jsonify(sonic_pi_configs)
+
+@app.route('/api/sonicpi/config', methods=['POST'])
+def update_sonicpi_config():
+    data = request.json
+    agent_type = data.get('agent_type')
+    new_ip = data.get('sonic_pi_IP')
+    new_port = data.get('sonic_pi_port')
+
+    config_path = os.path.join(find_agent_config_dir(), agent_type, 'ArtistConfig.json')
+    if not os.path.exists(config_path):
+        return jsonify({"error": "Configuration file not found"}), 404
+
+    with open(config_path, 'r') as f:
+        config = json.load(f)
+
+    config['sonic_pi_IP'] = new_ip
+    config['sonic_pi_port'] = new_port
+
+    with open(config_path, 'w') as f:
+        json.dump(config, f, indent=2)
+
+    return jsonify({"message": "Configuration updated successfully"})
+
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)

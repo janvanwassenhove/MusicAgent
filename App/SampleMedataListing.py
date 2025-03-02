@@ -5,10 +5,23 @@ import librosa
 import tensorflow as tf
 import numpy as np
 import faiss
+import logging
+import time
 from sentence_transformers import SentenceTransformer
 
+# Configure logging
+log_file = os.path.join(os.path.dirname(__file__), 'app.log')
+logging.basicConfig(level=logging.INFO, handlers=[logging.FileHandler(log_file, 'a', 'utf-8')])
+logger = logging.getLogger(__name__)
+
+progress_file = os.path.join(os.path.dirname(__file__), 'progress.json')
+
+def update_progress(progress):
+    with open(progress_file, 'w') as f:
+        json.dump({"progress": progress}, f)
+
 # Load YAMNet model and class names
-yamnet_model = tf.saved_model.load("Inc/yamnet-tensorflow2-yamnet-v1")  # Load the model from the specified directory
+yamnet_model = tf.saved_model.load("inc/yamnet-tensorflow2-yamnet-v1")  # Load the model from the specified directory
 yamnet_classes = []
 with open("Inc/yamnet-tensorflow2-yamnet-v1/assets/yamnet_class_map.csv", "r") as f:
     yamnet_classes = [line.strip() for line in f.readlines()]
@@ -202,23 +215,29 @@ def process_subfolder(subfolder_path):
 def save_to_json(metadata_list, output_file):
     """Save metadata to a JSON file."""
     if not metadata_list:
-        print(f"No metadata to save. Skipping JSON creation.")
+        logger.info(f"No metadata to save. Skipping JSON creation.")
         return
     with open(output_file, "w", encoding="utf-8") as json_file:
         json.dump(metadata_list, json_file, indent=4)
-    print(f"Metadata saved to JSON: {output_file}")
+    logger.info(f"Metadata saved to JSON: {output_file}")
 
 def process_directory(input_directory):
     """Process each subfolder in the directory and create a summary JSON file."""
+    logger.info(f"Processing directory: {input_directory}")
+    update_progress(0)
     summary = []
 
     model = SentenceTransformer('all-MiniLM-L6-v2')
     embeddings = []
     metadata = []
 
+    total_subfolders = len(next(os.walk(input_directory))[1])
+    processed_subfolders = 0
+
     for root, dirs, _ in os.walk(input_directory):
         for subfolder in dirs:
             subfolder_path = os.path.join(root, subfolder)
+            logger.info(f"Processing subfolder: {subfolder_path}")
             json_output = process_subfolder(subfolder_path)
             if json_output:
                 summary.append({
@@ -230,15 +249,28 @@ def process_directory(input_directory):
 
                 for item in json_content:
                     metadata.append(item)
+                processed_subfolders += 1
+                progress = (processed_subfolders / total_subfolders) * 90
+                update_progress(progress)
+                print(f"Progress: {progress:.2f}%")
+
+    print("Progress: 90.00%")
 
     final_json_content = json.dumps(metadata)  # Serialize the entire metadata array
     embedding = model.encode(final_json_content)  # Encode the final JSON string
     embeddings.append(embedding)  # Append the embedding
 
-    summary_json = os.path.join(input_directory, "summary_samples.json")
-    with open(summary_json, "w", encoding="utf-8") as json_file:
-        json.dump(summary, json_file, indent=4)
-    print(f"Summary JSON saved: {summary_json}")
+    try:
+        summary_json = os.path.join(input_directory, "summary_samples.json")
+        with open(summary_json, "w", encoding="utf-8") as json_file:
+            json.dump(summary, json_file, indent=4)
+        logger.info(f"Summary JSON saved: {summary_json}")
+    except Exception as e:
+        logger.error(f"Failed to save summary JSON: {e}")
+        if not os.path.exists(summary_json):
+            with open(summary_json, "w", encoding="utf-8") as json_file:
+                json.dump([], json_file, indent=4)
+        logger.info(f"Created empty summary JSON: {summary_json}")
 
     # Convert embeddings to a NumPy array
     embedding_array = np.array(embeddings).astype("float32")
@@ -253,14 +285,18 @@ def process_directory(input_directory):
     with open(os.path.join(input_directory, "sample_metadata.json"), "w") as f:
         json.dump(metadata, f)
 
+    logger.info("Processing complete")
+    update_progress(100)
+
 # Main script
 if __name__ == "__main__":
-    input_directory = r"Samples"  # Replace with your directory path
+    input_directory = os.path.join(os.path.dirname(__file__), "..", "Samples")
 
     process_directory(input_directory)
 
     # Load summary_samples.json
-    with open('Samples/summary_samples.json', 'r', encoding='utf-8') as f:
+    summary_json_path = os.path.join(input_directory, "summary_samples.json")
+    with open(summary_json_path, 'r', encoding='utf-8') as f:
         summary_samples = json.load(f)
 
     # agent_config_directory = 'AgentConfig'
