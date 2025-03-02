@@ -402,5 +402,64 @@ def upload_samples():
 
     return jsonify({"status": "success"}), 200
 
+@app.route('/api/sonicpi/config', methods=['GET'])
+def get_sonicpi_config():
+    agent_config_path = find_agent_config_dir()
+    sonic_pi_configs = []
+
+    for agent_type in os.listdir(agent_config_path):
+        config_path = os.path.join(agent_config_path, agent_type, 'ArtistConfig.json')
+        if os.path.exists(config_path):
+            with open(config_path, 'r') as f:
+                config = json.load(f)
+                sonic_pi_configs.append({
+                    "agent_type": agent_type,
+                    "sonic_pi_IP": config.get("sonic_pi_IP"),
+                    "sonic_pi_port": config.get("sonic_pi_port")
+                })
+
+    return jsonify(sonic_pi_configs)
+
+@app.route('/api/artists/config', methods=['GET'])
+def get_artists_config():
+    agent_config_path = find_agent_config_dir()
+    sonic_pi_configs = []
+
+    for agent_type in os.listdir(agent_config_path):
+        config_path = os.path.join(agent_config_path, agent_type, 'ArtistConfig.json')
+        if os.path.exists(config_path):
+            with open(config_path, 'r') as f:
+                config = json.load(f)
+                sonic_pi_configs.append({
+                    "agent_type": agent_type,
+                    "agent_name": config.get("agent_name"),
+                    "artist_style": config.get("artist_style")
+                })
+
+    return jsonify(sonic_pi_configs)
+
+@app.route('/api/sonicpi/config', methods=['POST'])
+def update_sonicpi_config():
+    data = request.json
+    agent_type = data.get('agent_type')
+    new_ip = data.get('sonic_pi_IP')
+    new_port = data.get('sonic_pi_port')
+
+    config_path = os.path.join(find_agent_config_dir(), agent_type, 'ArtistConfig.json')
+    if not os.path.exists(config_path):
+        return jsonify({"error": "Configuration file not found"}), 404
+
+    with open(config_path, 'r') as f:
+        config = json.load(f)
+
+    config['sonic_pi_IP'] = new_ip
+    config['sonic_pi_port'] = new_port
+
+    with open(config_path, 'w') as f:
+        json.dump(config, f, indent=2)
+
+    return jsonify({"message": "Configuration updated successfully"})
+
+
 if __name__ == '__main__':
     socketio.run(app, debug=True)

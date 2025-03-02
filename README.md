@@ -1,6 +1,6 @@
 # MusicAgent User Manual
 
-![Music Agency](Assets/img.png)
+![Music Agent logo](Assets/musicagent.png)
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -21,7 +21,7 @@
 
 ## Introduction
 
-![Music Agent logo](Assets/musicagent.png)
+![Music Agency](Assets/img.png)
 
 MusicAgent is a MAS (Multi Agent System) that programs songs in Sonic Pi. 
 It uses generative AI to generate song structures, arrangements, lyrics, ... based on user preferences.
@@ -195,10 +195,20 @@ or just load `Sonicpi/Setup/recording.rb` in your Sonic PI.
 MusicAgent can be run in 2 different ways: via the CLI or via the web application.
 #### Web Application
 
+To simplify launch of the web app, you can also run  the `start_musicagent.bat` script in the main folder.
+This will start up the web app, but also launch the backend application.
 Running the web application will allow you to interact with the MusicAgent via a web interface.
+
+You can still launch the backend and webapp individually as well:
+- For the Backend App
 ```bash
-python app.py
+cd app && python app.py
 ```
+- For the Frontend App
+```bash
+cd frontend && npm run serve
+```
+
 The app visualizes the different phases of the music creation process and allows you to interact with the MusicAgent.
 You'll also be able to go through the chat conversation with the different agents.
 
@@ -212,6 +222,7 @@ More elaborate information on how to use the Music Agent web application can be 
 #### CLI
 
 Running the CLI will allow you to interact with the MusicAgent via the command line.
+To run the CLI, simply launch the `run.py` script within project root.
 ```bash
 python run.py
 ```

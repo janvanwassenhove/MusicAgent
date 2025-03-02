@@ -1,8 +1,19 @@
 # MusicAgent Web Interface
 
 1. [Introduction](#introduction)
-2. [Launching the agent](#Launching-the-agent)
-
+2. [Launching the agent](#launching-the-agent)
+3. [New Song Creation](#new-song-creation)
+    - [Song Parameters](#song-parameters)
+    - [Music Creation Timeline](#music-creation-timeline)
+    - [Agent Conversations](#agent-conversations)
+    - [Sonic Pi Code](#sonic-pi-code)
+    - [Music Agent Logs](#music-agent-logs)
+    - [Additional Options](#additional-options)
+    - [Agent Configuration](#agent-configuration)
+4. [Samples](#samples)
+5. [Song Library](#song-library)
+6. [Settings](#settings)
+   
 ## Introduction
 The MusicAgent web interface is a more simple way to interact with the MusicAgent. 
 It allows you to create music, generate album covers, and more.
@@ -22,6 +33,8 @@ npm install
 ```
 npm run serve
 ```
+To simplify launch of the web app, you can also run  the `start_musicagent.bat` script in the main folder.
+This will startup the web app, but also launch the backend application.
 
 ## Dashboard Setup
 
@@ -69,3 +82,17 @@ The agent can be configured in the [AgentConfig](AgentConfig) folder but also vi
 
 ![config](../Assets/configwidget.png)
 
+
+## Samples
+
+![config](../Assets/WebApp/samples_playback.png)
+
+## Song-library
+Paginated view of the songs created by the MusicAgent.
+While selecting the song, you have the ability to see the album cover, and the sonic pi code.
+
+## Settings
+
+![config](../Assets/WebApp/settings_general.png)
+
+![config](../Assets/WebApp/settings_agents.png)

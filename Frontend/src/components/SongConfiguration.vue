@@ -2,7 +2,7 @@
   <div class="row mt-4">
     <div class="col-12 py-4">
       <form @submit.prevent="submitForm" v-if="formData">
-        <h3>Song Configuration</h3>
+        <h1>Song Configuration</h1>
         <div class="row">
           <div class="col-md-4 mb-3">
             <label for="api_provider" class="form-label">API Provider:</label>
