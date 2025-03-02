@@ -2,11 +2,10 @@
 The main file that will be executed to run the GPT agent for songwriting.
 '''
 import os
-import openai
 import logging
 import json
-from agent import GPTAgent
-from song import Song
+from App.agent import GPTAgent
+from App.song import Song
 
 def get_available_models():
     return {

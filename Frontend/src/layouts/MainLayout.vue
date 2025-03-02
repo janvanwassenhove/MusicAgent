@@ -13,13 +13,16 @@
           <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
               <li class="nav-item">
-                <router-link class="nav-link" to="/home">Create New</router-link>
+                <router-link class="nav-link" to="/home">New Song</router-link>
               </li>
               <li class="nav-item">
                 <router-link class="nav-link" to="/samples">Samples</router-link>
               </li>
               <li class="nav-item">
-                <router-link class="nav-link" to="/songs-library">Songs Library</router-link>
+                <router-link class="nav-link" to="/songs-library">Song Library</router-link>
+              </li>
+              <li class="nav-item">
+                <router-link class="nav-link" to="/settings">Settings</router-link>
               </li>
             </ul>
           </div>

@@ -3,6 +3,8 @@
   "OPENAI_API_KEY": "your Open AI api key",
   "agent_name": "mITy.John",
   "artist_style": " Retro & vintage using yellow, dark green, orange, black, white color palette.",
+  "sonic_pi_IP": "192.168.0.206",
+  "sonic_pi_port": "4560",
   "assistants": [
     {
       "name": "Artist",
@@ -102,7 +104,5 @@
       "id": 7
     }
   ],
-  "samples_max": 10,
-  "sonic_pi_IP": "192.168.0.209",
-  "sonic_pi_port": "4560"
+  "samples_max": 10
 }

@@ -3,6 +3,7 @@ import Welcome from '../views/Welcome.vue';
 import Song from '../views/Song.vue';
 import SampleList from '../views/SampleList.vue';
 import SongsLibrary from '../views/SongsLibrary.vue';
+import Settings from '../views/Settings.vue';
 
 const routes = [
   {
@@ -24,6 +25,11 @@ const routes = [
     path: '/songs-library',
     name: 'SongsLibrary',
     component: SongsLibrary
+  },
+  {
+    path: '/settings', // Add the new route for Settings
+    name: 'Settings',
+    component: Settings
   }
 ];
 

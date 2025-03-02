@@ -48,7 +48,7 @@ class GPTAgent:
         self.max_context_length = self.MAX_TOKENS[selected_model]["content_length"]
 
     def log_request_response(self, provider, request_data, response_data, cost, token_count, char_count):
-        songs_dir = 'Songs'
+        songs_dir = '../Songs'
         project_root = os.path.dirname(os.path.abspath(__file__))
         songs_dir = os.path.join(project_root, 'Songs')
         if not os.path.exists(songs_dir):

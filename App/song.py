@@ -6,7 +6,7 @@ import re
 
 from typing_extensions import final
 
-from songCreationData import SongCreationData
+from .songCreationData import SongCreationData
 class Song:
     def __init__(self, name, logger):
         self.name = name

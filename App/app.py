@@ -3,14 +3,8 @@ import sys
 import os
 import logging
 import queue
-import threading
-import traceback
-import time
-import asyncio
-from flask_socketio import SocketIO, emit
-from pythonosc import udp_client
+from flask_socketio import SocketIO
 from SampleMedataListing import process_directory
-import subprocess
 from concurrent.futures import ThreadPoolExecutor
 from flask_cors import CORS
 
@@ -19,8 +13,8 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 
-from agent import GPTAgent
-from song import Song
+from App.agent import GPTAgent
+from App.song import Song
 import json
 from queue import Queue
 
@@ -271,6 +265,8 @@ def get_sonicpi_code(songname):
     else:
         return jsonify({'error': 'File not found'}), 404
 
+from App.sonicPi import SonicPi
+
 @app.route('/api/send_to_sonicpi', methods=['POST'])
 def send_to_sonicpi():
     data = request.json
@@ -282,13 +278,23 @@ def send_to_sonicpi():
     agent_type = data.get('agent_type', 'mITyJohn')
     try:
         artist_config = load_config(agent_type)
-        client = udp_client.SimpleUDPClient(artist_config["sonic_pi_IP"], int(artist_config["sonic_pi_port"]))
+        ip_address = artist_config["sonic_pi_IP"]
+        port = int(artist_config["sonic_pi_port"])
 
+        # Create a Song instance
+        song = Song(name=song_name, logger=logger)
+
+        # Read the script file
         script_file_path = f"{os.path.dirname(current_dir)}\\Songs\\{song_name}\\{song_name}.rb"
         with open(script_file_path, 'r') as file:
             full_script = file.read()
 
-        client.send_message('/run-code', full_script)
+        # Initialize SonicPi instance
+        sonic_pi = SonicPi(logger)
+
+        # Call Sonic Pi with the song, IP address, port, and script content
+        sonic_pi.call_sonicpi(song, ip_address, port, full_script)
+
         return jsonify({"message": "Code sent to Sonic Pi"}), 200
 
     except Exception as e:

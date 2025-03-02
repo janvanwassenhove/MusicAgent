@@ -246,6 +246,45 @@ export default {
       };
       draw();
     },
+    async showFullSpectrum(filename) {
+      try {
+        const response = await axios.get(`${process.env.VUE_APP_API_URL}/api/sample/${filename}`, {responseType: 'blob'});
+        const arrayBuffer = await response.data.arrayBuffer();
+        const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+        const offlineContext = new OfflineAudioContext(1, audioBuffer.length, audioBuffer.sampleRate);
+        const source = offlineContext.createBufferSource();
+        source.buffer = audioBuffer;
+        const analyser = offlineContext.createAnalyser();
+        source.connect(analyser);
+        analyser.connect(offlineContext.destination);
+        source.start(0);
+        await offlineContext.startRendering();
+
+        const dataArray = new Uint8Array(analyser.frequencyBinCount);
+        analyser.getByteFrequencyData(dataArray);
+
+        const canvas = document.getElementById(`full-spectrum-${filename}`);
+        const canvasContext = canvas.getContext('2d');
+        canvas.width = canvas.clientWidth;
+        canvas.height = canvas.clientHeight;
+
+        canvasContext.fillStyle = '#1A4731';
+        canvasContext.fillRect(0, 0, canvas.width, canvas.height);
+
+        const barWidth = (canvas.width / dataArray.length) * 2.5;
+        let barHeight;
+        let x = 0;
+
+        for (let i = 0; i < dataArray.length; i++) {
+          barHeight = dataArray[i] / 2;
+          canvasContext.fillStyle = '#FFA500';
+          canvasContext.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+          x += barWidth + 1;
+        }
+      } catch (error) {
+        console.error('Error showing full spectrum:', error);
+      }
+    },
     pauseSample() {
       if (this.audio) {
         this.audio.pause();
@@ -276,6 +315,7 @@ export default {
         this.duration = 0;
       } else {
         this.visibleSample = filename;
+        this.showFullSpectrum(filename);
       }
     },
     prevPage() {
@@ -340,6 +380,14 @@ export default {
   background-color: #1A4731;
   border-radius: 8px;
   margin-bottom: 5px
+}
+
+.full-spectrum-canvas {
+  width: 100%;
+  height: 150px;
+  background-color: #1A4731;
+  border-radius: 8px;
+  margin-top: 10px;
 }
 
 .player {
