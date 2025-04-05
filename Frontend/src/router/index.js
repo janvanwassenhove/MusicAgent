@@ -4,12 +4,18 @@ import Song from '../views/Song.vue';
 import SampleList from '../views/SampleList.vue';
 import SongsLibrary from '../views/SongsLibrary.vue';
 import Settings from '../views/Settings.vue';
+import CreativeMode from '../views/CreativeMode.vue';
 
 const routes = [
   {
     path: '/',
     name: 'Welcome',
     component: Welcome
+  },
+  {
+    path: '/creative-mode',
+    name: 'CreativeMode',
+    component: CreativeMode
   },
   {
     path: '/home',

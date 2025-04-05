@@ -10,6 +10,5 @@ export default {
     },
     initializeAgent(agentType) {
         return api.post('/init', { agent_type: agentType })
-    },
-    // Add other API methods
+    }
 }

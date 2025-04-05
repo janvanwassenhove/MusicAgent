@@ -33,6 +33,8 @@
               <button class="copy-icon" title="Copy to clipboard" @click="copyCode"><i class="fas fa-copy"></i></button>
               <button class="send-icon" title="Send to Sonic Pi" @click="sendCodeToSonicPi"><i class="fas fa-play"></i></button>
               <pre class="sonic-pi-code"><code v-html="parsedSonicPiCode"></code></pre>
+              <button class="btn btn-secondary mt-2" @click="goToCreativeMode"><i class="fas fa-arrow-right"></i> Open in Creative Mode</button>
+
             </div>
           </div>
         </div>
@@ -167,6 +169,10 @@ export default {
         console.error('Error sending code to Sonic Pi:', error);
         alert('Failed to send the code to Sonic Pi, did you run SonicPi/Setup/recording.rb in Sonic Pi?');
       });
+    },
+    goToCreativeMode() {
+      const songName = this.selectedSong || 'Untitled';
+      window.location.href = `/creative-mode?song=${encodeURIComponent(songName)}`;
     },
     prevPage() {
       if (this.currentPage > 1) {

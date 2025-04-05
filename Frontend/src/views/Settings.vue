@@ -64,7 +64,7 @@
                 begin
                   eval script[<span class="number">0</span>]
                   osc_send '<span class="number">127.0</span>.<span class="number">0.1</span>', <span class="number">4559</span>, '/feedback', 'MusicAgent Code was executed successfully'
-                  rescue Exception =&gt; e<br>
+                  rescue Exception => e<br>
                 osc_send '<span class="number">127.0</span>.<span class="number">0.1</span>', <span class="number">4559</span>, '/feedback', e.message
               <span class="doend">end</span>
               </code></pre>

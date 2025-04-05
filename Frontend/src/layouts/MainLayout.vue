@@ -13,16 +13,29 @@
           <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
               <li class="nav-item">
-                <router-link class="nav-link" to="/home">New Song</router-link>
+                <router-link class="nav-link" to="/home">
+                  <i class="fas fa-music"></i> New Song
+                </router-link>
               </li>
               <li class="nav-item">
-                <router-link class="nav-link" to="/samples">Samples</router-link>
+                <router-link class="nav-link" to="/songs-library">
+                  <i class="fas fa-book"></i> Song Library
+                </router-link>
               </li>
               <li class="nav-item">
-                <router-link class="nav-link" to="/songs-library">Song Library</router-link>
+                <router-link class="nav-link" to="/creative-mode">
+                  <i class="fas fa-paint-brush"></i> Creative Mode
+                </router-link>
               </li>
               <li class="nav-item">
-                <router-link class="nav-link" to="/settings">Settings</router-link>
+                <router-link class="nav-link" to="/samples">
+                  <i class="fas fa-drum"></i> Samples
+                </router-link>
+              </li>
+              <li class="nav-item">
+                <router-link class="nav-link" to="/settings">
+                  <i class="fas fa-cog"></i> Settings
+                </router-link>
               </li>
             </ul>
           </div>
