@@ -534,5 +534,22 @@ class GPTAgent:
         feedback_message  = sonic_pi.call_sonicpi(song, artist_config["sonic_pi_IP"], int(artist_config["sonic_pi_port"]))
         return feedback_message
 
+    def handle_chat_input(self, user_message, artist_config):
+        assistant_role_name = artist_config["chat_assistant"]
+        system_content = self.get_assistant_content(assistant_role_name, artist_config)
+        
+        if self.api_provider == 'openai':
+            openai_messages = [
+                {"role": "system", "content": system_content},
+                {"role": "user", "content": user_message}
+            ]
+            if self.check_token_limit(system_content, user_message, self.selected_model):
+                return self.handle_openai_request(OpenAI(api_key=self.get_api_key()), system_content, user_message, openai_messages)
+
+        elif self.api_provider == 'anthropic':
+            if self.check_token_limit(system_content, user_message, self.selected_model):
+                return self.handle_anthropic_request(Anthropic(api_key=self.get_api_key()), system_content, user_message)
+
+        return "Sorry, I couldn't generate a response."
 
 

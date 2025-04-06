@@ -11,7 +11,12 @@
             <img :src="song.thumbnail" alt="Thumbnail" class="thumbnail me-3" v-if="song.thumbnail">
             <span  style="cursor: pointer;">{{ song.name }}</span>
           </div>
-          <button class="btn btn-danger btn-sm" @click="deleteSong(song.name)">Delete</button>
+          <div class="d-flex">
+            <button class="btn btn-secondary btn-sm me-2" @click="goToCreativeModeForSong(song.name)">
+            <i class="fas fa-paint-brush"></i>
+          </button>          
+          <button class="btn btn-danger btn-sm" @click="deleteSong(song.name)"><i class="fas fa-trash"></i></button>
+          </div>
         </li>
       </ul>
       <div v-if="songs.length > 5" class="pagination mt-3">
@@ -33,7 +38,7 @@
               <button class="copy-icon" title="Copy to clipboard" @click="copyCode"><i class="fas fa-copy"></i></button>
               <button class="send-icon" title="Send to Sonic Pi" @click="sendCodeToSonicPi"><i class="fas fa-play"></i></button>
               <pre class="sonic-pi-code"><code v-html="parsedSonicPiCode"></code></pre>
-              <button class="btn btn-secondary mt-2" @click="goToCreativeMode"><i class="fas fa-arrow-right"></i> Open in Creative Mode</button>
+              <button class="btn btn-secondary mt-2" @click="goToCreativeMode"><i class="fas fa-paint-brush"></i> Open in Creative Mode</button>
 
             </div>
           </div>
@@ -172,6 +177,9 @@ export default {
     },
     goToCreativeMode() {
       const songName = this.selectedSong || 'Untitled';
+      window.location.href = `/creative-mode?song=${encodeURIComponent(songName)}`;
+    },
+    goToCreativeModeForSong(songName) {
       window.location.href = `/creative-mode?song=${encodeURIComponent(songName)}`;
     },
     prevPage() {

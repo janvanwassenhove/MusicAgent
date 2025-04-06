@@ -460,6 +460,30 @@ def update_sonicpi_config():
 
     return jsonify({"message": "Configuration updated successfully"})
 
+@app.route('/api/chat', methods=['POST'])
+def handle_chat():
+    data = request.json
+    user_message = data.get('message')
+    song_name = data.get('song_name')
+    agent_type = data.get('agent_type')
+    selected_model = data.get('selected_model')
+    api_provider = data.get('api_provider')
+
+    artist_config = load_config(agent_type)
+    song = Song(name=song_name, logger=logger)
+
+    agent = GPTAgent(
+        selected_model=selected_model,
+        logger=logger,
+        song=song,
+        agentType=agent_type,
+        api_provider=api_provider
+    )
+
+    response = agent.handle_chat_input(user_message, artist_config)
+
+    return jsonify({"response": response})
+
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)
