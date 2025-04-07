@@ -611,13 +611,12 @@ class GPTAgent:
             raise ValueError(f"Unsupported provider: {self.api_provider}")
         self.logger.info(f"Original response: {response_text}")
 
-        response_data = json.loads(response_text)
-        comment = response_data.get('comment', '')
-
+        # Append the assistant's response to the conversation history
         conversation_history.append({
             "role": "assistant",
-            "content": comment
+            "content": response_text
         })
+
         # Save the updated conversation history
         with open(conversation_file, 'w') as file:
             json.dump(conversation_history, file, indent=2)

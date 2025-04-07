@@ -99,7 +99,7 @@ export default {
         return URL.createObjectURL(response.data);
       } catch (error) {
         console.error(`Error fetching thumbnail for song ${song}:`, error);
-        return null;
+        return require('@/assets/images/assistants/Music_Publisher.webp');
       }
     },
     async deleteSong(song) {

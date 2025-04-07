@@ -481,7 +481,15 @@ def handle_chat():
         with open(filepath, 'r') as file:
             sonic_pi_code = file.read()
 
+    selected_files = data.get('selectedFiles', [])
+    samples_str = ', '.join(item.get('Filename', '') for item in selected_files if isinstance(item, dict))
+
+    phrase = f'Following samples (external to Sonic Pi) can be used: {samples_str}.'
+
     user_comment = data.get('message')
+    if samples_str:
+        user_comment += ' ' + phrase
+
     selected_model = data.get('selected_model', 'gpt-4o-mini')
     api_provider = data.get('api_provider', 'openai')
 
@@ -501,6 +509,30 @@ def handle_chat():
     chatResponse = agent.handle_chat_input(sonic_pi_code, user_comment)
     app.logger.debug(f"Chat response: {chatResponse}")
 
+    song_log_directory = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'songs', songName)
+    chat_history_file = os.path.join(song_log_directory, 'chat_history.json')
+
+    # Load existing chat history
+    if os.path.exists(chat_history_file):
+        with open(chat_history_file, 'r') as file:
+            chat_history = json.load(file)
+    else:
+        chat_history = []
+
+    # Append new chat entry
+    chat_history.append({
+        "role": "user",
+        "content": user_comment
+    })
+    chat_history.append({
+        "role": "assistant",
+        "content": chatResponse
+    })
+
+    # Save updated chat history
+    with open(chat_history_file, 'w') as file:
+        json.dump(chat_history, file, indent=2)
+
     if chatResponse is not None:
         return jsonify({"comment": chatResponse})
     else:
@@ -513,15 +545,15 @@ def search_samples():
     samples_dir = os.path.join(project_root, 'Samples')
     filepath = os.path.join(samples_dir, f'sample_metadata.json')
     with open(filepath, 'r') as f:
-        samples = json.load(f)
-    results = [sample['Filename'] for sample in samples if query in sample['Filename'].lower()]
+        data = json.load(f)
+    results = [item for item in data if query.lower() in json.dumps(item).lower()]
     return jsonify(results)
 
 @app.route('/api/conversation_history', methods=['GET'])
 def get_conversation_history():
     song_name = request.args.get('song_name', 'default_song')
     project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    conversation_history_path = os.path.join(project_root, 'songs', song_name, 'conversation_history.json')
+    conversation_history_path = os.path.join(project_root, 'songs', song_name, 'chat_history.json')
     if os.path.exists(conversation_history_path):
         with open(conversation_history_path, 'r') as file:
             conversation_history = json.load(file)

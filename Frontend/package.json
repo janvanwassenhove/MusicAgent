@@ -20,6 +20,7 @@
     "vue": "^3.2.13",
     "vue-audio-visual": "^3.0.9",
     "vue-file-drop": "^0.2.2",
+    "vue-multiselect": "^3.2.0",
     "vue-router": "^4.5.0",
     "vuex": "^4.1.0"
   },
