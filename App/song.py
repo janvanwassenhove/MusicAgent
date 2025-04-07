@@ -48,6 +48,8 @@ class Song:
         self.logger.info("Writing song to directory: " + self.song_dir)
         self.logger.info("sonic pi code " + finalcode)
 
+        song_file = os.path.join(self.song_dir, self.name + '.rb')
+
         # Check if the file already exists
         if os.path.exists(song_file):
             # Compare the existing file content with the new content

@@ -463,27 +463,71 @@ def update_sonicpi_config():
 @app.route('/api/chat', methods=['POST'])
 def handle_chat():
     data = request.json
-    user_message = data.get('message')
-    song_name = data.get('song_name')
-    agent_type = data.get('agent_type')
-    selected_model = data.get('selected_model')
-    api_provider = data.get('api_provider')
+    sonic_pi_code = ''
+    songName = data.get('song_name')
 
-    artist_config = load_config(agent_type)
-    song = Song(name=song_name, logger=logger)
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    songs_dir = os.path.join(project_root, 'songs')
+    if not os.path.exists(songs_dir):
+        os.makedirs(songs_dir)
+    song_log_directory = os.path.join(songs_dir, songName)
+    if not os.path.exists(song_log_directory):
+        os.makedirs(song_log_directory)
+
+    song_log_directory = os.path.join(songs_dir, songName)
+    filepath = os.path.join(song_log_directory, f'{songName}.rb')
+    app.logger.debug(f"Looking for file in: {filepath}")
+    if os.path.exists(filepath):
+        with open(filepath, 'r') as file:
+            sonic_pi_code = file.read()
+
+    user_comment = data.get('message')
+    selected_model = data.get('selected_model', 'gpt-4o-mini')
+    api_provider = data.get('api_provider', 'openai')
+
+    app.logger.debug(f"sonic_pi_code retrieved: {sonic_pi_code}")
+    app.logger.debug(f"Received chat request: {data}")
+
+    song = Song(name=songName, logger=logger)
 
     agent = GPTAgent(
         selected_model=selected_model,
         logger=logger,
         song=song,
-        agentType=agent_type,
+        agentType='default',  # Not used in this context
         api_provider=api_provider
     )
 
-    response = agent.handle_chat_input(user_message, artist_config)
+    chatResponse = agent.handle_chat_input(sonic_pi_code, user_comment)
+    app.logger.debug(f"Chat response: {chatResponse}")
 
-    return jsonify({"response": response})
+    if chatResponse is not None:
+        return jsonify({"comment": chatResponse})
+    else:
+        return jsonify({"error": "No response from agent"})
 
+@app.route('/api/sample/search', methods=['GET'])
+def search_samples():
+    query = request.args.get('query', '').lower()
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    samples_dir = os.path.join(project_root, 'Samples')
+    filepath = os.path.join(samples_dir, f'sample_metadata.json')
+    with open(filepath, 'r') as f:
+        samples = json.load(f)
+    results = [sample['Filename'] for sample in samples if query in sample['Filename'].lower()]
+    return jsonify(results)
+
+@app.route('/api/conversation_history', methods=['GET'])
+def get_conversation_history():
+    song_name = request.args.get('song_name', 'default_song')
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    conversation_history_path = os.path.join(project_root, 'songs', song_name, 'conversation_history.json')
+    if os.path.exists(conversation_history_path):
+        with open(conversation_history_path, 'r') as file:
+            conversation_history = json.load(file)
+        return jsonify(conversation_history)
+    else:
+        return jsonify([])
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)

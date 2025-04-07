@@ -177,10 +177,10 @@ export default {
     },
     goToCreativeMode() {
       const songName = this.selectedSong || 'Untitled';
-      window.location.href = `/creative-mode?song=${encodeURIComponent(songName)}`;
+      this.$router.push({ path: '/creative-mode', query: { song: songName } });
     },
     goToCreativeModeForSong(songName) {
-      window.location.href = `/creative-mode?song=${encodeURIComponent(songName)}`;
+      this.$router.push({ path: '/creative-mode', query: { song: songName } });
     },
     prevPage() {
       if (this.currentPage > 1) {

@@ -3,15 +3,56 @@
       <div class="row">
 
       <div v-show="visibleDivs.copilotChat" class="col-md-6 d-flex flex-column">
-        <h3>Copilot Chat</h3>
+        <h3>Music Agent Chat</h3>
         <div class="copilot-chat flex-grow-1">
-          <div class="chat-log mt-3 overflow-auto border rounded bg-white p-3">
-                <div v-for="(message, index) in chatLog" :key="index" class="chat-message">
-              <strong>{{ message.sender }}:</strong> {{ message.text }}
+          <div class="chat-log overflow-auto border rounded bg-white p-3" style="min-height: 200px;">
+            <div v-for="(message, index) in chatLog" :key="index" class="chat-message d-flex align-items-start mb-3">
+              <div v-if="message.sender === 'Agent'" class="d-flex flex-row-reverse align-items-start w-100">
+                <img
+                    :src="require('@/assets/images/assistants/Artist.webp')"
+                    @error="handleImageError"
+                    :alt="message.sender"
+                    class="chat-image ms-3"
+                />
+                <div class="chat-text p-3 rounded">
+                  <em>{{ message.text }}</em>
+                </div>
+              </div>
+              <div v-else class="d-flex align-items-start">
+                <img
+                    :src="require('@/assets/images/assistants/Unknown.webp')"
+                    @error="handleImageError"
+                    :alt="message.sender"
+                    class="chat-image me-3"
+                />
+                <div class="chat-text p-3 rounded">
+                  <em>{{ message.text }}</em>
+                </div>
+              </div>
+            </div>
+            <div v-if="isLoading" class="loader-container">
+              <div class="spinner"></div>
+              <div class="loader-text">Magical song creation at work ...</div>
             </div>
           </div>
-          <textarea v-model="chatInput" placeholder="Type your message here..." class="form-control mb-2"></textarea>
-          <button @click="sendMessage" class="btn btn-primary">Send</button>
+          <div class="mb-2 d-flex align-items-center mt-2">
+            <div class="col-4"><label for="api_provider" class="form-label me-2">API Provider:</label></div>
+            <div class="col-8">
+            <select v-model="apiProvider" id="api_provider" class="form-select me-3" @change="updateModelOptions" required>
+              <option value="openai">OpenAI</option>
+              <option value="anthropic">Anthropic</option>
+            </select>
+            </div>
+          </div>
+          <div class="mb-2 d-flex align-items-center">
+            <div class="col-4"><label for="selected_model" class="form-label">Model:</label></div>
+            <div class="col-8"><select v-model="selectedModel" id="selected_model" class="form-select" required>
+              <option v-for="model in availableModels" :key="model" :value="model" v-text="model"></option>
+            </select>
+            </div>
+          </div>
+          <textarea v-model="chatInput" placeholder="Type your message here..." class="mt-1 form-control mb-2"></textarea>
+          <button @click="sendMessage" class="btn btn-primary">Perform some magic!</button>
         </div>
       </div>
       <div v-show="visibleDivs.sonicPiCode" class="col-md-6 d-flex flex-column">
@@ -25,7 +66,7 @@
 
       <div v-show="visibleDivs.visualization" class="mt-4 col-md-12 d-flex flex-column position-relative">
           <h3>Timeline</h3>
-          
+
           <div class="controls mb-2">
             <!-- Align icons to the right -->
             <div class="time-scale-icons">
@@ -125,15 +166,17 @@ export default {
       defines: {}, // stores :hook, :acid_bass etc.
       zoomLevel: 1,
       timeScale: 'seconds', // 'seconds', 'milliseconds', or 'beats'
-      collapsedLayers: []
+      collapsedLayers: [],
+      currentSong: this.$route.query.song || 'Untitled',
+      apiProvider: 'openai',
+      selectedModel: 'gpt-4o-mini',
+      availableModels: ['gpt-4o-mini', 'gpt-4o', 'gpt-3.5-turbo'],
+
     };
   },
   computed: {
     parsedSonicPiCode() {
       return this.sonicPiCode ? this.parseSonicPiCode(this.sonicPiCode) : '';
-    },
-    playbackLeft() {
-      return (this.playbackTime / this.totalDuration) * 100;
     }
   },
   methods: {
@@ -168,12 +211,6 @@ export default {
         console.error('Error fetching Sonic Pi code:', error);
         this.sonicPiCode = '// Failed to load Sonic Pi code.';
       }
-    },
-    sendMessage() {
-      if (this.chatInput.trim() === '') return;
-      this.chatLog.push({ sender: 'You', text: this.chatInput });
-      this.chatLog.push({ sender: 'Copilot', text: 'Response to: ' + this.chatInput });
-      this.chatInput = '';
     },
     parseSonicPiCode(code) {
       const keywordRegex = /\b(live_loop|play|sleep)\b/g;
@@ -213,26 +250,6 @@ export default {
         console.error('Error sending code to Sonic Pi:', error);
         alert('Failed to send the code to Sonic Pi, did you run SonicPi/Setup/recording.rb in Sonic Pi?');
       });
-    },
-    startPlayback() {
-      this.playbackTime = 0;
-      this.isPlaying = true;
-      const start = performance.now();
-
-      const step = (timestamp) => {
-        if (!this.isPlaying) return;
-        const elapsed = (timestamp - start) / 1000;
-        this.playbackTime = Math.min(elapsed, this.totalDuration);
-        if (this.playbackTime < this.totalDuration) {
-          requestAnimationFrame(step);
-        } else {
-          this.isPlaying = false;
-        }
-      };
-      requestAnimationFrame(step);
-    },
-    stopPlayback() {
-      this.isPlaying = false;
     },
     estimateDuration(lines) {
       return lines.reduce((sum, line) => {
@@ -410,38 +427,74 @@ export default {
 
       this.visualizationLayers = sortedLayers;
     },
-    formatNumber(value, decimals) {
-      return value.toFixed(decimals);
+
+    async refreshSonicPiCode() {
+      const codeResponse = await axios.get(`${process.env.VUE_APP_API_URL}/api/get_sonicpi_code/${this.currentSong}`);
+      this.sonicPiCode = codeResponse.data.sonicpi_code;
     },
-    async refreshSonicPiCode() { 
-      const response = await axios.get(`${process.env.VUE_APP_API_URL}/api/get_sonicpi_code/${this.currentSong}`);
-      const data = await response.json();
-      if (data.sonicpi_code) {
-        this.sonicPiCode = data.sonicpi_code;
-      }
+    sendMessage() {
+      if (this.chatInput.trim() === '') return;
+      this.chatLog.push({ sender: 'You', text: this.chatInput });
+      this.isLoading = true;
+      this.sendChatMessage(this.chatInput);
+      this.chatInput = '';
     },
     async sendChatMessage(message) {
-      const response = await axios.get(`${process.env.VUE_APP_API_URL}/api/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      try {
+        const response = await axios.post(`${process.env.VUE_APP_API_URL}/api/chat`, {
           message: message,
           song_name: this.currentSong,
           agent_type: this.selectedAgent,
           selected_model: this.model,
           api_provider: this.apiProvider
-        })
-      });
-      const result = await response.json();
-      this.chatLog.push({ user: message, agent: result.response });
-      this.refreshSonicPiCode(); 
+        }, {
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const result = response.data;
+        if (result.error) {
+          console.info('Error from agent:', result.error);
+          await this.refreshSonicPiCode();
+        } else {
+          this.chatLog.push({ sender: 'Agent', text: result.comment });
+          await this.refreshSonicPiCode();
+        }
+        this.isLoading = false;
+      } catch (error) {
+        console.error('Error sending chat message:', error);
+      } finally {
+        this.isLoading = false;
+      }
     },
+    handleImageError(event) {
+      event.target.src = require('@/assets/images/assistants/Unknown.webp');
+    },
+    updateModelOptions() {
+      if (this.apiProvider === 'openai') {
+        this.availableModels = ['gpt-4o-mini', 'gpt-4o', 'gpt-3.5-turbo'];
+      } else if (this.apiProvider === 'anthropic') {
+        this.availableModels = ['claude-v1', 'claude-v1.2', 'claude-instant-v1'];
+      }
+    },
+    async loadConversationHistory() {
+      try {
+        const response = await axios.get(`${process.env.VUE_APP_API_URL}/api/conversation_history`, {
+          params: { song_name: this.currentSong }
+        });
+        this.chatLog = response.data.map(entry => ({
+          sender: entry.role === 'user' ? 'You' : 'Agent',
+          text: entry.content
+        }));
+      } catch (error) {
+        console.error('Error loading conversation history:', error);
+      }
+    }
   },
   mounted() {
     const songName = this.$route.query.song;
     if (songName) {
       this.fetchSonicPiCode(songName);
     }
+    this.loadConversationHistory();
   },
 };
 </script>
@@ -472,7 +525,21 @@ export default {
   background-color: #fff;
 }
 .chat-message {
-  margin-bottom: 5px;
+  display: flex;
+  align-items: start;
+  margin-bottom: 1rem;
+}
+.chat-image {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-right: 1rem;
+}
+
+.chat-text {
+  background-color: #f1f1f1;
+  padding: 1rem;
+  border-radius: 0.5rem;
 }
 .sonic-pi-code {
   background-color: #f8f9fa;
@@ -626,5 +693,33 @@ export default {
 
 .time-scale-btn:hover {
   color: #278156;
+}
+
+.loader-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-left-color: #000;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loader-text {
+  margin-top: 5px;
+  font-size: 1rem;
+  color: #666;
 }
 </style>
