@@ -202,8 +202,12 @@ export default {
   },
   mounted() {
     console.log("FormData:", this.formData);
-    this.fetchAgentTypes()
-    this.updateModelOptions()
+    this.fetchAgentTypes();
+    this.updateModelOptions();
+    if (this.agentTypes.length > 0) {
+      this.formData.agentType = this.agentTypes[0]; // Set the first agent type by default
+      this.initializeAgent();
+    }
   }
 }
 </script>
