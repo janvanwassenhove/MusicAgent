@@ -4,12 +4,16 @@
     <br/><br>
     <h1>Welcome to MusicAgent</h1>
 
-    <p>Welcome, and get ready to start creating your own songs!<br>
-      <br>Click on the "New Song" link in the navigation bar to start creating your own song.
-      <br>Click on the "Samples" link in the navigation bar to see some sample songs or launch the metadata listing (if you aded new samples).
-      <br>Click on the "Songs Library" link in the navigation bar to see the songs library.
-      <br>Click on the "Settings" link in the navigation bar to adjust Music Agent settings (Sonic Pi, styling, ...).
-    </p>
+    <p>🎵 Welcome to Music Agent!
+Ready to bring your musical ideas to life? You’re in the right place.<br/>
+
+👉 Start a new track by clicking "New Song" in the navigation bar.<br/>
+🎧 Explore and play with inspiration via the "Samples" section — perfect for discovering example songs or checking your newly added samples.<br/>
+📚 Dive into your creations in the "Songs Library", where all your saved songs live.<br/>
+⚙️ Want to fine-tune your setup? Visit "Settings" to configure Sonic Pi, tweak styles, and personalize your experience.<br/>
+<br/>
+Let the jam begin!
+</p>
   </MainLayout>
 </template>
 
