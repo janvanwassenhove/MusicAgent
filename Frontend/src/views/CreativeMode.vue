@@ -313,6 +313,9 @@ export default {
           this.albumImage = require('@/assets/images/assistants/Music_Publisher.webp');
         });
     } 
+    if (this.currentSong === 'Untitled') {
+        this.isEditingSongName = true; // Enable editing mode
+    }
   },
 };
 </script>
