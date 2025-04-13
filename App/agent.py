@@ -566,7 +566,7 @@ class GPTAgent:
             "\n**KEY REQUIREMENTS:**"
             "1. **PARALLEL INSTRUMENTATION**: During key segments (e.g., verses, choruses, solos), ensure multiple instruments (e.g., melody, bassline, chords, and drum patterns) are **PLAYED SIMULTANEOUSLY** to create a **FULLER, RICHER SOUND**."
             "2. **BACKGROUND CONTINUITY**: Ensure background elements like drum patterns, recurring beats, or basslines **RUN CONTINUOUSLY** during segments to support the main melody or chords."
-            "3. **DYNAMIC LAYERING**: During segments such as the **CHORUS**, introduce additional layers (e.g., harmony, effects like reverb or distortion, or more complex rhythms) to enhance the sound."
+            "3. **DYNAMIC LAYERING**: During segments such as the **CHORUS**, introduce additional layers (e.g., harmony, effects like reverb or distortion, or more complex rhythms) to enhance the sound. Try having multiple sound patterns play in parallel like e.g. background synths, pads, and drums."
             "4. **NO SILENT GAPS**: The song must have a **CONTINUOUS, FLUENT MELODY** with no silent gaps or separate blocks."
             "5. **AVOID LIVE LOOPS**: Do not use live loops. Instead, use techniques like `in_thread`, `sync`, `sleep`, and timed sequences to manage the flow."
             "6. **TRANSLATION OF ARRANGEMENTS**: Translate the arrangements within the limitations of Sonic Pi, balancing instruments and effects effectively for each segment."
