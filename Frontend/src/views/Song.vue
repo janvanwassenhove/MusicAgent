@@ -80,8 +80,8 @@ export default {
   data() {
     return {
       visibleDivs: {
-        songParameters: false,
-        agentTimeline: false,
+        songParameters: true,
+        agentTimeline: true,
         agentConversations: false,
         musicAgentLogs: false,
         sonicPiCode: false

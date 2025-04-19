@@ -12,7 +12,8 @@
     - [Agent Configuration](#agent-configuration)
 4. [Samples](#samples)
 5. [Song Library](#song-library)
-6. [Settings](#settings)
+6. [Creative Mode](#creative-mode)
+7. [Settings](#settings)
    
 ## Introduction
 The MusicAgent web interface is a more simple way to interact with the MusicAgent. 
@@ -92,6 +93,19 @@ Paginated view of the songs created by the MusicAgent.
 While selecting the song, you have the ability to see the album cover, and the sonic pi code.
 
 ![config](../Assets/WebApp/songlibrary.png)
+
+## Creative Mode
+The creative mode allows you to create a song from scratch. You can chat directly with the MusicAgent and ask it to generate a song for you.
+
+![config](../Assets/WebApp/CreativeMode.png)
+
+It also allows to you to select specific samples to be used in the song creation process. During song creation, MusicAgent will use the selected samples to generate the song.
+But will also propose adjustments and enhancements to your song.
+![config](../Assets/WebApp/chat_history_samples.png)
+
+The Sonic Pi code will be visualized as well, giving you a better overview on the song structure and specific loops and threads used throughout the song.
+
+![config](../Assets/WebApp/SonicPi_Visualisation.png)
 
 ## Settings
 Changing you agent style (impacts e.g. cover generation).

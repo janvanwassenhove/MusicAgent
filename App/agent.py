@@ -534,5 +534,123 @@ class GPTAgent:
         feedback_message  = sonic_pi.call_sonicpi(song, artist_config["sonic_pi_IP"], int(artist_config["sonic_pi_port"]))
         return feedback_message
 
+    def handle_chat_input(self, sonic_pi_code, user_comment):
+        song_log_directory = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'songs', self.song.name)
+        conversation_file = os.path.join(song_log_directory, 'conversation_history.json')
 
+        # Load existing conversation history
+        if os.path.exists(conversation_file):
+            with open(conversation_file, 'r') as file:
+                conversation_history = json.load(file)
+        else:
+            conversation_history = []
 
+        conversation_history.append({
+            "role": "user",
+            "content": user_comment
+        })
+
+        # Save updated conversation history
+        with open(conversation_file, 'w') as file:
+            json.dump(conversation_history, file, indent=2)
+
+        # Convert system_content from a tuple to a string
+        system_content = (
+            "You are a creative music composer using Sonic Pi syntax. You respond to user suggestions by writing or editing Ruby code blocks for Sonic Pi."
+            "Provide a response in **JSON format** with a field for \"sonicpi_code\". This field must contain the **entire Sonic Pi code** (not just the revisions or parts, but the full code for the entire song written in Ruby)."
+            "Add a second field \"comment\" to include your feedback and comments on the code. E.g. what changed and some proposals for improvement of the song."
+            "The response should be formatted as a JSON-compatible string, ready to be parsed. Format it as follows: {\"sonicpi_code\": \"<complete code here>\", \"comment\": \"<complete comment & feedback here>\"}."
+            "Do not include any additional text, explanations, or comments outside of the JSON format."
+            "Ensure the JSON strictly includes only the \"sonicpi_code\" and \"comment\" field, properly formatted and containing the final, complete code."
+            "**GIVEN THIS INFORMATION, CODE SONGS USING THE SONIC PI PROGRAMMING LANGUAGE.**"
+            "\n**KEY REQUIREMENTS:**"
+            "1. **PARALLEL INSTRUMENTATION**: During key segments (e.g., verses, choruses, solos), ensure multiple instruments (e.g., melody, bassline, chords, and drum patterns) are **PLAYED SIMULTANEOUSLY** to create a **FULLER, RICHER SOUND**."
+            "2. **BACKGROUND CONTINUITY**: Ensure background elements like drum patterns, recurring beats, or basslines **RUN CONTINUOUSLY** during segments to support the main melody or chords."
+            "3. **DYNAMIC LAYERING**: During segments such as the **CHORUS**, introduce additional layers (e.g., harmony, effects like reverb or distortion, or more complex rhythms) to enhance the sound. Try having multiple sound patterns play in parallel like e.g. background synths, pads, and drums."
+            "4. **NO SILENT GAPS**: The song must have a **CONTINUOUS, FLUENT MELODY** with no silent gaps or separate blocks."
+            "5. **AVOID LIVE LOOPS**: Do not use live loops. Instead, use techniques like `in_thread`, `sync`, `sleep`, and timed sequences to manage the flow."
+            "6. **TRANSLATION OF ARRANGEMENTS**: Translate the arrangements within the limitations of Sonic Pi, balancing instruments and effects effectively for each segment."
+            "7. **SONIC PI SYNTAX**: Use Sonic Pi syntax and functions to create the song, ensuring it runs without errors."
+            "8. **IN_THREAD USAGE**: Use `in_thread` to manage multiple instruments, to structure the song or effects running simultaneously, ensuring they are properly synchronized."
+            "\nThe composition should feel complete and cohesive, with a consistent tempo and flow."
+        )
+
+        user_message = {
+            "role": "user",
+            "content": f"We have following song in Sonic PI code: {sonic_pi_code}. Code was reviewed with following comments: {user_comment}."
+        }
+
+        # Add conversation history to the user message
+        conversation_history.append(user_message)
+        conversation_history_str = "\n".join([f"{msg['role']}: {msg['content']}" for msg in conversation_history])
+
+        if self.api_provider == 'openai':
+            client = OpenAI(api_key=self.get_api_key())
+            messages = [
+                {"role": "system", "content": system_content + "\n\n" + conversation_history_str},
+                user_message
+            ]
+            self.logger.info(f"Sending request to OpenAI: {messages}")
+            completion = client.chat.completions.create(
+                model=self.selected_model,
+                messages=messages
+            )
+            response_text = completion.choices[0].message.content
+
+        elif self.api_provider == 'anthropic':
+            client = Anthropic(api_key=self.get_api_key())
+            request_data = {
+                "model": self.selected_model,
+                "prompt": system_content + "\n\n" + conversation_history_str + "\n\n" + user_message["content"],
+                "max_tokens": self.MAX_TOKENS[self.selected_model]["tokens"]
+            }
+            self.logger.info(f"Sending request to Anthropic: {request_data}")
+            completion = client.messages.create(**request_data)
+            response_text = completion.content[0].text
+        else:
+            raise ValueError(f"Unsupported provider: {self.api_provider}")
+        self.logger.info(f"Original response: {response_text}")
+
+        # Append the assistant's response to the conversation history
+        conversation_history.append({
+            "role": "assistant",
+            "content": response_text
+        })
+
+        # Save the updated conversation history
+        with open(conversation_file, 'w') as file:
+            json.dump(conversation_history, file, indent=2)
+
+        retry_count = 0
+        max_retries = 3
+        while retry_count < max_retries:
+            try:
+                match = re.search(r'\{.*\}', response_text, re.DOTALL)
+                if match:
+                    response_data = json.loads(match.group(0))
+                else:
+                    response_data = json.loads(response_text)
+
+                if 'sonicpi_code' in response_data:
+                    if isinstance(response_data['sonicpi_code'], list):
+                        code_to_retrieve = '\n'.join(response_data['sonicpi_code'])
+                    elif isinstance(response_data['sonicpi_code'], str):
+                        code_to_retrieve = response_data['sonicpi_code']
+
+                    if code_to_retrieve and isinstance(code_to_retrieve, str):
+                        fixed_code = self.fix_sonic_pi_notes(code_to_retrieve)
+                    else:
+                        print(f"Warning: code_to_retrieve is not a valid string. Value: {code_to_retrieve}")
+                        fixed_code = code_to_retrieve
+
+                    self.logger.info(f"Code successfully retrieved: {fixed_code}")
+                    self.song_creation_data.set_parameter("sonicpi_code", fixed_code)
+                    self.song.create_song_file(self.song_creation_data)
+                else:
+                    song_creation_data.update_parameters_from_response(response_data)
+                return response_data.get('comment', '')
+            except json.JSONDecodeError as e:
+                self.logger.info(f"Failed to parse the response as JSON: {e}")
+                if self.handle_json_decode_error(response_text, self.song_creation_data, '', ''):
+                    return response_data.get('comment', '')
+                retry_count += 1

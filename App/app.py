@@ -17,6 +17,7 @@ from App.agent import GPTAgent
 from App.song import Song
 import json
 from queue import Queue
+from routes import register_routes
 
 app = Flask(__name__, static_url_path='/static', static_folder=os.path.join(parent_dir, 'Songs'))
 
@@ -56,6 +57,8 @@ class QueueHandler(logging.Handler):
     def emit(self, record):
         log_queue.put(self.format(record))
 
+register_routes(app)
+
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
@@ -69,45 +72,6 @@ current_config = None
 # Load configurations
 with open(os.path.join(parent_dir, 'AgentConfig', 'mITyJohn', 'SongConfig.json')) as f:
     song_config = json.load(f)
-
-def find_agent_config_dir():
-    """     Find the AgentConfig directory by traversing up the directory tree.     """
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    while True:
-        parent_dir = os.path.dirname(current_dir)
-        if parent_dir == current_dir:  # We've reached the root directory
-            raise FileNotFoundError("AgentConfig directory not found in any parent directory")
-        agent_config_path = os.path.join(parent_dir, 'AgentConfig')
-        if os.path.exists(agent_config_path) and os.path.isdir(agent_config_path):
-            return agent_config_path
-        current_dir = parent_dir
-
-def get_agent_types():
-    """     Get the list of available agent types based on the folders in AgentConfig.     """
-    try:
-        agent_config_path = find_agent_config_dir()
-        agent_types = [folder for folder in os.listdir(agent_config_path)
-                       if os.path.isdir(os.path.join(agent_config_path, folder))]
-        return agent_types
-    except FileNotFoundError as e:
-        print(f"Error: {str(e)}")
-        return []
-
-def load_config(agent_type):
-    """
-    Load the configuration for the specified agent type.
-    """
-    agent_config_path = find_agent_config_dir()
-    config_path = os.path.join(agent_config_path, agent_type, 'ArtistConfig.json')
-
-    try:
-        with open(config_path, 'r') as config_file:
-            config = json.load(config_file)
-        return config
-    except FileNotFoundError:
-        raise ValueError(f"Configuration file for {agent_type} // {config_path}  not found.")
-    except Exception as e:
-        raise ValueError(f"Error loading configuration for {agent_type}: {str(e)}")
 
 def initialize_agent(song_name, agent_type, input_callback, selected_model, api_provider):
     # Set up logging
@@ -130,25 +94,61 @@ def initialize_agent(song_name, agent_type, input_callback, selected_model, api_
     logger.info(f"input_callback set {agent.input_callback} ")
     return agent
 
-@app.route('/api/agent_types')
-def agent_types():
+@app.route('/api/run_sample_metadata_listing', methods=['POST'])
+def run_sample_metadata_listing_endpoint():
+    #print("Starting sample metadata listing")
+    #threading.Thread(target=run_sample_metadata_listing).start()
+    logging.info("run_sample_metadata_listing API called")
     try:
-        types = get_agent_types()
-        return jsonify({"agent_types": types})
-    except FileNotFoundError as e:
-        return jsonify({"error": str(e)}), 404
+        input_directory = os.path.join(os.path.dirname(__file__), "..", "Samples")
+        executor.submit(process_directory, input_directory)
+        return jsonify({"status": "accepted"}), 202
+    except Exception as e:
+        logging.error(f"Error running sample metadata listing: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
 
-@app.route('/api/init', methods=['POST'])
-def init_agent():
-    global current_config
-    agent_type = request.json.get('agent_type')
+@app.route('/api/sample_metadata_progress', methods=['GET'])
+def sample_metadata_progress():
     try:
-        current_config = load_config(agent_type)
-        return jsonify({
-            "genres": current_config['genres']
-        })
-    except ValueError as e:
-        return jsonify({"error": str(e)}), 404
+        with open(progress_file, 'r') as f:
+            data = json.load(f)
+            progress = data.get("progress", 0)
+        return jsonify({"progress": progress})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/sample_metadata', methods=['GET'])
+def get_sample_metadata():
+    try:
+        sample_metadata_path = os.path.join(parent_dir, 'Samples', 'sample_metadata.json')
+        with open(sample_metadata_path, 'r', encoding='utf-8') as f:
+            sample_metadata = json.load(f)
+        return jsonify(sample_metadata)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/sample/<path:filename>', methods=['GET'])
+def get_sample(filename):
+    try:
+        sample_path = os.path.join(parent_dir, 'Samples', filename)
+        if os.path.exists(sample_path):
+            return send_file(sample_path, as_attachment=True)
+        else:
+            return jsonify({"error": "File not found"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/sample/search', methods=['GET'])
+def search_samples():
+    query = request.args.get('query', '').lower()
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    samples_dir = os.path.join(project_root, 'Samples')
+    filepath = os.path.join(samples_dir, f'sample_metadata.json')
+    with open(filepath, 'r') as f:
+        data = json.load(f)
+    results = [item for item in data if query.lower() in json.dumps(item).lower()]
+    return jsonify(results)
+
 
 @app.route('/api/create', methods=['GET', 'POST'])
 def index():
@@ -206,18 +206,6 @@ def get_timeline():
         return jsonify(config)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-@app.route('/api/agent_config/<agent_type>', methods=['GET'])
-def get_agent_config(agent_type):
-    print(f"Getting config for {agent_type}")
-    config = load_config(agent_type)
-    return jsonify(config)
-
-@app.route('/api/agent_config/<agent_type>', methods=['POST'])
-def save_agent_config(agent_type):
-    new_config = request.json
-    save_config(agent_type, new_config)
-    return jsonify({"message": "Configuration saved successfully"})
 
 def save_config(agent_type, new_config):
     agent_config_path = find_agent_config_dir()
@@ -300,6 +288,20 @@ def send_to_sonicpi():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+def load_config(agent_type):
+    """Load the configuration for the specified agent type."""
+    agent_config_path = find_agent_config_dir()
+    config_path = os.path.join(agent_config_path, agent_type, 'ArtistConfig.json')
+
+    try:
+        with open(config_path, 'r') as config_file:
+            config = json.load(config_file)
+        return config
+    except FileNotFoundError:
+        raise ValueError(f"Configuration file for {agent_type} // {config_path} not found.")
+    except Exception as e:
+        raise ValueError(f"Error loading configuration for {agent_type}: {str(e)}")
+
 @app.route('/api/songs', methods=['GET'])
 def list_songs():
     songs_dir = os.path.join(parent_dir, 'Songs')
@@ -342,49 +344,6 @@ def read_progress():
 
 executor = ThreadPoolExecutor(max_workers=1)
 
-@app.route('/api/run_sample_metadata_listing', methods=['POST'])
-def run_sample_metadata_listing_endpoint():
-    #print("Starting sample metadata listing")
-    #threading.Thread(target=run_sample_metadata_listing).start()
-    logging.info("run_sample_metadata_listing API called")
-    try:
-        input_directory = os.path.join(os.path.dirname(__file__), "..", "Samples")
-        executor.submit(process_directory, input_directory)
-        return jsonify({"status": "accepted"}), 202
-    except Exception as e:
-        logging.error(f"Error running sample metadata listing: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 500
-
-@app.route('/api/sample_metadata_progress', methods=['GET'])
-def sample_metadata_progress():
-    try:
-        with open(progress_file, 'r') as f:
-            data = json.load(f)
-            progress = data.get("progress", 0)
-        return jsonify({"progress": progress})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/api/sample_metadata', methods=['GET'])
-def get_sample_metadata():
-    try:
-        sample_metadata_path = os.path.join(parent_dir, 'Samples', 'sample_metadata.json')
-        with open(sample_metadata_path, 'r', encoding='utf-8') as f:
-            sample_metadata = json.load(f)
-        return jsonify(sample_metadata)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/api/sample/<path:filename>', methods=['GET'])
-def get_sample(filename):
-    try:
-        sample_path = os.path.join(parent_dir, 'Samples', filename)
-        if os.path.exists(sample_path):
-            return send_file(sample_path, as_attachment=True)
-        else:
-            return jsonify({"error": "File not found"}), 404
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
 
 UPLOAD_DIRECTORY = os.path.join(os.path.dirname(__file__), '..', 'Samples', 'Uploaded')
 
@@ -419,6 +378,18 @@ def get_sonicpi_config():
                 })
 
     return jsonify(sonic_pi_configs)
+
+def find_agent_config_dir():
+    """Find the AgentConfig directory by traversing up the directory tree."""
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    while True:
+        parent_dir = os.path.dirname(current_dir)
+        if parent_dir == current_dir:  # We've reached the root directory
+            raise FileNotFoundError("AgentConfig directory not found in any parent directory")
+        agent_config_path = os.path.join(parent_dir, 'AgentConfig')
+        if os.path.exists(agent_config_path) and os.path.isdir(agent_config_path):
+            return agent_config_path
+        current_dir = parent_dir
 
 @app.route('/api/artists/config', methods=['GET'])
 def get_artists_config():
@@ -460,6 +431,95 @@ def update_sonicpi_config():
 
     return jsonify({"message": "Configuration updated successfully"})
 
+@app.route('/api/chat', methods=['POST'])
+def handle_chat():
+    data = request.json
+    sonic_pi_code = ''
+    songName = data.get('song_name')
+
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    songs_dir = os.path.join(project_root, 'songs')
+    if not os.path.exists(songs_dir):
+        os.makedirs(songs_dir)
+    song_log_directory = os.path.join(songs_dir, songName)
+    if not os.path.exists(song_log_directory):
+        os.makedirs(song_log_directory)
+
+    song_log_directory = os.path.join(songs_dir, songName)
+    filepath = os.path.join(song_log_directory, f'{songName}.rb')
+    app.logger.debug(f"Looking for file in: {filepath}")
+    if os.path.exists(filepath):
+        with open(filepath, 'r') as file:
+            sonic_pi_code = file.read()
+
+    selected_files = data.get('selectedFiles', [])
+    samples_str = ', '.join(item.get('Filename', '') for item in selected_files if isinstance(item, dict))
+
+    phrase = f'Following samples (external to Sonic Pi) can be used: {samples_str}.'
+
+    user_comment = data.get('message')
+    if samples_str:
+        user_comment += ' ' + phrase
+
+    selected_model = data.get('selected_model', 'gpt-4o-mini')
+    api_provider = data.get('api_provider', 'openai')
+
+    app.logger.debug(f"sonic_pi_code retrieved: {sonic_pi_code}")
+    app.logger.debug(f"Received chat request: {data}")
+
+    song = Song(name=songName, logger=logger)
+
+    agent = GPTAgent(
+        selected_model=selected_model,
+        logger=logger,
+        song=song,
+        agentType='default',  # Not used in this context
+        api_provider=api_provider
+    )
+
+    chatResponse = agent.handle_chat_input(sonic_pi_code, user_comment)
+    app.logger.debug(f"Chat response: {chatResponse}")
+
+    song_log_directory = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'songs', songName)
+    chat_history_file = os.path.join(song_log_directory, 'chat_history.json')
+
+    # Load existing chat history
+    if os.path.exists(chat_history_file):
+        with open(chat_history_file, 'r') as file:
+            chat_history = json.load(file)
+    else:
+        chat_history = []
+
+    # Append new chat entry
+    chat_history.append({
+        "role": "user",
+        "content": user_comment
+    })
+    chat_history.append({
+        "role": "assistant",
+        "content": chatResponse
+    })
+
+    # Save updated chat history
+    with open(chat_history_file, 'w') as file:
+        json.dump(chat_history, file, indent=2)
+
+    if chatResponse is not None:
+        return jsonify({"comment": chatResponse})
+    else:
+        return jsonify({"error": "No response from agent"})
+
+@app.route('/api/conversation_history', methods=['GET'])
+def get_conversation_history():
+    song_name = request.args.get('song_name', 'default_song')
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    conversation_history_path = os.path.join(project_root, 'songs', song_name, 'chat_history.json')
+    if os.path.exists(conversation_history_path):
+        with open(conversation_history_path, 'r') as file:
+            conversation_history = json.load(file)
+        return jsonify(conversation_history)
+    else:
+        return jsonify([])
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)

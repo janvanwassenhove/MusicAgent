@@ -48,8 +48,24 @@ class Song:
         self.logger.info("Writing song to directory: " + self.song_dir)
         self.logger.info("sonic pi code " + finalcode)
 
-        # Create the song file
         song_file = os.path.join(self.song_dir, self.name + '.rb')
+
+        # Check if the file already exists
+        if os.path.exists(song_file):
+            # Compare the existing file content with the new content
+            with open(song_file, 'r') as existing_file:
+                existing_content = existing_file.read()
+            if existing_content != finalcode:
+                # Find the next available index for renaming
+                index = 1
+                while True:
+                    new_song_file = os.path.join(self.song_dir, f"{self.name}_{index}.rb")
+                    if not os.path.exists(new_song_file):
+                        os.rename(song_file, new_song_file)
+                        break
+                    index += 1
+
+        # Write the new content to the song file
         with open(song_file, 'w') as f:
             f.write(finalcode)
 
