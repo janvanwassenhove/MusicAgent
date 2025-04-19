@@ -373,7 +373,18 @@ export default {
   position: relative;
   cursor: pointer;
 }
-.live-loop { background-color: #3a86ff; }
+.live-loop {
+  background-color: #3a86ff;
+  color: #fff;
+  position: relative;
+}
+
+.live-loop::after {
+  content: "\f2f9";
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  margin-left: 5px;
+}
 .in-thread { background-color: #ff006e; }
 .fxClass-reverb { border: 2px dashed #aaa; }
 .fxClass-distortion { border: 2px solid red; }
