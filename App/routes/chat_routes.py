@@ -36,7 +36,27 @@ def handle_chat():
             sonic_pi_code = file.read()
 
     selected_files = data.get('selectedFiles', [])
-    samples_str = ', '.join(item.get('Filename', '') for item in selected_files if isinstance(item, dict))
+
+    samples_metadata_path = os.path.join(root_dir, 'Samples', 'sample_metadata.json')
+    with open(samples_metadata_path, 'r') as f:
+        sample_metadata = json.load(f)
+
+    # Create a lookup dictionary for fast access by filename
+    metadata_lookup = {item['Filename']: item for item in sample_metadata}
+
+    # For each selected file, get its full metadata
+    selected_metadata = []
+    for item in selected_files:
+        filename = item.get('Filename', '')
+        if filename in metadata_lookup:
+            selected_metadata.append(metadata_lookup[filename])
+        else:
+            # Optionally, handle missing metadata
+            selected_metadata.append({'Filename': filename, 'Error': 'Metadata not found'})
+
+    # Now, selected_metadata is a list of dicts with all metadata for each selected file
+    # You can convert it to a JSON string for display or further processing
+    samples_str = json.dumps(selected_metadata, indent=2)
 
     phrase = f'Following samples (external to Sonic Pi) can be used: {samples_str}.'
 

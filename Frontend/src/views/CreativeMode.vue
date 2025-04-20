@@ -265,6 +265,7 @@ export default {
           await this.refreshSonicPiCode();
         } else {
           this.chatLog.push({ sender: 'Agent', text: result.comment });
+          this.selectedFiles = [];
           await this.refreshSonicPiCode();
         }
         this.isLoading = false;
