@@ -11,6 +11,15 @@ from App.services.song import Song
 agent_bp = Blueprint('agent', __name__)
 logger = logging.getLogger()
 
+# Import agent/song classes and helpers from parent
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(os.path.dirname(current_dir))
+sys.path.append(parent_dir)
+
+# Load song config for genres
+with open(os.path.join(parent_dir, 'AgentConfig', 'mITyJohn', 'SongConfig.json')) as f:
+    song_config = json.load(f)
+
 # Helper functions
 def find_agent_config_dir():
     """Find the AgentConfig directory by traversing up the directory tree."""
@@ -54,16 +63,6 @@ def save_config(agent_type, new_config):
     config_path = os.path.join(agent_config_path, agent_type, 'ArtistConfig.json')
     with open(config_path, 'w') as config_file:
         json.dump(new_config, config_file, indent=2)
-
-# Import agent/song classes and helpers from parent
-current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(os.path.dirname(current_dir))
-sys.path.append(parent_dir)
-
-
-# Load song config for genres
-with open(os.path.join(parent_dir, 'AgentConfig', 'mITyJohn', 'SongConfig.json')) as f:
-    song_config = json.load(f)
 
 input_queue = Queue()
 def create_input_callback():
