@@ -4,8 +4,8 @@ The main file that will be executed to run the GPT agent for songwriting.
 import os
 import logging
 import json
-from App.agent import GPTAgent
-from App.song import Song
+from App.services.agent import GPTAgent
+from App.services.song import Song
 
 def get_available_models():
     return {
