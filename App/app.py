@@ -4,7 +4,6 @@ import os
 import logging
 import queue
 from flask_socketio import SocketIO
-from services.SampleMedataListing import process_directory
 from concurrent.futures import ThreadPoolExecutor
 from flask_cors import CORS
 
@@ -15,17 +14,11 @@ sys.path.append(parent_dir)
 
 from App.services.agent import GPTAgent
 from App.services.song import Song
-from App.services.sonicPi import SonicPi
 import json
 from queue import Queue
 from routes import register_routes
-from App.routes.agent_routes import agent_bp
-from App.routes.song_routes import song_bp
-from App.routes.chat_routes import chat_bp
-from App.routes.sonicpi_routes import sonicpi_bp
 
 app = Flask(__name__, static_url_path='/static', static_folder=os.path.join(parent_dir, 'Songs'))
-
 CORS(app)
 
 socketio = SocketIO(app, async_mode='threading', cors_allowed_origins="*")
