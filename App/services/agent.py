@@ -21,6 +21,7 @@ import datetime
 import faiss
 import numpy as np
 from sentence_transformers import SentenceTransformer
+from App.config import Config
 
 class GPTAgent:
 
@@ -48,9 +49,7 @@ class GPTAgent:
         self.max_context_length = self.MAX_TOKENS[selected_model]["content_length"]
 
     def log_request_response(self, provider, request_data, response_data, cost, token_count, char_count):
-        songs_dir = '../Songs'
-        project_root = os.path.dirname(os.path.abspath(__file__))
-        songs_dir = os.path.join(project_root, 'Songs')
+        songs_dir = os.path.join(Config.PROJECT_ROOT, 'Songs')
         if not os.path.exists(songs_dir):
             os.makedirs(songs_dir)
         song_log_directory = os.path.join(songs_dir, self.song.name)
@@ -237,9 +236,7 @@ class GPTAgent:
             f"Assistant is {assistant_role_name}, questioned by {user_role_name}. \nPrompting:\n {phase_prompt}\n"
         )
 
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        project_root = os.path.dirname(current_dir)  # Set project_root to the parent directory
-
+        project_root = Config.PROJECT_ROOT
         # Correct the path to the FAISS index file
         faiss_index_path = os.path.join(project_root, 'Samples', 'sample_index.faiss')
         metadata_path = os.path.join(project_root, 'Samples', 'sample_metadata.json')
@@ -253,7 +250,11 @@ class GPTAgent:
         model = SentenceTransformer('all-MiniLM-L6-v2')
 
         # Generate an embedding for the query
-        query = "We are creating a new song with the following details: - Theme: Hope and transformation. - Melody: Uplifting and bright, featuring synth arpeggios and soaring lead lines. - Rhythm: A mix of syncopated strumming, dynamic shifts, and four-on-the-floor beats. - Song Structure: - Intro (20s): Soft piano, lush pads, ethereal vocal samples, progression Cmaj - Gmaj - Amin - Fmaj. - Verse 1 (30s): Acoustic guitar, rhythmic synth bass, soft percussion, progression Amin - Fmaj - Cmaj - Gmaj. - Chorus (30s): Punchy kick drum, layered synths, claps, progression Fmaj - Cmaj - Amin - Gmaj. - Solo (20s): Uplifting synth arpeggios, resonating lead synth. - Bridge (20s): Ambient pads, soft piano, counterpoint melody. The total duration is 170 seconds. Please suggest suitable samples with tags matching the mood, progression, and instrumentation described above."
+        query = f"We are creating a new song with the following details: - Theme: {song_creation_data.theme}. " \
+                f"- Melody: {song_creation_data.melody}. " \
+                f"- Rhythm: {song_creation_data.rhythm}. " \
+                f"- Song Description: {song_creation_data.song_description}. " \
+                "Please suggest suitable samples with tags matching the mood, progression, and instrumentation described above."
         query_embedding = model.encode(query)  # Generate embedding locally
         query_embedding = np.array([query_embedding]).astype("float32")
 
@@ -407,8 +408,7 @@ class GPTAgent:
         return False
 
     def execute_composition_chain(self, genre, duration, additional_information):
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        project_root = os.path.dirname(current_dir) 
+        project_root = Config.PROJECT_ROOT
 
         with open(os.path.join(project_root, 'AgentConfig', self.agentType, 'MusicCreationPhaseConfig.json')) as file:
             phase_config = json.load(file)
@@ -471,8 +471,7 @@ class GPTAgent:
         self.logger.info("image " + image_url)
 
         if songdir == "":
-            project_root = os.path.dirname(os.path.abspath(__file__))
-            songdir = os.path.join(project_root, 'Songs', filename)
+            songdir = os.path.join(Config.PROJECT_ROOT, 'Songs', filename)
         if not os.path.exists(songdir):
             os.makedirs(songdir)
 
@@ -534,8 +533,21 @@ class GPTAgent:
         feedback_message  = sonic_pi.call_sonicpi(song, artist_config["sonic_pi_IP"], int(artist_config["sonic_pi_port"]))
         return feedback_message
 
+    def fix_sample_paths(self, sonic_pi_code: str) -> str:
+        # Pattern matches sample file paths starting with the absolute Windows path.
+        pattern = r'sample\s+"(?:[^"]*Samples\\\\)([^"]+)"'
+
+        def repl(match):
+            # Convert the captured relative path to use forward slashes.
+            sample_relative = match.group(1).replace("\\", "/")
+            return f'sample "{sample_relative}"'
+
+        return re.sub(pattern, repl, sonic_pi_code)
+
     def handle_chat_input(self, sonic_pi_code, user_comment):
-        song_log_directory = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'songs', self.song.name)
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        root_dir = os.path.abspath(os.path.join(current_dir, '..', '..'))
+        song_log_directory = os.path.join(root_dir, 'songs', self.song.name)
         conversation_file = os.path.join(song_log_directory, 'conversation_history.json')
 
         # Load existing conversation history
@@ -575,6 +587,7 @@ class GPTAgent:
             "\nThe composition should feel complete and cohesive, with a consistent tempo and flow."
         )
 
+        sonic_pi_code = self.fix_sample_paths(sonic_pi_code)
         user_message = {
             "role": "user",
             "content": f"We have following song in Sonic PI code: {sonic_pi_code}. Code was reviewed with following comments: {user_comment}."

@@ -20,8 +20,7 @@ def handle_chat():
     sonic_pi_code = ''
     songName = data.get('song_name')
 
-    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    songs_dir = os.path.join(project_root, 'songs')
+    songs_dir = os.path.join(root_dir, 'songs')
     if not os.path.exists(songs_dir):
         os.makedirs(songs_dir)
     song_log_directory = os.path.join(songs_dir, songName)
@@ -83,7 +82,8 @@ def handle_chat():
     chatResponse = agent.handle_chat_input(sonic_pi_code, user_comment)
     logger.debug(f"Chat response: {chatResponse}")
 
-    song_log_directory = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'songs', songName)
+    song_log_directory = os.path.join(root_dir, 'songs', songName)
+
     chat_history_file = os.path.join(song_log_directory, 'chat_history.json')
 
     # Load existing chat history
