@@ -584,6 +584,7 @@ class GPTAgent:
             "6. **TRANSLATION OF ARRANGEMENTS**: Translate the arrangements within the limitations of Sonic Pi, balancing instruments and effects effectively for each segment."
             "7. **SONIC PI SYNTAX**: Use Sonic Pi syntax and functions to create the song, ensuring it runs without errors."
             "8. **IN_THREAD USAGE**: Use `in_thread` to manage multiple instruments, to structure the song or effects running simultaneously, ensuring they are properly synchronized."
+            "9. **SONG STRUCTURE**: The song should have a clear structure, including sections like intro, verse, chorus, bridge, and outro. Each section should be clearly defined and labeled in the code. The structure is depending on the song style or genre given in the prompt instructions."
             "\nThe composition should feel complete and cohesive, with a consistent tempo and flow."
         )
 
