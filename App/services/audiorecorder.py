@@ -4,8 +4,9 @@ import numpy as np
 from scipy.io.wavfile import write
 import time
 import threading
-from .sonicPi import SonicPi
 import sys
+from .sonicPi import SonicPi
+from App.config import Config
 
 sys.set_int_max_str_digits(1000000)  # Increase as necessary
 
@@ -68,7 +69,7 @@ class AudioRecorder:
 
         # Delay slightly to ensure the recording starts before playing the Sonic Pi script
         time.sleep(0.5)
-        feedback_message = sonic_pi.call_sonicpi(self.song, self.artist_config["sonic_pi_IP"], int(self.artist_config["sonic_pi_port"]))
+        feedback_message = sonic_pi.call_sonicpi(self.song, Config.SONIC_PI_HOST, Config.SONIC_PI_PORT)
         if feedback_message is not None and "error" in feedback_message.lower():
             self.logger.info(f"Error detected in Sonic Pi execution: {feedback_message}")
 

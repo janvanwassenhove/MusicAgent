@@ -1,8 +1,6 @@
 {
   "agent_name": "mITy.John",
   "artist_style": " Retro & vintage using yellow, dark green, orange, black, white color palette.",
-  "sonic_pi_IP": "192.168.0.160",
-  "sonic_pi_port": "4560",
   "samples_max": 10,
   "assistants": [
     {

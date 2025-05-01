@@ -515,7 +515,7 @@ class GPTAgent:
 
     def run_sonic_pi_script(self, song, artist_config):
         sonic_pi = SonicPi(self.logger)
-        feedback_message  = sonic_pi.call_sonicpi(song, artist_config["sonic_pi_IP"], int(artist_config["sonic_pi_port"]))
+        feedback_message = sonic_pi.call_sonicpi(self.song, Config.SONIC_PI_HOST, Config.SONIC_PI_PORT)
         return feedback_message
 
     def fix_sample_paths(self, sonic_pi_code: str) -> str:
