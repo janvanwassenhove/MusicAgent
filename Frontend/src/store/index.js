@@ -1,4 +1,5 @@
 import { createStore } from 'vuex'
+import axios from 'axios'
 
 export default createStore({
     state: {
@@ -23,7 +24,11 @@ export default createStore({
         currentCycle: {},
         songParameters: {},
         logMessages: [],
-        sonicPiCodeVersions: []
+        sonicPiCodeVersions: [],
+        selectedProvider: localStorage.getItem('selectedProvider') || 'openai',
+        selectedModel: localStorage.getItem('selectedModel') || '',
+        providers: [],
+        modelsByProvider: {}
     },
     mutations: {
         addSonicPiCodeVersion(state, newCode) {
@@ -62,19 +67,25 @@ export default createStore({
                 state.completedPhases.push(phase);
             }
         },
-    },
-    actions: {
-        updateModelOptions({ commit, state }) {
-            const modelOptions = {
-                "openai": ["gpt-4o", "gpt-4o-mini", "gpt-3.5-turbo", "gpt-4", "gpt-4-32k"],
-                "anthropic": ["claude-3-5-sonnet-20240620", "claude-3-sonnet-20240229", "claude-3-haiku-20240307"]
-            }
-            const availableModels = modelOptions[state.formData.api_provider] || []
-            commit('setAvailableModels', availableModels)
-            if (!availableModels.includes(state.formData.selected_model)) {
-                state.formData.selected_model = availableModels[0] || ''
+        setProviders(state, providers) {
+            state.providers = providers
+        },
+        setModelsByProvider(state, { provider, models }) {
+            state.modelsByProvider = {
+                ...state.modelsByProvider,
+                [provider]: models
             }
         },
+        setSelectedProvider(state, provider) {
+            state.selectedProvider = provider
+            localStorage.setItem('selectedProvider', provider)
+        },
+        setSelectedModel(state, model) {
+            state.selectedModel = model
+            localStorage.setItem('selectedModel', model)
+        },
+    },
+    actions: {
         async fetchAgentTypes({ commit }) {
             try {
                 const response = await fetch('/agent_types')
@@ -83,6 +94,26 @@ export default createStore({
             } catch (error) {
                 console.error('Error fetching agent types:', error)
             }
+        },
+        async fetchModelConfig({ commit }) {
+            try {
+                const response = await axios.get(`${process.env.VUE_APP_API_URL}/api/model_config`)
+                const data = response.data
+                commit('setProviders', Object.keys(data))
+            } catch (error) {
+                console.error('Error fetching model config:', error)
+            }
+        },
+        async updateModelOptions({ commit }, provider) {
+            try {
+                const response = await axios.get(`${process.env.VUE_APP_API_URL}/api/model_config/${provider}`)
+                commit('setModelsByProvider', { provider, models: Object.keys(response.data) })
+            } catch (error) {
+                console.error('Error fetching models:', error)
+            }
         }
+    },
+    getters: {
+        availableModels: state => state.modelsByProvider[state.selectedProvider] || []
     }
 })

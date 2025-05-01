@@ -7,6 +7,7 @@
 2. [How does it work?](#how-does-it-work)
 3. [Using Music Agent](#using-music-agent)
     - [Prerequisites](#prerequisites)
+    - [Model API](#ModelAPI)
     - [Installation](#installation)
     - [Samples](#samples)
 4. [Configuration](#configuration)
@@ -84,12 +85,12 @@ The eventual output is a booklet with an album cover (optionally a recording dep
 - **Sonic Pi:** Must be installed on your system (needed to run the *.rb files): https://sonic-pi.net/
 - **Python** Must be installed on your machine (Currently MusicAgent supports v12)
 
-#### Model API
+### Model API
 
 Music agents works as well with the OpenAI & Anthropic API (Anthropic currently does not provide image generation, so no album cover will be generated).
 To switch in between both, make sure to set both variables in your config file or environment variables.
 
-- **OPENAI_API_KEY:** Set as a system environment variable or in `ArtistConfig/mITyJohn/ArtistConfig.json`.
+- **OPENAI_API_KEY:** Set as a system environment variable or in `App/static/config/settings.json`.
 
   On MAC:
     ```bash
@@ -99,7 +100,7 @@ To switch in between both, make sure to set both variables in your config file o
     ```bash
     $env:OPENAI_API_KEY='<your_api_key>'
     ```
-- **ANTHROPIC_API_KEY:** Set as a system environment variable or in `ArtistConfig/mITyJohn/ArtistConfig.json`.
+- **ANTHROPIC_API_KEY:** Set as a system environment variable or in `App/static/config/settings.json`.
   
   On MAC:
     ```bash
@@ -108,6 +109,17 @@ To switch in between both, make sure to set both variables in your config file o
   On Windows (using PowerShell):
     ```bash
     $env:ANTHROPIC_API_KEY='<your_api_key>'
+    ```
+
+- **AZURE_OPENAI_API_KEY:** Set as a system environment variable or in `App/static/config/settings.json`.
+
+  On MAC:
+    ```bash
+    export AZURE_OPENAI_API_KEY='<your_api_key>'
+    ```
+  On Windows (using PowerShell):
+    ```bash
+    $env:AZURE_OPENAI_API_KEY='<your_api_key>'
     ```
   
 ### Installation

@@ -4,7 +4,7 @@
     "agent_name": "mITy.John",
     "description": "MusicAgent will not only create, but also used active feedback from Sonic Pi and record the entire track. When using make sure Sonic Pi is running and following script is started (from within the IDE): live_loop :listen do\n  use_real_time\n  script = sync \"/osc*/run-code\"\n  \n  begin\n    eval script[0]\n    osc_send '127.0.0.1', 4559, '/feedback', 'MusicAgent Code was executed successfully'\n  rescue Exception => e\n    osc_send '127.0.0.1', 4559, '/feedback', e.message\n  end\nend",
     "artist_style": " Retro & vintage using yellow, dark green, orange, black, white color palette.",
-    "sonic_pi_IP": "127.0.0.1",
+    "sonic_pi_IP": "192.168.0.163",
     "sonic_pi_port": "4560",
     "samples_max": 10,
     "assistants": [

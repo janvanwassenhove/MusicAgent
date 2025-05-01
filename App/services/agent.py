@@ -3,6 +3,7 @@ This file contains the GPTAgent class that interacts with the OpenAI or Anthropi
 '''
 
 from openai import OpenAI
+from openai import AzureOpenAI
 from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
 from .audiorecorder import AudioRecorder
 from .songCreationData import SongCreationData
@@ -25,17 +26,6 @@ from App.config import Config
 
 class GPTAgent:
 
-    MAX_TOKENS = {
-        "gpt-4o": {"tokens": 8192, "content_length": 4096000},
-        "gpt-4o-mini": {"tokens": 4096, "content_length": 2048000},
-        "gpt-3.5-turbo": {"tokens": 4096, "content_length": 2048000},
-        "gpt-4": {"tokens": 8192, "content_length": 4096000},
-        "gpt-4-32k": {"tokens": 32768, "content_length": 16384000},
-        "claude-3-5-sonnet-20240620": {"tokens": 8192, "content_length": 4096000},
-        "claude-3-sonnet-20240307": {"tokens": 8192, "content_length": 4096000},
-        "claude-3-haiku-20240307": {"tokens": 8192, "content_length": 4096000}
-    }
-
     def __init__(self, selected_model, logger, song, agentType, api_provider):
         self.selected_model = selected_model
         self.song_creation_data = SongCreationData(logger)
@@ -45,8 +35,10 @@ class GPTAgent:
         self.agentType = agentType
         self.api_provider = api_provider
         self.input_callback = None
-        self.conversation_history = []  # Store the conversation history here
-        self.max_context_length = self.MAX_TOKENS[selected_model]["content_length"]
+        self.conversation_history = []
+        provider_config = Config.MODEL_CONFIG.get(api_provider, {})
+        model_config = provider_config.get(selected_model, {})
+        self.max_context_length = model_config.get("content_length", 4096000)
 
     def log_request_response(self, provider, request_data, response_data, cost, token_count, char_count):
         songs_dir = os.path.join(Config.PROJECT_ROOT, 'Songs')
@@ -77,22 +69,26 @@ class GPTAgent:
         return len(tokens)
 
     def check_token_limit(self, system_content, phase_prompt, model):
-        if model not in self.MAX_TOKENS:
-            print(f"Model {model} not recognized.")
+        provider_config = Config.MODEL_CONFIG.get(self.api_provider, {})
+        model_config = provider_config.get(model, {})
+
+        if not model_config:
+            print(f"Model {model} not recognized for provider {self.api_provider}")
             return False
 
         combined_content = system_content + phase_prompt
-        max_content_length = self.MAX_TOKENS[model]["content_length"]
+        max_content_length = model_config.get("content_length")
         if len(combined_content) > max_content_length:
-            print(f"Combined content ({combined_content}) length exceeds the maximum allowed length of {max_content_length} characters.")
+            print(f"Combined content length exceeds the maximum allowed length of {max_content_length} characters.")
             return False
 
         token_count = self.count_tokens(combined_content, model)
-        if token_count <= self.MAX_TOKENS[model]["tokens"]:
-            print(f"Combined content is within the token limit for {model}. Token count: {token_count}, max is {self.MAX_TOKENS[model]["tokens"]}")
+        max_tokens = model_config.get("tokens")
+        if token_count <= max_tokens:
+            print(f"Combined content is within the token limit for {model}. Token count: {token_count}, max is {max_tokens}")
             return True
         else:
-            print(f"Combined content exceeds the token limit for {model}. Token count: {token_count}, max is {self.MAX_TOKENS[model]["tokens"]}")
+            print(f"Combined content exceeds the token limit for {model}. Token count: {token_count}, max is {max_tokens}")
             return False
 
     def get_user_input(self, prompt):
@@ -102,20 +98,7 @@ class GPTAgent:
         return input(prompt)
 
     def get_api_key(self):
-        # Try to get the API key from an environment variable
-        env_var = "OPENAI_API_KEY" if self.api_provider == 'openai' else "ANTHROPIC_API_KEY"
-        api_key = os.getenv(env_var)
-
-        # If not found, fallback to the config file
-        if not api_key:
-            try:
-                with open('AgentConfig/'+self.agentType+'/ArtistConfig.json', 'r') as config_file:
-                    config = json.load(config_file)
-                    api_key = config.get(env_var)
-            except (FileNotFoundError, json.JSONDecodeError) as e:
-                print(f"Error reading config file: {e}")
-                return None
-        return api_key
+        return Config.get_api_key(self.api_provider)
 
     # Function to get assistant content from ArtistConfig
     def get_assistant_content(self, role_name, artist_config):
@@ -203,6 +186,20 @@ class GPTAgent:
         return response_text
 
     def handle_openai_request(self, client, system_content, phase_prompt, openai_messages):
+        completion = client.chat.completions.create(
+            model=self.selected_model,
+            messages=openai_messages
+        )
+        response_text = completion.choices[0].message.content
+
+        token_count = self.count_tokens(system_content + phase_prompt, self.selected_model)
+        char_count = len(system_content + phase_prompt)
+        cost = self.calculate_cost(token_count)
+
+        self.log_request_response('openai', openai_messages, completion.choices[0].message.content, cost, token_count, char_count)
+        return response_text
+
+    def handle_azure_openai_request(self, client, system_content, phase_prompt, openai_messages):
         completion = client.chat.completions.create(
             model=self.selected_model,
             messages=openai_messages
@@ -310,7 +307,9 @@ class GPTAgent:
                     ]
                     if self.check_token_limit(system_content, phase_prompt, self.selected_model):
                         response_text = self.handle_openai_request(client, system_content, phase_prompt, openai_messages)
-
+                elif self.api_provider == 'azure': #Azure
+                    if self.check_token_limit(system_content, phase_prompt, self.selected_model):
+                        response_text = self.handle_azure_openai_request(client, system_content, phase_prompt, openai_messages)
                 elif self.api_provider == 'anthropic':  # Anthropic
                     if self.check_token_limit(system_content, phase_prompt, self.selected_model):
                         response_text = self.handle_anthropic_request(client, system_content, phase_prompt)
@@ -501,24 +500,10 @@ class GPTAgent:
             self.logger.info("Failed to download image")
 
     def calculate_cost(self, token_count):
-        pricing = {
-            'openai': {
-                'gpt-4o': 0.0001,
-                'gpt-4o-mini': 0.00005,
-                'gpt-3.5-turbo': 0.00002,
-                'gpt-4': 0.0002,
-                'gpt-4-32k': 0.0004
-            },
-            'anthropic': {
-                'claude-3-5-sonnet-20240620': 0.00015,
-                'claude-3-sonnet-20240229': 0.0001,
-                'claude-3-haiku-20240307': 0.00005
-            }
-        }
-
-        provider_pricing = pricing.get(self.api_provider, {})
-        model_pricing = provider_pricing.get(self.selected_model, 0.0001)  # Default to 0.0001 if not found
-        return token_count * model_pricing
+        provider_config = Config.MODEL_CONFIG.get(self.api_provider, {})
+        model_config = provider_config.get(self.selected_model, {})
+        price = model_config.get("price", 0.0001)  # Default fallback price
+        return token_count * price
 
     def get_image_type(self, image_content):
         try:
@@ -605,6 +590,26 @@ class GPTAgent:
                 user_message
             ]
             self.logger.info(f"Sending request to OpenAI: {messages}")
+            completion = client.chat.completions.create(
+                model=self.selected_model,
+                messages=messages
+            )
+            response_text = completion.choices[0].message.content
+
+        elif self.api_provider == 'azure':
+            client = OpenAI(
+                # api_key=self.get_api_key(),
+                api_version="2024-12-01-preview",
+                # credential=
+                # azure_endpoint=
+                #azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"), #https://musicagent.openai.azure.com/
+                azure_deployment=self.selected_model
+            )
+            messages = [
+                {"role": "system", "content": system_content + "\n\n" + conversation_history_str},
+                user_message
+            ]
+            self.logger.info(f"Sending request to Azure OpenAI: {messages}")
             completion = client.chat.completions.create(
                 model=self.selected_model,
                 messages=messages

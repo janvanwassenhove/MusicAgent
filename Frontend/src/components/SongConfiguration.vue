@@ -4,19 +4,7 @@
       <form @submit.prevent="submitForm" v-if="formData">
         <h1>Song Configuration</h1>
         <div class="row">
-          <div class="col-md-4 mb-3">
-            <label for="api_provider" class="form-label">API Provider:</label>
-            <select v-model="formData.api_provider" id="api_provider" class="form-select" @change="updateModelOptions" required>
-              <option value="openai">OpenAI</option>
-              <option value="anthropic">Anthropic</option>
-            </select>
-          </div>
-          <div class="col-md-4 mb-3">
-            <label for="selected_model" class="form-label">Model:</label>
-            <select v-model="formData.selected_model" id="selected_model" class="form-select" required>
-              <option v-for="model in availableModels" :key="model" :value="model" v-text="model"></option>
-            </select>
-          </div>
+          <model-selector />
           <div class="col-md-4 mb-3">
             <label for="agent_type" class="form-label">Select Agent Type:</label>
             <div class="input-group">
@@ -89,9 +77,13 @@
 import { mapState, mapActions } from 'vuex'
 import axios from 'axios'
 import * as bootstrap from 'bootstrap'
+import ModelSelector from './ModelSelector.vue'
 
 export default {
   name: 'SongConfiguration',
+  components: {
+    ModelSelector
+  },
   data() {
     return {
       configJson: ''
@@ -203,7 +195,6 @@ export default {
   mounted() {
     console.log("FormData:", this.formData);
     this.fetchAgentTypes();
-    this.updateModelOptions();
     if (this.agentTypes.length > 0) {
       this.formData.agentType = this.agentTypes[0]; // Set the first agent type by default
       this.initializeAgent();

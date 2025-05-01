@@ -10,7 +10,8 @@ from App.services.song import Song
 def get_available_models():
     return {
         "openai": ["gpt-4o", "gpt-4o-mini", "gpt-3.5-turbo", "gpt-4", "gpt-4-32k"],
-        "anthropic": ["claude-3-5-sonnet-20240620", "claude-3-sonnet-20240229", "claude-3-haiku-20240307"]
+        "anthropic": ["claude-3-5-sonnet-20240620", "claude-3-sonnet-20240229", "claude-3-haiku-20240307"],
+        "azure": ["gpt-4o-mini"],
     }
 
 def get_user_input(prompt, options):
@@ -34,7 +35,7 @@ def main():
     print("\nWelcome to mITy John's music agent, let's make you a song!")
 
     # Get user input for provider
-    available_providers = ["openai", "anthropic"]
+    available_providers = ["openai", "anthropic", "azure"]
     provider = get_user_input("Choose API provider:", available_providers)
 
     # Get user input for model

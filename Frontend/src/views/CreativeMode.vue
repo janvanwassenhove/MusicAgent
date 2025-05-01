@@ -57,18 +57,7 @@
             </div>
           </div>
           <div class="mb-2 d-flex align-items-center mt-2">
-            <div class="col-3"><label for="api_provider" class="form-label me-2 m-2">API Provider:</label></div>
-            <div class="col-3">
-            <select v-model="apiProvider" id="api_provider" class="form-select me-3" @change="updateModelOptions" required>
-              <option value="openai">OpenAI</option>
-              <option value="anthropic">Anthropic</option>
-            </select>
-            </div>
-            <div class="col-2"><label for="selected_model" class="form-label m-2">Model:</label></div>
-            <div class="col-4"><select v-model="selectedModel" id="selected_model" class="form-select" required>
-              <option v-for="model in availableModels" :key="model" :value="model" v-text="model"></option>
-            </select>
-            </div>
+            <model-selector />
           </div>
           <multiselect
               v-model="selectedFiles"
@@ -105,11 +94,13 @@ import MainLayout from '@/layouts/MainLayout.vue';
 import axios from 'axios';
 import Multiselect from 'vue-multiselect';
 import VisualizationControls from '@/components/VisualizationControls.vue';
+import ModelSelector from '@/components/ModelSelector.vue'
+import { mapState } from 'vuex'
 
 export default {
   name: 'CreativeMode',
   components: {
-    MainLayout,Multiselect, VisualizationControls
+    MainLayout,Multiselect, VisualizationControls, ModelSelector
   },
   data() {
     return {
@@ -128,9 +119,8 @@ export default {
 
       currentSong: this.$route.query.song || 'Untitled',
       albumImage: '',
-      apiProvider: 'openai',
-      selectedModel: 'gpt-4o-mini',
-      availableModels: ['gpt-4o-mini', 'gpt-4o', 'gpt-3.5-turbo'],
+      providers: [],
+      availableModels: [],
       selectedFiles: [],
       options: [],
       isLoading: false,
@@ -139,6 +129,10 @@ export default {
     };
   },
   computed: {
+    ...mapState({
+      selectedModel: state => state.formData.selected_model,
+      selectedProvider: state => state.formData.api_provider
+    }),
     parsedSonicPiCode() {
       return this.sonicPiCode ? this.parseSonicPiCode(this.sonicPiCode) : '';
     }
@@ -253,9 +247,8 @@ export default {
           message: message,
           selectedFiles: this.selectedFiles,
           song_name: this.currentSong,
-          agent_type: this.selectedAgent,
-          selected_model: this.model,
-          api_provider: this.apiProvider
+          selected_model: this.selectedModel,
+          api_provider: this.selectedProvider
         }, {
           headers: { 'Content-Type': 'application/json' }
         });
@@ -277,13 +270,6 @@ export default {
     },
     handleImageError(event) {
       event.target.src = require('@/assets/images/assistants/Unknown.webp');
-    },
-    updateModelOptions() {
-      if (this.apiProvider === 'openai') {
-        this.availableModels = ['gpt-4o-mini', 'gpt-4o', 'gpt-3.5-turbo'];
-      } else if (this.apiProvider === 'anthropic') {
-        this.availableModels = ['claude-v1', 'claude-v1.2', 'claude-instant-v1'];
-      }
     },
     async loadConversationHistory() {
       try {

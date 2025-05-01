@@ -5,6 +5,7 @@ import logging
 import sys
 from App.services.sonicPi import SonicPi
 from App.services.song import Song
+from App.config import Config
 
 sonicpi_bp = Blueprint('sonicpi', __name__)
 logger = logging.getLogger()
@@ -38,43 +39,32 @@ def load_config(agent_type):
 
 @sonicpi_bp.route('/sonicpi/config', methods=['GET'])
 def get_sonicpi_config():
-    agent_config_path = find_agent_config_dir()
-    sonic_pi_configs = []
-
-    for agent_type in os.listdir(agent_config_path):
-        config_path = os.path.join(agent_config_path, agent_type, 'ArtistConfig.json')
-        if os.path.exists(config_path):
-            with open(config_path, 'r') as f:
-                config = json.load(f)
-                sonic_pi_configs.append({
-                    "agent_type": agent_type,
-                    "sonic_pi_IP": config.get("sonic_pi_IP"),
-                    "sonic_pi_port": config.get("sonic_pi_port")
-                })
-
-    return jsonify(sonic_pi_configs)
+    return jsonify({
+        "sonic_pi_IP": Config.SONIC_PI_HOST,
+        "sonic_pi_port": Config.SONIC_PI_PORT
+    })
 
 @sonicpi_bp.route('/sonicpi/config', methods=['POST'])
 def update_sonicpi_config():
     data = request.json
-    agent_type = data.get('agent_type')
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
     new_ip = data.get('sonic_pi_IP')
     new_port = data.get('sonic_pi_port')
 
-    config_path = os.path.join(find_agent_config_dir(), agent_type, 'ArtistConfig.json')
-    if not os.path.exists(config_path):
-        return jsonify({"error": "Configuration file not found"}), 404
+    if not new_ip or not new_port:
+        return jsonify({"error": "IP and port are required"}), 400
 
-    with open(config_path, 'r') as f:
-        config = json.load(f)
-
-    config['sonic_pi_IP'] = new_ip
-    config['sonic_pi_port'] = new_port
-
-    with open(config_path, 'w') as f:
-        json.dump(config, f, indent=2)
-
-    return jsonify({"message": "Configuration updated successfully"})
+    try:
+        Config.update_sonic_pi_settings(new_ip, new_port)
+        return jsonify({
+            "message": "Configuration updated successfully",
+            "sonic_pi_IP": Config.SONIC_PI_HOST,
+            "sonic_pi_port": Config.SONIC_PI_PORT
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @sonicpi_bp.route('/send_to_sonicpi', methods=['POST'])
 def send_to_sonicpi():
@@ -86,9 +76,8 @@ def send_to_sonicpi():
     song_name = data.get('song_name', 'Untitled')
     agent_type = data.get('agent_type', 'mITyJohn')
     try:
-        artist_config = load_config(agent_type)
-        ip_address = artist_config["sonic_pi_IP"]
-        port = int(artist_config["sonic_pi_port"])
+        host = Config.SONIC_PI_HOST
+        port = Config.SONIC_PI_PORT
 
         # Create a Song instance
         song = Song(name=song_name, logger=logger)
