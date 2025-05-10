@@ -3,6 +3,7 @@ This file contains the GPTAgent class that interacts with the OpenAI or Anthropi
 '''
 
 from openai import OpenAI
+from openai import AzureOpenAI
 from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
 from .audiorecorder import AudioRecorder
 from .songCreationData import SongCreationData
@@ -21,19 +22,9 @@ import datetime
 import faiss
 import numpy as np
 from sentence_transformers import SentenceTransformer
+from App.config import Config
 
 class GPTAgent:
-
-    MAX_TOKENS = {
-        "gpt-4o": {"tokens": 8192, "content_length": 4096000},
-        "gpt-4o-mini": {"tokens": 4096, "content_length": 2048000},
-        "gpt-3.5-turbo": {"tokens": 4096, "content_length": 2048000},
-        "gpt-4": {"tokens": 8192, "content_length": 4096000},
-        "gpt-4-32k": {"tokens": 32768, "content_length": 16384000},
-        "claude-3-5-sonnet-20240620": {"tokens": 8192, "content_length": 4096000},
-        "claude-3-sonnet-20240307": {"tokens": 8192, "content_length": 4096000},
-        "claude-3-haiku-20240307": {"tokens": 8192, "content_length": 4096000}
-    }
 
     def __init__(self, selected_model, logger, song, agentType, api_provider):
         self.selected_model = selected_model
@@ -44,13 +35,13 @@ class GPTAgent:
         self.agentType = agentType
         self.api_provider = api_provider
         self.input_callback = None
-        self.conversation_history = []  # Store the conversation history here
-        self.max_context_length = self.MAX_TOKENS[selected_model]["content_length"]
+        self.conversation_history = []
+        provider_config = Config.MODEL_CONFIG.get(api_provider, {})
+        model_config = provider_config.get(selected_model, {})
+        self.max_context_length = model_config.get("content_length", 4096000)
 
     def log_request_response(self, provider, request_data, response_data, cost, token_count, char_count):
-        songs_dir = '../Songs'
-        project_root = os.path.dirname(os.path.abspath(__file__))
-        songs_dir = os.path.join(project_root, 'Songs')
+        songs_dir = os.path.join(Config.PROJECT_ROOT, 'Songs')
         if not os.path.exists(songs_dir):
             os.makedirs(songs_dir)
         song_log_directory = os.path.join(songs_dir, self.song.name)
@@ -78,22 +69,26 @@ class GPTAgent:
         return len(tokens)
 
     def check_token_limit(self, system_content, phase_prompt, model):
-        if model not in self.MAX_TOKENS:
-            print(f"Model {model} not recognized.")
+        provider_config = Config.MODEL_CONFIG.get(self.api_provider, {})
+        model_config = provider_config.get(model, {})
+
+        if not model_config:
+            print(f"Model {model} not recognized for provider {self.api_provider}")
             return False
 
         combined_content = system_content + phase_prompt
-        max_content_length = self.MAX_TOKENS[model]["content_length"]
+        max_content_length = model_config.get("content_length")
         if len(combined_content) > max_content_length:
-            print(f"Combined content ({combined_content}) length exceeds the maximum allowed length of {max_content_length} characters.")
+            print(f"Combined content length exceeds the maximum allowed length of {max_content_length} characters.")
             return False
 
         token_count = self.count_tokens(combined_content, model)
-        if token_count <= self.MAX_TOKENS[model]["tokens"]:
-            print(f"Combined content is within the token limit for {model}. Token count: {token_count}, max is {self.MAX_TOKENS[model]["tokens"]}")
+        max_tokens = model_config.get("tokens")
+        if token_count <= max_tokens:
+            print(f"Combined content is within the token limit for {model}. Token count: {token_count}, max is {max_tokens}")
             return True
         else:
-            print(f"Combined content exceeds the token limit for {model}. Token count: {token_count}, max is {self.MAX_TOKENS[model]["tokens"]}")
+            print(f"Combined content exceeds the token limit for {model}. Token count: {token_count}, max is {max_tokens}")
             return False
 
     def get_user_input(self, prompt):
@@ -103,20 +98,7 @@ class GPTAgent:
         return input(prompt)
 
     def get_api_key(self):
-        # Try to get the API key from an environment variable
-        env_var = "OPENAI_API_KEY" if self.api_provider == 'openai' else "ANTHROPIC_API_KEY"
-        api_key = os.getenv(env_var)
-
-        # If not found, fallback to the config file
-        if not api_key:
-            try:
-                with open('AgentConfig/'+self.agentType+'/ArtistConfig.json', 'r') as config_file:
-                    config = json.load(config_file)
-                    api_key = config.get(env_var)
-            except (FileNotFoundError, json.JSONDecodeError) as e:
-                print(f"Error reading config file: {e}")
-                return None
-        return api_key
+        return Config.get_api_key(self.api_provider)
 
     # Function to get assistant content from ArtistConfig
     def get_assistant_content(self, role_name, artist_config):
@@ -186,18 +168,41 @@ class GPTAgent:
         else:
             self.logger.info("No review provided, 'review' parameter will not be set.")
 
-    def handle_anthropic_request(self, client, system_content, phase_prompt):
+    # def handle_anthropic_request(self, client, system_content, phase_prompt):
+    #     request_data = {
+    #         "model": self.selected_model,
+    #         "system": system_content,
+    #         "messages": [{"role": "user", "content": phase_prompt}],
+    #         "max_tokens": self.MAX_TOKENS[self.selected_model]["tokens"]
+    #     }
+    #     completion = client.messages.create(**request_data)
+    #     response_text = completion.content[0].text
+    #
+    #     token_count = self.count_tokens(system_content + phase_prompt, self.selected_model)
+    #     char_count = len(system_content + phase_prompt)
+    #     cost = self.calculate_cost(token_count)
+    #     self.log_request_response('anthropic', request_data, completion.content[0].text, cost, token_count, char_count)
+    #
+    #     return response_text
+
+    def handle_anthropic_request(self, client, system_content, conversation_history):
+        provider_config = Config.MODEL_CONFIG.get(self.api_provider, {})
+        model_config = provider_config.get(self.selected_model, {})
+        max_tokens = model_config.get("tokens", 4096)
+
         request_data = {
             "model": self.selected_model,
             "system": system_content,
-            "messages": [{"role": "user", "content": phase_prompt}],
-            "max_tokens": self.MAX_TOKENS[self.selected_model]["tokens"]
+            "messages": conversation_history,
+            "max_tokens": max_tokens
         }
+
         completion = client.messages.create(**request_data)
         response_text = completion.content[0].text
 
-        token_count = self.count_tokens(system_content + phase_prompt, self.selected_model)
-        char_count = len(system_content + phase_prompt)
+        conversation_str = "\n".join([f"{msg['role']}: {msg['content']}" for msg in conversation_history])
+        token_count = self.count_tokens(system_content + conversation_str, self.selected_model)
+        char_count = len(system_content + conversation_str)
         cost = self.calculate_cost(token_count)
         self.log_request_response('anthropic', request_data, completion.content[0].text, cost, token_count, char_count)
 
@@ -210,11 +215,35 @@ class GPTAgent:
         )
         response_text = completion.choices[0].message.content
 
+        # shouldn't we pass openai_messages here?
         token_count = self.count_tokens(system_content + phase_prompt, self.selected_model)
         char_count = len(system_content + phase_prompt)
         cost = self.calculate_cost(token_count)
 
         self.log_request_response('openai', openai_messages, completion.choices[0].message.content, cost, token_count, char_count)
+        return response_text
+
+    def handle_azure_openai_request(self, client, system_content, phase_prompt, openai_messages):
+        provider_config = Config.MODEL_CONFIG.get(self.api_provider, {})
+        model_config = provider_config.get(self.selected_model, {})
+        deployment_name = model_config.get("deployment_name")
+
+        if not deployment_name:
+            raise ValueError(f"Deployment name not configured for model {self.selected_model}")
+
+        completion = client.chat.completions.create(
+            model=self.selected_model,
+            deployment_name=deployment_name,
+            messages=openai_messages
+        )
+        response_text = completion.choices[0].message.content
+
+        conversation_str = "\n".join([f"{msg['role']}: {msg['content']}" for msg in openai_messages])
+        token_count = self.count_tokens(system_content + conversation_str, self.selected_model)
+        char_count = len(system_content + conversation_str)
+        cost = self.calculate_cost(token_count)
+
+        self.log_request_response('azure', openai_messages, completion.choices[0].message.content, cost, token_count, char_count)
         return response_text
 
     def local_discussion(self, client, phase, song_creation_data, artist_config, phase_config):
@@ -237,9 +266,7 @@ class GPTAgent:
             f"Assistant is {assistant_role_name}, questioned by {user_role_name}. \nPrompting:\n {phase_prompt}\n"
         )
 
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        project_root = os.path.dirname(current_dir)  # Set project_root to the parent directory
-
+        project_root = Config.PROJECT_ROOT
         # Correct the path to the FAISS index file
         faiss_index_path = os.path.join(project_root, 'Samples', 'sample_index.faiss')
         metadata_path = os.path.join(project_root, 'Samples', 'sample_metadata.json')
@@ -253,7 +280,11 @@ class GPTAgent:
         model = SentenceTransformer('all-MiniLM-L6-v2')
 
         # Generate an embedding for the query
-        query = "We are creating a new song with the following details: - Theme: Hope and transformation. - Melody: Uplifting and bright, featuring synth arpeggios and soaring lead lines. - Rhythm: A mix of syncopated strumming, dynamic shifts, and four-on-the-floor beats. - Song Structure: - Intro (20s): Soft piano, lush pads, ethereal vocal samples, progression Cmaj - Gmaj - Amin - Fmaj. - Verse 1 (30s): Acoustic guitar, rhythmic synth bass, soft percussion, progression Amin - Fmaj - Cmaj - Gmaj. - Chorus (30s): Punchy kick drum, layered synths, claps, progression Fmaj - Cmaj - Amin - Gmaj. - Solo (20s): Uplifting synth arpeggios, resonating lead synth. - Bridge (20s): Ambient pads, soft piano, counterpoint melody. The total duration is 170 seconds. Please suggest suitable samples with tags matching the mood, progression, and instrumentation described above."
+        query = f"We are creating a new song with the following details: - Theme: {song_creation_data.theme}. " \
+                f"- Melody: {song_creation_data.melody}. " \
+                f"- Rhythm: {song_creation_data.rhythm}. " \
+                f"- Song Description: {song_creation_data.song_description}. " \
+                "Please suggest suitable samples with tags matching the mood, progression, and instrumentation described above."
         query_embedding = model.encode(query)  # Generate embedding locally
         query_embedding = np.array([query_embedding]).astype("float32")
 
@@ -309,7 +340,9 @@ class GPTAgent:
                     ]
                     if self.check_token_limit(system_content, phase_prompt, self.selected_model):
                         response_text = self.handle_openai_request(client, system_content, phase_prompt, openai_messages)
-
+                elif self.api_provider == 'azure': #Azure
+                    if self.check_token_limit(system_content, phase_prompt, self.selected_model):
+                        response_text = self.handle_azure_openai_request(client, system_content, phase_prompt, openai_messages)
                 elif self.api_provider == 'anthropic':  # Anthropic
                     if self.check_token_limit(system_content, phase_prompt, self.selected_model):
                         response_text = self.handle_anthropic_request(client, system_content, phase_prompt)
@@ -407,8 +440,7 @@ class GPTAgent:
         return False
 
     def execute_composition_chain(self, genre, duration, additional_information):
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        project_root = os.path.dirname(current_dir) 
+        project_root = Config.PROJECT_ROOT
 
         with open(os.path.join(project_root, 'AgentConfig', self.agentType, 'MusicCreationPhaseConfig.json')) as file:
             phase_config = json.load(file)
@@ -419,6 +451,8 @@ class GPTAgent:
 
         if self.api_provider == 'openai':
             client = OpenAI(api_key=self.get_api_key())
+        elif self.api_provider =='azure':
+            client = AzureOpenAI(api_key=self.get_api_key(), azure_endpoint=Config.get_azure_endpoint(), api_version=Config.get_azure_api_version())
         else:
             client = Anthropic(api_key=self.get_api_key())
 
@@ -471,8 +505,7 @@ class GPTAgent:
         self.logger.info("image " + image_url)
 
         if songdir == "":
-            project_root = os.path.dirname(os.path.abspath(__file__))
-            songdir = os.path.join(project_root, 'Songs', filename)
+            songdir = os.path.join(Config.PROJECT_ROOT, 'Songs', filename)
         if not os.path.exists(songdir):
             os.makedirs(songdir)
 
@@ -502,24 +535,10 @@ class GPTAgent:
             self.logger.info("Failed to download image")
 
     def calculate_cost(self, token_count):
-        pricing = {
-            'openai': {
-                'gpt-4o': 0.0001,
-                'gpt-4o-mini': 0.00005,
-                'gpt-3.5-turbo': 0.00002,
-                'gpt-4': 0.0002,
-                'gpt-4-32k': 0.0004
-            },
-            'anthropic': {
-                'claude-3-5-sonnet-20240620': 0.00015,
-                'claude-3-sonnet-20240229': 0.0001,
-                'claude-3-haiku-20240307': 0.00005
-            }
-        }
-
-        provider_pricing = pricing.get(self.api_provider, {})
-        model_pricing = provider_pricing.get(self.selected_model, 0.0001)  # Default to 0.0001 if not found
-        return token_count * model_pricing
+        provider_config = Config.MODEL_CONFIG.get(self.api_provider, {})
+        model_config = provider_config.get(self.selected_model, {})
+        price = model_config.get("price", 0.0001)  # Default fallback price
+        return token_count * price
 
     def get_image_type(self, image_content):
         try:
@@ -531,11 +550,24 @@ class GPTAgent:
 
     def run_sonic_pi_script(self, song, artist_config):
         sonic_pi = SonicPi(self.logger)
-        feedback_message  = sonic_pi.call_sonicpi(song, artist_config["sonic_pi_IP"], int(artist_config["sonic_pi_port"]))
+        feedback_message = sonic_pi.call_sonicpi(self.song, Config.SONIC_PI_HOST, Config.SONIC_PI_PORT)
         return feedback_message
 
+    def fix_sample_paths(self, sonic_pi_code: str) -> str:
+        # Pattern matches sample file paths starting with the absolute Windows path.
+        pattern = r'sample\s+"(?:[^"]*Samples\\\\)([^"]+)"'
+
+        def repl(match):
+            # Convert the captured relative path to use forward slashes.
+            sample_relative = match.group(1).replace("\\", "/")
+            return f'sample "{sample_relative}"'
+
+        return re.sub(pattern, repl, sonic_pi_code)
+
     def handle_chat_input(self, sonic_pi_code, user_comment):
-        song_log_directory = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'songs', self.song.name)
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        root_dir = os.path.abspath(os.path.join(current_dir, '..', '..'))
+        song_log_directory = os.path.join(root_dir, 'songs', self.song.name)
         conversation_file = os.path.join(song_log_directory, 'conversation_history.json')
 
         # Load existing conversation history
@@ -572,17 +604,20 @@ class GPTAgent:
             "6. **TRANSLATION OF ARRANGEMENTS**: Translate the arrangements within the limitations of Sonic Pi, balancing instruments and effects effectively for each segment."
             "7. **SONIC PI SYNTAX**: Use Sonic Pi syntax and functions to create the song, ensuring it runs without errors."
             "8. **IN_THREAD USAGE**: Use `in_thread` to manage multiple instruments, to structure the song or effects running simultaneously, ensuring they are properly synchronized."
+            "9. **SONG STRUCTURE**: The song should have a clear structure, including sections like intro, verse, chorus, bridge, and outro. Each section should be clearly defined and labeled in the code. The structure is depending on the song style or genre given in the prompt instructions."
             "\nThe composition should feel complete and cohesive, with a consistent tempo and flow."
         )
 
+        sonic_pi_code = self.fix_sample_paths(sonic_pi_code)
         user_message = {
             "role": "user",
-            "content": f"We have following song in Sonic PI code: {sonic_pi_code}. Code was reviewed with following comments: {user_comment}."
+            "content": f"{'We have following song in Sonic PI code: ' + sonic_pi_code if sonic_pi_code.strip() else 'We will be creating a new song in Sonic PI code'}. Adapt to following comments: {user_comment}."
         }
-
         # Add conversation history to the user message
         conversation_history.append(user_message)
         conversation_history_str = "\n".join([f"{msg['role']}: {msg['content']}" for msg in conversation_history])
+
+        prompt = system_content + "\n\n" + conversation_history_str + "\n\n" + user_message["content"]
 
         if self.api_provider == 'openai':
             client = OpenAI(api_key=self.get_api_key())
@@ -591,22 +626,23 @@ class GPTAgent:
                 user_message
             ]
             self.logger.info(f"Sending request to OpenAI: {messages}")
-            completion = client.chat.completions.create(
-                model=self.selected_model,
-                messages=messages
-            )
-            response_text = completion.choices[0].message.content
+            response_text = self.handle_openai_request(client, system_content, prompt,messages)
 
+        elif self.api_provider == 'azure':
+            client = AzureOpenAI(
+                api_key=self.get_api_key(),
+                azure_endpoint=Config.get_azure_endpoint()
+                # api_version=Config.get_azure_api_version()
+            )
+            messages = [
+                {"role": "system", "content": system_content + "\n\n" + conversation_history_str},
+                user_message
+            ]
+            response_text = self.handle_azure_openai_request(client, system_content, prompt,messages)
         elif self.api_provider == 'anthropic':
             client = Anthropic(api_key=self.get_api_key())
-            request_data = {
-                "model": self.selected_model,
-                "prompt": system_content + "\n\n" + conversation_history_str + "\n\n" + user_message["content"],
-                "max_tokens": self.MAX_TOKENS[self.selected_model]["tokens"]
-            }
-            self.logger.info(f"Sending request to Anthropic: {request_data}")
-            completion = client.messages.create(**request_data)
-            response_text = completion.content[0].text
+            self.logger.info(f"Sending request to Anthropic: {prompt}")
+            response_text = self.handle_anthropic_request(client, system_content, conversation_history)
         else:
             raise ValueError(f"Unsupported provider: {self.api_provider}")
         self.logger.info(f"Original response: {response_text}")

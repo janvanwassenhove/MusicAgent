@@ -4,13 +4,14 @@ The main file that will be executed to run the GPT agent for songwriting.
 import os
 import logging
 import json
-from App.agent import GPTAgent
-from App.song import Song
+from App.services.agent import GPTAgent
+from App.services.song import Song
 
 def get_available_models():
     return {
         "openai": ["gpt-4o", "gpt-4o-mini", "gpt-3.5-turbo", "gpt-4", "gpt-4-32k"],
-        "anthropic": ["claude-3-5-sonnet-20240620", "claude-3-sonnet-20240229", "claude-3-haiku-20240307"]
+        "anthropic": ["claude-3-5-sonnet-20240620", "claude-3-sonnet-20240229", "claude-3-haiku-20240307"],
+        "azure": ["gpt-4o-mini"],
     }
 
 def get_user_input(prompt, options):

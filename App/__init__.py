@@ -15,11 +15,6 @@ def create_app(config_name='default'):
 
     socketio = SocketIO(app, async_mode='threading', cors_allowed_origins="*")
 
-    # Register blueprints
-    from App.routes.routes import api_bp, main_routes
-    app.register_blueprint(api_bp)
-    app.register_blueprint(main_routes)
-
     # Register error handlers
     @app.errorhandler(404)
     def not_found_error(error):

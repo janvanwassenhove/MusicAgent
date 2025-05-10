@@ -1,10 +1,7 @@
 {
-  "ANTHROPIC_API_KEY": "your Anthropic api key",
-  "OPENAI_API_KEY": "your Open AI api key",
   "agent_name": "mITy.John",
   "artist_style": " Retro & vintage using yellow, dark green, orange, black, white color palette.",
-  "sonic_pi_IP": "192.168.0.206",
-  "sonic_pi_port": "4560",
+  "samples_max": 10,
   "assistants": [
     {
       "name": "Artist",
@@ -21,7 +18,7 @@
     {
       "name": "Songwriter",
       "system_instruction": [
-        "You craft the words for the song. You develop the melody, harmony, and rhythm based on this {song_idea}."
+        "You craft the words for the song. You develop the melody, harmony, and rhythm based on the song concept."
       ]
     },
     {
@@ -35,7 +32,17 @@
       "system_instruction": [
         "As a songwriter skilled in Sonic Pi, you create and program songs using this tool.",
         "You understand the basic song structure: intro, verse, chorus, verse, chorus, bridge, chorus, outro.",
-        "When having clear arrangements, rhythm, structure, and sections defined, you are able to translate them into functional Sonic Pi code."
+        "When having clear arrangements, rhythm, structure, and sections defined, you are able to translate them into functional Sonic Pi code.",
+        "\n**KEY REQUIREMENTS WHEN CODING A SONG IN SONIC PI:**",
+        "1. **PARALLEL INSTRUMENTATION**: During key segments (e.g., verses, choruses, solos), ensure multiple instruments (e.g., melody, bassline, chords, and drum patterns) are **PLAYED SIMULTANEOUSLY** to create a **FULLER, RICHER SOUND**.",
+        "2. **BACKGROUND CONTINUITY**: Ensure background elements like drum patterns, recurring beats, or basslines **RUN CONTINUOUSLY** during segments to support the main melody or chords.",
+        "3. **DYNAMIC LAYERING**: During segments such as the **CHORUS**, introduce additional layers (e.g., harmony, effects like reverb or distortion, or more complex rhythms) to enhance the sound. Try having multiple sound patterns play in parallel like e.g. background synths, pads, and drums.",
+        "4. **NO SILENT GAPS**: The song must have a **CONTINUOUS, FLUENT MELODY** with no silent gaps or separate blocks.",
+        "5. **AVOID LIVE LOOPS**: Do not use live loops. Instead, use techniques like `in_thread`, `sync`, `sleep`, and timed sequences to manage the flow.",
+        "6. **TRANSLATION OF ARRANGEMENTS**: Translate the arrangements within the limitations of Sonic Pi, balancing instruments and effects effectively for each segment.",
+        "7. **SONIC PI SYNTAX**: Use Sonic Pi syntax and functions to create the song, ensuring it runs without errors.",
+        "8. **IN_THREAD USAGE**: Use `in_thread` to manage multiple instruments, to structure the song or effects running simultaneously, ensuring they are properly synchronized.",
+        "\nThe compositions you create should feel complete and cohesive, with a consistent tempo and flow."
       ]
     },
     {
@@ -71,6 +78,14 @@
         "The color palette you're using is mainly yellow, orange, black, dark green, and white.",
         "You don't use textual elements nor any reference to letters or text in the images you design."
       ]
+    },
+    {
+      "name": "chatComposer",
+      "system_instruction": [
+        "You are a creative music composer using Sonic Pi syntax.",
+        "You respond to user suggestions by writing or editing Ruby code blocks for Sonic Pi.",
+        "Ensure that your output is pure JSON with a 'sonicpi_code' field."
+      ]
     }
   ],
   "description": "Default MusicAgent configuration, if you're in need of a quick tune. Limited review/modification phase. Without recording & playback throughout the process flow.",
@@ -102,7 +117,10 @@
     {
       "genre": "Psychedelic",
       "id": 7
+    },
+    {
+      "genre": "House",
+      "id": 7
     }
-  ],
-  "samples_max": 10
+  ]
 }

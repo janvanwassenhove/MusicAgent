@@ -32,20 +32,14 @@
         <div class="tab-pane fade" id="sonicpi" role="tabpanel" aria-labelledby="sonicpi-tab">
           <h4>Sonic Pi Configuration</h4>
           <div class="row col-md-12 ">
-            <div class="col-md-5 mt-3 mb-3">
-              <label for="agentType" class="form-label">Select Agent Type:</label>
-              <select id="agentType" v-model="selectedAgentType" class="form-select" @change="updateSonicPiConfigFields">
-                <option v-for="type in agentTypes" :key="type" :value="type">{{ type }}</option>
-              </select>
-            </div>
             <div class="row col-md-10  mb-3">
               <div class="col-md-5 ">
                 <label for="sonicPiIP" class="form-label">Local IP:</label>
-                <input type="text" id="sonicPiIP" v-model="sonicPiConfig.ip" class="form-control" />
+                <input type="text" id="sonicPiIP" v-model="sonicPiConfig.sonic_pi_IP" class="form-control" />
               </div>
               <div class="col-md-5 ">
                 <label for="sonicPiPort" class="form-label">Incoming OSC Port:</label>
-                <input type="number" id="sonicPiPort" v-model="sonicPiConfig.port" class="form-control" />
+                <input type="number" id="sonicPiPort" v-model="sonicPiConfig.sonic_pi_port" class="form-control" />
               </div>
             </div>
             <div class="mt-3">
@@ -63,9 +57,10 @@
                 script = sync "/osc*/run-code"
                 begin
                   eval script[<span class="number">0</span>]
-                  osc_send '<span class="number">127.0</span>.<span class="number">0.1</span>', <span class="number">4559</span>, '/feedback', 'MusicAgent Code was executed successfully'
+                  osc_send '<span class="number">{{ sonicPiHost }}</span>', <span class="number">{{ sonicPiPort }}</span>, '/feedback', 'MusicAgent Code was executed successfully'
                   rescue Exception => e<br>
-                osc_send '<span class="number">127.0</span>.<span class="number">0.1</span>', <span class="number">4559</span>, '/feedback', e.message
+                osc_send '<span class="number">{{ sonicPiHost }}</span>', <span class="number">{{ sonicPiPort }}</span>, '/feedback'
+                <span class="doend">end</span>
               <span class="doend">end</span>
               </code></pre>
             </div>
@@ -80,12 +75,15 @@
 <script>
 import MainLayout from "@/layouts/MainLayout.vue";
 import { mapMutations } from 'vuex';
+import axios from 'axios';
 
 export default {
   name: 'AgentSettings' ,
   components: {MainLayout},
   data() {
     return {
+      sonicPiHost: '127.0.0.1',
+      sonicPiPort: 4559,
       visibleDivs: {
         songParameters: false,
         agentTimeline: false,
@@ -94,8 +92,8 @@ export default {
         sonicPiCode: false
       },
       sonicPiConfig: {
-        ip: '',
-        port: ''
+        sonic_pi_IP: '',
+        sonic_pi_port: ''
       },
       artistConfig: {
         artist_style: '',
@@ -111,6 +109,15 @@ export default {
     ...mapMutations(['setFormSubmitted']),
     toggleVisibility(div) {
       this.visibleDivs[div] = !this.visibleDivs[div];
+    },
+    async loadSonicPiConfig() {
+      try {
+        const response = await axios.get(`${process.env.VUE_APP_API_URL}/api/sonicpi/config`);
+        this.sonicPiHost = response.data.sonic_pi_IP;
+        this.sonicPiPort = response.data.sonic_pi_port;
+      } catch (error) {
+        console.error('Error loading Sonic Pi config:', error);
+      }
     },
     async updateArtistConfig() {
       try {
@@ -130,33 +137,24 @@ export default {
 
     async fetchSonicPiConfig() {
       try {
-        const response = await fetch(`${process.env.VUE_APP_API_URL}/api/sonicpi/config`);
-        const data = await response.json();
-        if (data.length > 0) {
-          // Assuming you want the first agent's config
-          this.sonicPiConfig.ip = data[0].sonic_pi_IP;
-          this.sonicPiConfig.port = data[0].sonic_pi_port;
-        }
+        const response = await axios.get(`${process.env.VUE_APP_API_URL}/api/sonicpi/config`)
+        this.sonicPiConfig = response.data
       } catch (error) {
-        console.error('Error fetching Sonic Pi config:', error);
+        console.error('Error fetching Sonic Pi config:', error)
       }
     },
     async updateSonicPiConfig() {
       try {
-        await fetch(`${process.env.VUE_APP_API_URL}/api/sonicpi/config`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            agent_type: 'mITyJohn', // or the selected agent type
-            sonic_pi_IP: this.sonicPiConfig.ip,
-            sonic_pi_port: this.sonicPiConfig.port
-          })
-        });
-        alert('Sonic Pi configuration updated successfully');
+        const response = await axios.post(
+            `${process.env.VUE_APP_API_URL}/api/sonicpi/config`,
+            this.sonicPiConfig
+        )
+        if (response.data.message) {
+          alert('Configuration updated successfully')
+        }
       } catch (error) {
-        console.error('Error updating Sonic Pi config:', error);
+        console.error('Error updating Sonic Pi config:', error)
+        alert('Failed to update configuration')
       }
     },
     async fetchAgentTypes() {
@@ -216,6 +214,7 @@ export default {
   mounted() {
     this.fetchSonicPiConfig();
     this.fetchAgentTypes();
+    this.loadSonicPiConfig();
   }
 
 }

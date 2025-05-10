@@ -113,7 +113,7 @@
     "assistant_role_name": "Arranger",
     "user_role_name": "Composer",
     "phase_prompt": [
-      "The theme ois {theme}. ",
+      "The theme is {theme}. ",
       "The melody is described as: {melody}. ",
       "Rhythm elements include: {rhythm}. ",
       "The arrangements are: {arrangements}."

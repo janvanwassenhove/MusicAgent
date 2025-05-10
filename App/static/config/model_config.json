@@ -1,0 +1,46 @@
+{
+  "openai": {
+    "gpt-4o": {
+      "tokens": 8192,
+      "content_length": 4096000,
+      "price": 0.0001
+    },
+    "gpt-4o-mini": {
+      "tokens": 4096,
+      "content_length": 2048000,
+      "price": 0.00005
+    },
+    "gpt-3.5-turbo": {
+      "tokens": 4096,
+      "content_length": 2048000,
+      "price": 0.00002
+    },
+    "gpt-4": {
+      "tokens": 8192,
+      "content_length": 4096000,
+      "price": 0.0002
+    },
+    "gpt-4-32k": {
+      "tokens": 32768,
+      "content_length": 16384000,
+      "price": 0.0004
+    }
+  },
+  "anthropic": {
+    "claude-3-5-sonnet-20240620": {
+      "tokens": 8192,
+      "content_length": 4096000,
+      "price": 0.00015
+    },
+    "claude-3-sonnet-20240307": {
+      "tokens": 8192,
+      "content_length": 4096000,
+      "price": 0.0001
+    },
+    "claude-3-haiku-20240307": {
+      "tokens": 8192,
+      "content_length": 4096000,
+      "price": 0.00005
+    }
+  }
+}

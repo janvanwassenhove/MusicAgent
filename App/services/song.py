@@ -23,7 +23,8 @@ class Song:
 
         # Create the songs directory if it doesn't exist
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        project_root = os.path.dirname(current_dir)  # Set project_root to the parent directory
+        project_root = os.path.abspath(os.path.join(current_dir, '..', '..'))
+
         songs_directory = os.path.join(project_root, 'Songs')
         if not os.path.exists(songs_directory):
             os.makedirs(songs_directory)

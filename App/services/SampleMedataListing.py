@@ -21,9 +21,10 @@ def update_progress(progress):
         json.dump({"progress": progress}, f)
 
 # Load YAMNet model and class names
-yamnet_model = tf.saved_model.load("inc/yamnet-tensorflow2-yamnet-v1")  # Load the model from the specified directory
+model_path = os.path.join(os.path.dirname(__file__), "..", "inc", "yamnet-tensorflow2-yamnet-v1")
+yamnet_model = tf.saved_model.load(model_path)  # Load the model from the specified directory
 yamnet_classes = []
-with open("Inc/yamnet-tensorflow2-yamnet-v1/assets/yamnet_class_map.csv", "r") as f:
+with open("inc/yamnet-tensorflow2-yamnet-v1/assets/yamnet_class_map.csv", "r") as f:
     yamnet_classes = [line.strip() for line in f.readlines()]
 
 def preprocess_audio(file_path):
