@@ -42,12 +42,5 @@
       "content_length": 4096000,
       "price": 0.00005
     }
-  },
-  "azure": {
-    "gpt-4o-mini": {
-      "tokens": 4096,
-      "content_length": 2048000,
-      "price": 0.00005
-    }
   }
 }
