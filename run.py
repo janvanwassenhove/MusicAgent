@@ -35,7 +35,7 @@ def main():
     print("\nWelcome to mITy John's music agent, let's make you a song!")
 
     # Get user input for provider
-    available_providers = ["openai", "anthropic", "azure"]
+    available_providers = ["openai", "anthropic"]
     provider = get_user_input("Choose API provider:", available_providers)
 
     # Get user input for model

@@ -69,7 +69,25 @@
               track-by="Filename"
               tag-placeholder="Add samples"
               placeholder="Search for samples"
-          ></multiselect>
+          >
+            <template #tag="{ option, remove }">
+              <div class="multiselect__tag">
+                <button
+                    @click="togglePlayPause(option)"
+                    class="play-pause-button">
+                  <i :class="option.isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
+                </button>
+                <span>{{ option.Filename }}</span>
+                <div v-if="isPlaying && currentSample === option.Filename" class="sound-wave">
+                  <span></span><span></span><span></span><span></span>
+                </div>
+                <button @click="remove(option)" class="multiselect__tag-icon">
+                  <i class="icon-remove"></i>
+                </button>
+              </div>
+            </template>
+
+          </multiselect>
           <textarea v-model="chatInput" placeholder="How can I help you create some music ..." class="mt-1 form-control mb-2"></textarea>
 
           <div class="button-container mb-2 mt-2">
@@ -125,7 +143,13 @@ export default {
       options: [],
       isLoading: false,
       showSongNameModal: false,
-      isEditingSongName: false, 
+      isEditingSongName: false,
+
+      audio: null,
+      currentSample: null,
+      isPlaying: false,
+      currentTime: 0,
+      duration: 0
     };
   },
   computed: {
@@ -138,6 +162,66 @@ export default {
     }
   },
   methods: {
+    async togglePlayPause(option) {
+      option.isPlaying = !option.isPlaying;
+      if (this.isPlaying && this.currentSample === option.Filename) {
+        this.pauseSample();
+      } else {
+        await this.playSample(option.Filename);
+      }
+      console.log(`${option.Filename} is now ${option.isPlaying ? 'playing' : 'paused'}`);
+    },
+    async playSample(filename) {
+      if (this.audio && this.currentSample === filename) {
+        this.audio.play();
+        this.isPlaying = true;
+        return;
+      }
+      if (this.audio) {
+        this.audio.pause();
+      }
+      try {
+        const response = await axios.get(`${process.env.VUE_APP_API_URL}/api/sample/${filename}`, {responseType: 'blob'});
+        const url = URL.createObjectURL(response.data);
+        this.audio = new Audio(url);
+
+        this.audio.onloadedmetadata = () => {
+          this.duration = this.audio.duration;
+        };
+
+        this.audio.ontimeupdate = () => {
+          this.currentTime = this.audio.currentTime;
+        };
+
+        this.audio.onended = () => {
+          this.isPlaying = false;
+          this.currentSample = null;
+          this.audio = null;
+          // Find and update the option's isPlaying state
+          const option = this.selectedFiles.find(file => file.Filename === filename);
+          if (option) {
+            option.isPlaying = false;
+          }
+        };
+
+        this.audio.play();
+        this.currentSample = filename;
+        this.isPlaying = true;
+      } catch (error) {
+        console.error('Error playing sample:', error);
+      }
+    },
+
+    pauseSample() {
+      if (this.audio) {
+        this.audio.pause();
+        this.isPlaying = false;
+      }
+    },
+    // Check if the option is selected
+    isSelected(option) {
+      return this.selectedFiles.some(selected => selected.Filename === option.Filename);
+    },
     updateTotalDuration(duration) {
       this.totalDuration = duration;
     },
@@ -437,5 +521,66 @@ export default {
 .toggle-visualization-btn:hover {
   color: #278156;
 }
+.play-pause-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-right: 8px; /* Space between the icon and the filename */
+  flex-shrink: 0;
+}
 
+.icon-play, .icon-pause {
+  font-size: 16px; /* Adjust icon size as needed */
+  color: orange;
+}
+
+.multiselect__tag {
+  display: flex;
+  align-items: center;
+  position: relative;
+  min-height: 24px;
+  padding-right: 30px;
+}
+
+.multiselect__tag-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #999;
+
+}
+
+.sound-wave {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 16px;
+  margin: 0 8px;
+}
+
+.sound-wave span {
+  display: inline-block;
+  width: 2px;
+  height: 100%;
+  background-color: #1A4731;
+  animation: wave 1s ease-in-out infinite;
+}
+
+.sound-wave span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.sound-wave span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+.sound-wave span:nth-child(4) {
+  animation-delay: 0.6s;
+}
+
+@keyframes wave {
+  0%, 100% { height: 4px; }
+  50% { height: 10px; }
+}
 </style>

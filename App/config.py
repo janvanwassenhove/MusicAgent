@@ -28,6 +28,14 @@ class Config:
     }
 
     @classmethod
+    def get_azure_endpoint(cls):
+        return os.environ.get('AZURE_OPENAI_ENDPOINT') or cls.SETTINGS.get('AZURE_OPENAI_ENDPOINT')
+
+    @classmethod
+    def get_azure_api_version(cls):
+        return os.environ.get('AZURE_OPENAI_API_VERSION') or cls.SETTINGS.get('AZURE_OPENAI_API_VERSION')
+    
+    @classmethod
     def get_api_key(cls, provider):
         return cls.API_KEYS.get(provider)
 

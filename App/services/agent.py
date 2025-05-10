@@ -168,18 +168,41 @@ class GPTAgent:
         else:
             self.logger.info("No review provided, 'review' parameter will not be set.")
 
-    def handle_anthropic_request(self, client, system_content, phase_prompt):
+    # def handle_anthropic_request(self, client, system_content, phase_prompt):
+    #     request_data = {
+    #         "model": self.selected_model,
+    #         "system": system_content,
+    #         "messages": [{"role": "user", "content": phase_prompt}],
+    #         "max_tokens": self.MAX_TOKENS[self.selected_model]["tokens"]
+    #     }
+    #     completion = client.messages.create(**request_data)
+    #     response_text = completion.content[0].text
+    #
+    #     token_count = self.count_tokens(system_content + phase_prompt, self.selected_model)
+    #     char_count = len(system_content + phase_prompt)
+    #     cost = self.calculate_cost(token_count)
+    #     self.log_request_response('anthropic', request_data, completion.content[0].text, cost, token_count, char_count)
+    #
+    #     return response_text
+
+    def handle_anthropic_request(self, client, system_content, conversation_history):
+        provider_config = Config.MODEL_CONFIG.get(self.api_provider, {})
+        model_config = provider_config.get(self.selected_model, {})
+        max_tokens = model_config.get("tokens", 4096)
+
         request_data = {
             "model": self.selected_model,
             "system": system_content,
-            "messages": [{"role": "user", "content": phase_prompt}],
-            "max_tokens": self.MAX_TOKENS[self.selected_model]["tokens"]
+            "messages": conversation_history,
+            "max_tokens": max_tokens
         }
+
         completion = client.messages.create(**request_data)
         response_text = completion.content[0].text
 
-        token_count = self.count_tokens(system_content + phase_prompt, self.selected_model)
-        char_count = len(system_content + phase_prompt)
+        conversation_str = "\n".join([f"{msg['role']}: {msg['content']}" for msg in conversation_history])
+        token_count = self.count_tokens(system_content + conversation_str, self.selected_model)
+        char_count = len(system_content + conversation_str)
         cost = self.calculate_cost(token_count)
         self.log_request_response('anthropic', request_data, completion.content[0].text, cost, token_count, char_count)
 
@@ -192,6 +215,7 @@ class GPTAgent:
         )
         response_text = completion.choices[0].message.content
 
+        # shouldn't we pass openai_messages here?
         token_count = self.count_tokens(system_content + phase_prompt, self.selected_model)
         char_count = len(system_content + phase_prompt)
         cost = self.calculate_cost(token_count)
@@ -200,17 +224,26 @@ class GPTAgent:
         return response_text
 
     def handle_azure_openai_request(self, client, system_content, phase_prompt, openai_messages):
+        provider_config = Config.MODEL_CONFIG.get(self.api_provider, {})
+        model_config = provider_config.get(self.selected_model, {})
+        deployment_name = model_config.get("deployment_name")
+
+        if not deployment_name:
+            raise ValueError(f"Deployment name not configured for model {self.selected_model}")
+
         completion = client.chat.completions.create(
             model=self.selected_model,
+            deployment_name=deployment_name,
             messages=openai_messages
         )
         response_text = completion.choices[0].message.content
 
-        token_count = self.count_tokens(system_content + phase_prompt, self.selected_model)
-        char_count = len(system_content + phase_prompt)
+        conversation_str = "\n".join([f"{msg['role']}: {msg['content']}" for msg in openai_messages])
+        token_count = self.count_tokens(system_content + conversation_str, self.selected_model)
+        char_count = len(system_content + conversation_str)
         cost = self.calculate_cost(token_count)
 
-        self.log_request_response('openai', openai_messages, completion.choices[0].message.content, cost, token_count, char_count)
+        self.log_request_response('azure', openai_messages, completion.choices[0].message.content, cost, token_count, char_count)
         return response_text
 
     def local_discussion(self, client, phase, song_creation_data, artist_config, phase_config):
@@ -418,6 +451,8 @@ class GPTAgent:
 
         if self.api_provider == 'openai':
             client = OpenAI(api_key=self.get_api_key())
+        elif self.api_provider =='azure':
+            client = AzureOpenAI(api_key=self.get_api_key(), azure_endpoint=Config.get_azure_endpoint(), api_version=Config.get_azure_api_version())
         else:
             client = Anthropic(api_key=self.get_api_key())
 
@@ -576,12 +611,13 @@ class GPTAgent:
         sonic_pi_code = self.fix_sample_paths(sonic_pi_code)
         user_message = {
             "role": "user",
-            "content": f"We have following song in Sonic PI code: {sonic_pi_code}. Code was reviewed with following comments: {user_comment}."
+            "content": f"{'We have following song in Sonic PI code: ' + sonic_pi_code if sonic_pi_code.strip() else 'We will be creating a new song in Sonic PI code'}. Adapt to following comments: {user_comment}."
         }
-
         # Add conversation history to the user message
         conversation_history.append(user_message)
         conversation_history_str = "\n".join([f"{msg['role']}: {msg['content']}" for msg in conversation_history])
+
+        prompt = system_content + "\n\n" + conversation_history_str + "\n\n" + user_message["content"]
 
         if self.api_provider == 'openai':
             client = OpenAI(api_key=self.get_api_key())
@@ -590,42 +626,23 @@ class GPTAgent:
                 user_message
             ]
             self.logger.info(f"Sending request to OpenAI: {messages}")
-            completion = client.chat.completions.create(
-                model=self.selected_model,
-                messages=messages
-            )
-            response_text = completion.choices[0].message.content
+            response_text = self.handle_openai_request(client, system_content, prompt,messages)
 
         elif self.api_provider == 'azure':
-            client = OpenAI(
-                # api_key=self.get_api_key(),
-                api_version="2024-12-01-preview",
-                # credential=
-                # azure_endpoint=
-                #azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"), #https://musicagent.openai.azure.com/
-                azure_deployment=self.selected_model
+            client = AzureOpenAI(
+                api_key=self.get_api_key(),
+                azure_endpoint=Config.get_azure_endpoint()
+                # api_version=Config.get_azure_api_version()
             )
             messages = [
                 {"role": "system", "content": system_content + "\n\n" + conversation_history_str},
                 user_message
             ]
-            self.logger.info(f"Sending request to Azure OpenAI: {messages}")
-            completion = client.chat.completions.create(
-                model=self.selected_model,
-                messages=messages
-            )
-            response_text = completion.choices[0].message.content
-
+            response_text = self.handle_azure_openai_request(client, system_content, prompt,messages)
         elif self.api_provider == 'anthropic':
             client = Anthropic(api_key=self.get_api_key())
-            request_data = {
-                "model": self.selected_model,
-                "prompt": system_content + "\n\n" + conversation_history_str + "\n\n" + user_message["content"],
-                "max_tokens": self.MAX_TOKENS[self.selected_model]["tokens"]
-            }
-            self.logger.info(f"Sending request to Anthropic: {request_data}")
-            completion = client.messages.create(**request_data)
-            response_text = completion.content[0].text
+            self.logger.info(f"Sending request to Anthropic: {prompt}")
+            response_text = self.handle_anthropic_request(client, system_content, conversation_history)
         else:
             raise ValueError(f"Unsupported provider: {self.api_provider}")
         self.logger.info(f"Original response: {response_text}")
