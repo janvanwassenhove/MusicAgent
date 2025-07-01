@@ -36,7 +36,8 @@
             class="timeline-tick"
             :style="{ left: ((i - 1) * 5) + '%' }"
           >
-            &nbsp;{{ formatTickLabel((i - 1) * (totalDuration / 20), 1) }}
+            <!-- Always use (i-1) * (totalDuration / 20) as the base value in seconds -->
+            &nbsp;{{ formatTickLabel((i - 1) * (totalDuration / 20)) }}
           </div>
         </div>
       </div>
@@ -96,6 +97,18 @@ export default {
     },
   },
   methods: {
+    getBpm() {
+      const bpmMatch = this.sonicPiCode.match(/use_bpm\s+([\d.]+)/);
+      return bpmMatch ? parseFloat(bpmMatch[1]) : 130;
+    },
+    secondsToBeats(seconds) {
+      const bpm = this.getBpm();
+      return (seconds * bpm) / 60;
+    },
+    beatsToSeconds(beats) {
+      const bpm = this.getBpm();
+      return (beats * 60) / bpm;
+    },
     parseSonicPiCode(code) {
       const keywordRegex = /\b(live_loop|play|sleep)\b/g;
       const numberRegex = /\b\d+(\.\d+)?\b/g;
@@ -112,15 +125,14 @@ export default {
     formatTickLabel(value) {
         switch (this.timeScale) {
             case 'milliseconds': {
-            return `${(value * 1000).toFixed(0)}ms`;
+              return `${(value * 1000).toFixed(0)}ms`;
             }
             case 'beats': {
-            const bpmMatch = this.sonicPiCode.match(/use_bpm\s+([\d.]+)/);
-            const bpm = bpmMatch ? parseFloat(bpmMatch[1]) : 130; // default to 130 BPM if not specified
-            return `${(value / 60 * bpm / 4).toFixed(1)} bars`;
+              const beats = this.secondsToBeats(value);
+              return `${beats.toFixed(1)} beats`;
             }
             default: {
-            return `${value.toFixed(1)}s`;
+              return `${value.toFixed(1)}s`;
             }
         }
     },
@@ -129,6 +141,42 @@ export default {
     },
     toggleLayer(index) {
       this.$emit('toggle-layer', index);
+    },
+    // Helper to estimate duration of a block, taking repetitions into account
+    estimateDuration(lines, startIdx = 0, endIdx = null) {
+      let total = 0;
+      let i = startIdx;
+      endIdx = endIdx === null ? lines.length : endIdx;
+      while (i < endIdx) {
+        const line = lines[i].trim();
+        // Match e.g. 8.times do
+        const timesMatch = line.match(/^(\d+)\.times\s+do/);
+        if (timesMatch) {
+          const repeatCount = parseInt(timesMatch[1], 10);
+          // Find the block for this times-do
+          let blockStart = i + 1;
+          let blockEnd = blockStart;
+          let nesting = 1;
+          while (blockEnd < endIdx && nesting > 0) {
+            const l = lines[blockEnd].trim();
+            if (l.match(/do\b/)) nesting++;
+            if (l.match(/\bend\b/)) nesting--;
+            blockEnd++;
+          }
+          // blockEnd is now just after the end
+          const blockDuration = this.estimateDuration(lines, blockStart, blockEnd - 1);
+          total += repeatCount * blockDuration;
+          i = blockEnd; // skip block
+          continue;
+        }
+        // Match sleep
+        const sleepMatch = line.match(/sleep\s+([\d.]+)/);
+        if (sleepMatch) {
+          total += parseFloat(sleepMatch[1]);
+        }
+        i++;
+      }
+      return total;
     },
     generateVisualization() {
       const lines = this.sonicPiCode.split('\n');
@@ -143,18 +191,15 @@ export default {
       let globalTime = 0;
       let liveLoopBodies = {};
 
-      // Determine total duration based on sleep in top-level context only
-      lines.forEach((line) => {
-        if (!currentThread) {
-          const match = line.match(/sleep\s+([\d.]+)/);
-          if (match) globalTime += parseFloat(match[1]);
-        }
-      });
+      // Determine total duration based on sleep in top-level context only (in seconds), including repetitions
+      globalTime = this.estimateDuration(lines);
+
       totalDuration = Math.max(globalTime, 1);
       this.totalDuration = totalDuration;
-  
+
       for (const [loopName, bodyLines] of Object.entries(liveLoopBodies)) {
         const containsStop = bodyLines.some(l => /\bstop\b/.test(l));
+        // Estimate duration in seconds, then convert to beats if needed
         const durationPerIteration = this.estimateDuration(bodyLines) || 4;
         const iterations = Math.floor(this.totalDuration / durationPerIteration);
         const layer = layersMap.get(loopName) || [];
@@ -171,9 +216,8 @@ export default {
       }
 
       globalTime = 0; // reset for second pass
- 
+
       lines.forEach((line, lineIndex) => {
-    
         const trimmed = line.trim();
         const liveLoopMatch = trimmed.match(/live_loop\s+(:\w+)/);
         const inThreadMatch = trimmed.match(/in_thread\s+do/);
@@ -235,7 +279,6 @@ export default {
         } else if (endMatch) {
           if (currentThread) {
             if (currentThread.nestingLevel > 0) {
-              // Decrement nesting level for nested blocks
               currentThread.nestingLevel--;
             } else {
               // Finalize the current thread when nesting level reaches 0
@@ -245,13 +288,16 @@ export default {
 
               const fxClass = currentThread.fx.length > 0 ? `fxClass-${currentThread.fx[0]}` : '';
               const codeSnippet = this.parseSonicPiCode(
-                lines.slice(currentThread.index, lineIndex + 1).join('\n') // Include the current line with `end`
+                lines.slice(currentThread.index, lineIndex + 1).join('\n')
               );
+              // Convert duration and startTime to seconds for visualization
+              const startSec = currentThread.startTime;
+              const durSec = duration;
               const tooltip = `
                 <h6>${name}</h6>
                 <ul>
                   <li>FX: ${currentThread.fx.join(', ') || 'none'}</li>
-                  <li>Duration: ${duration}s</li>
+                  <li>Duration: ${durSec.toFixed(2)}s (${this.secondsToBeats(durSec).toFixed(2)} beats)</li>
                 </ul>
                 <pre class="sonic-pi-code"><code>${codeSnippet}</code></pre>
               `;
@@ -263,7 +309,7 @@ export default {
                 fxClass,
                 tooltip,
                 infinite: false,
-                style: `left: ${(currentThread.startTime / totalDuration) * 100}%; width: ${(duration / totalDuration) * 100}%;`
+                style: `left: ${(startSec / totalDuration) * 100}%; width: ${(durSec / totalDuration) * 100}%;`
               }]);
 
               currentThread = threadStack.pop() || null;

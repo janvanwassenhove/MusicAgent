@@ -605,7 +605,7 @@ class GPTAgent:
             "7. **SONIC PI SYNTAX**: Use Sonic Pi syntax and functions to create the song, ensuring it runs without errors."
             "8. **IN_THREAD USAGE**: Use `in_thread` to manage multiple instruments, to structure the song or effects running simultaneously, ensuring they are properly synchronized."
             "9. **SONG STRUCTURE**: The song should have a clear structure, including sections like intro, verse, chorus, bridge, and outro. Each section should be clearly defined and labeled in the code. The structure is depending on the song style or genre given in the prompt instructions."
-            "\nThe composition should feel complete and cohesive, with a consistent tempo and flow."
+            "\nThe composition should feel complete and cohesive, with a consistent tempo and flow. Bear in mind that in sonic PI the duration is calculated based on BPM, take this into account setting up the song."
         )
 
         sonic_pi_code = self.fix_sample_paths(sonic_pi_code)
